@@ -24,7 +24,8 @@
       </el-form-item>
     </el-form>
     <el-row>
-      <el-table ref="table" :data="dbTableList" height="260px" @row-click="clickRow" @selection-change="handleSelectionChange">
+      <el-table ref="table" :data="dbTableList" height="260px" @row-click="clickRow"
+                @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column :show-overflow-tooltip="true" label="表名称" prop="tableName"></el-table-column>
         <el-table-column :show-overflow-tooltip="true" label="表描述" prop="tableComment"></el-table-column>
@@ -49,13 +50,13 @@
 </template>
 
 <script setup>
-import { listDbTable, importTable } from "@/api/tool/gen";
+import {listDbTable, importTable} from "@/api/tool/gen";
 
 const total = ref(0);
 const visible = ref(false);
 const tables = ref([]);
 const dbTableList = ref([]);
-const { proxy } = getCurrentInstance();
+const {proxy} = getCurrentInstance();
 
 const queryParams = reactive({
   pageNum: 1,
@@ -71,14 +72,17 @@ function show() {
   getList();
   visible.value = true;
 }
+
 /** 单击选择行 */
 function clickRow(row) {
   proxy.$refs.table.toggleRowSelection(row);
 }
+
 /** 多选框选中数据 */
 function handleSelectionChange(selection) {
   tables.value = selection.map(item => item.tableName);
 }
+
 /** 查询表数据 */
 function getList() {
   listDbTable(queryParams).then(res => {
@@ -86,16 +90,19 @@ function getList() {
     total.value = res.total;
   });
 }
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.pageNum = 1;
   getList();
 }
+
 /** 重置按钮操作 */
 function resetQuery() {
   proxy.resetForm("queryRef");
   handleQuery();
 }
+
 /** 导入按钮操作 */
 function handleImportTable() {
   const tableNames = tables.value.join(",");
@@ -103,7 +110,7 @@ function handleImportTable() {
     proxy.$modal.msgError("请选择要导入的表");
     return;
   }
-  importTable({ tables: tableNames }).then(res => {
+  importTable({tables: tableNames}).then(res => {
     proxy.$modal.msgSuccess(res.msg);
     if (res.code === 200) {
       visible.value = false;

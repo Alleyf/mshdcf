@@ -62,21 +62,24 @@
             plain
             type="primary"
             @click="goTarget('https://gitee.com/JavaLionLi/RuoYi-Cloud-Plus')"
-            >访问码云</el-button
+          >访问码云
+          </el-button
           >
           <el-button
             icon="Cloudy"
             plain
             type="primary"
             @click="goTarget('https://github.com/JavaLionLi/RuoYi-Cloud-Plus')"
-          >访问GitHub</el-button
+          >访问GitHub
+          </el-button
           >
           <el-button
-              icon="Cloudy"
-              plain
-              type="primary"
-              @click="goTarget('https://gitee.com/JavaLionLi/RuoYi-Cloud-Plus/wikis/pages?sort_id=5303316&doc_id=2056143')"
-          >更新日志</el-button
+            icon="Cloudy"
+            plain
+            type="primary"
+            @click="goTarget('https://gitee.com/JavaLionLi/RuoYi-Cloud-Plus/wikis/pages?sort_id=5303316&doc_id=2056143')"
+          >更新日志
+          </el-button
           >
         </p>
       </el-col>
@@ -115,7 +118,7 @@
         </el-row>
       </el-col>
     </el-row>
-    <el-divider />
+    <el-divider/>
     <el-row :gutter="20">
       <el-col :lg="8" :md="12" :sm="24" :xs="24">
         <el-card class="update-log">
@@ -124,10 +127,12 @@
           </div>
           <div class="body">
             <p>
-              <i class="el-icon-s-promotion"></i> 官网：<el-link
+              <i class="el-icon-s-promotion"></i> 官网：
+              <el-link
                 href="https://gitee.com/JavaLionLi/RuoYi-Cloud-Plus"
                 target="_blank"
-                >https://gitee.com/JavaLionLi/RuoYi-Cloud-Plus</el-link
+              >https://gitee.com/JavaLionLi/RuoYi-Cloud-Plus
+              </el-link
               >
             </p>
           </div>
@@ -153,12 +158,14 @@ function goTarget(url) {
     font-size: 17.5px;
     border-left: 5px solid #eee;
   }
+
   hr {
     margin-top: 20px;
     margin-bottom: 20px;
     border: 0;
     border-top: 1px solid #eee;
   }
+
   .col-item {
     margin-bottom: 20px;
   }

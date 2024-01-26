@@ -10,7 +10,9 @@
           size="large"
           type="text"
         >
-          <template #prefix><svg-icon class="el-input__icon input-icon" icon-class="user" /></template>
+          <template #prefix>
+            <svg-icon class="el-input__icon input-icon" icon-class="user"/>
+          </template>
         </el-input>
       </el-form-item>
       <el-form-item prop="password">
@@ -22,7 +24,9 @@
           type="password"
           @keyup.enter="handleRegister"
         >
-          <template #prefix><svg-icon class="el-input__icon input-icon" icon-class="password" /></template>
+          <template #prefix>
+            <svg-icon class="el-input__icon input-icon" icon-class="password"/>
+          </template>
         </el-input>
       </el-form-item>
       <el-form-item prop="confirmPassword">
@@ -34,7 +38,9 @@
           type="password"
           @keyup.enter="handleRegister"
         >
-          <template #prefix><svg-icon class="el-input__icon input-icon" icon-class="password" /></template>
+          <template #prefix>
+            <svg-icon class="el-input__icon input-icon" icon-class="password"/>
+          </template>
         </el-input>
       </el-form-item>
       <el-form-item v-if="captchaEnabled" prop="code">
@@ -46,7 +52,9 @@
           style="width: 63%"
           @keyup.enter="handleRegister"
         >
-          <template #prefix><svg-icon class="el-input__icon input-icon" icon-class="validCode" /></template>
+          <template #prefix>
+            <svg-icon class="el-input__icon input-icon" icon-class="validCode"/>
+          </template>
         </el-input>
         <div class="register-code">
           <img :src="codeUrl" class="register-code-img" @click="getCode"/>
@@ -76,11 +84,11 @@
 </template>
 
 <script setup>
-import { ElMessageBox } from "element-plus";
-import { getCodeImg, register } from "@/api/login";
+import {ElMessageBox} from "element-plus";
+import {getCodeImg, register} from "@/api/login";
 
 const router = useRouter();
-const { proxy } = getCurrentInstance();
+const {proxy} = getCurrentInstance();
 
 const registerForm = ref({
   username: "",
@@ -101,18 +109,18 @@ const equalToPassword = (rule, value, callback) => {
 
 const registerRules = {
   username: [
-    { required: true, trigger: "blur", message: "请输入您的账号" },
-    { min: 2, max: 20, message: "用户账号长度必须介于 2 和 20 之间", trigger: "blur" }
+    {required: true, trigger: "blur", message: "请输入您的账号"},
+    {min: 2, max: 20, message: "用户账号长度必须介于 2 和 20 之间", trigger: "blur"}
   ],
   password: [
-    { required: true, trigger: "blur", message: "请输入您的密码" },
-    { min: 5, max: 20, message: "用户密码长度必须介于 5 和 20 之间", trigger: "blur" }
+    {required: true, trigger: "blur", message: "请输入您的密码"},
+    {min: 5, max: 20, message: "用户密码长度必须介于 5 和 20 之间", trigger: "blur"}
   ],
   confirmPassword: [
-    { required: true, trigger: "blur", message: "请再次输入您的密码" },
-    { required: true, validator: equalToPassword, trigger: "blur" }
+    {required: true, trigger: "blur", message: "请再次输入您的密码"},
+    {required: true, validator: equalToPassword, trigger: "blur"}
   ],
-  code: [{ required: true, trigger: "change", message: "请输入验证码" }]
+  code: [{required: true, trigger: "change", message: "请输入验证码"}]
 };
 
 const codeUrl = ref("");
@@ -130,7 +138,8 @@ function handleRegister() {
           type: "success",
         }).then(() => {
           router.push("/login");
-        }).catch(() => {});
+        }).catch(() => {
+        });
       }).catch(() => {
         loading.value = false;
         if (captchaEnabled) {
@@ -163,6 +172,7 @@ getCode();
   background-image: url("../assets/images/login-background.jpg");
   background-size: cover;
 }
+
 .title {
   margin: 0px auto 30px auto;
   text-align: center;
@@ -174,32 +184,39 @@ getCode();
   background: #ffffff;
   width: 400px;
   padding: 25px 25px 5px 25px;
+
   .el-input {
     height: 40px;
+
     input {
       height: 40px;
     }
   }
+
   .input-icon {
     height: 39px;
     width: 14px;
     margin-left: 0px;
   }
 }
+
 .register-tip {
   font-size: 13px;
   text-align: center;
   color: #bfbfbf;
 }
+
 .register-code {
   width: 33%;
   height: 40px;
   float: right;
+
   img {
     cursor: pointer;
     vertical-align: middle;
   }
 }
+
 .el-register-footer {
   height: 40px;
   line-height: 40px;
@@ -212,6 +229,7 @@ getCode();
   font-size: 12px;
   letter-spacing: 1px;
 }
+
 .register-code-img {
   height: 40px;
   padding-left: 12px;
