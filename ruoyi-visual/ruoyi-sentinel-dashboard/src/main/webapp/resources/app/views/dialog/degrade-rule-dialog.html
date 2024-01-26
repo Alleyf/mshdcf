@@ -1,0 +1,93 @@
+<div>
+	<span class="brand" style="font-weight:bold;">{{degradeRuleDialog.title}}</span>
+	<div class="card" style="margin-top: 20px;margin-bottom: 10px;">
+		<div class="panel-body">
+			<div class="row">
+				<form class="form-horizontal" role="form">
+					<div class="form-group">
+						<label class="col-sm-2 control-label">资源名</label>
+						<div class="col-sm-9">
+							<input class="form-control" disabled="" ng-if="degradeRuleDialog.type == 'edit'" ng-model='currentRule.resource' placeholder="资源名"
+							 type="text" />
+							<input class="form-control highlight-border" ng-if="degradeRuleDialog.type == 'add'" ng-model='currentRule.resource' placeholder="资源名" type="text"
+							/>
+						</div>
+					</div>
+
+					<!--<div class="form-group">-->
+						<!--<label class="col-sm-2 control-label">流控应用</label>-->
+						<!--<div class="col-sm-9">-->
+							<!--<input type="text" class="form-control highlight-border" ng-model='currentRule.limitApp' placeholder='"default"表示所有应用。' />-->
+						<!--</div>-->
+					<!--</div>-->
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label">熔断策略</label>
+						<div class="col-sm-9">
+							<div align="center" class="form-control highlight-border">
+								<input checked name="grade" ng-model='currentRule.grade' title="慢调用比例（1.8.0+ 版本生效）" type="radio" value="0" />&nbsp;慢调用比例&nbsp;&nbsp;
+								<input name="grade" ng-model='currentRule.grade' title="异常比例" type="radio" value="1" />&nbsp;异常比例&nbsp;&nbsp;
+								<input name="grade" ng-model='currentRule.grade' title="异常数" type="radio" value="2" />&nbsp;异常数
+							</div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" ng-if="currentRule.grade == 0"  title="最大 RT，超过该值则计为慢调用">最大 RT</label>
+						<label class="col-sm-2 control-label" ng-if="currentRule.grade == 1">比例阈值</label>
+						<label class="col-sm-2 control-label" ng-if="currentRule.grade == 2">异常数</label>
+						<div class="col-sm-4">
+							<input class="form-control highlight-border" ng-if="currentRule.grade == 0" ng-model='currentRule.count' placeholder="RT (毫秒)" type='number'/>
+							<input class="form-control highlight-border" ng-if="currentRule.grade == 1" ng-model='currentRule.count' placeholder="取值范围 [0.0,1.0]" type='number'/>
+							<input class="form-control highlight-border" ng-if="currentRule.grade == 2" ng-model='currentRule.count' placeholder="异常数" type='number'/>
+						</div>
+						<div ng-if="currentRule.grade == 0">
+							<label class="col-sm-2 control-label">比例阈值</label>
+							<div class="col-sm-3">
+								<input class="form-control highlight-border" min="0" ng-model='currentRule.slowRatioThreshold' placeholder="取值 [0.0, 1.0]"
+									   type='number' />
+							</div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label">熔断时长</label>
+						<div class="col-sm-4">
+							<div class="input-group">
+								<input class="form-control highlight-border" min="0" ng-model='currentRule.timeWindow' placeholder="熔断时长(s)"
+									   type='number' />
+								<span class="input-group-addon">s</span>
+							</div>
+						</div>
+
+						<label class="col-sm-2 control-label" style="text-align: center; padding-right: 5px;"
+							   title="触发熔断的最小请求数目，若当前统计窗口内的请求数小于此值，即使达到熔断条件规则也不会触发">最小请求数</label>
+						<div class="col-sm-3">
+							<input class="form-control highlight-border" min="1" ng-model='currentRule.minRequestAmount' placeholder="最小请求数目"
+								   type='number' />
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label">统计时长</label>
+						<div class="col-sm-4">
+							<div class="input-group">
+							<input class="form-control highlight-border" min="1" ng-model='currentRule.statIntervalMs' placeholder="统计时长(ms)"
+								   type='number' />
+							<span class="input-group-addon">ms</span>
+							</div>
+						</div>
+					</div>
+
+				</form>
+			</div>
+			<div class="separator"></div>
+			<div clss="row" style="margin-top: 20px;">
+				<button class="btn btn-outline-danger" ng-click="closeThisDialog()" style="float:right; height: 30px;font-size: 12px;margin-left: 10px;">取消</button>
+				<button class="btn btn-outline-success" ng-click="saveRule()" style="float:right; height: 30px;font-size: 12px;margin-left: 10px;">{{degradeRuleDialog.confirmBtnText}}</button>
+				<button class="btn btn-default" ng-click="saveRuleAndContinue()" ng-if="degradeRuleDialog.saveAndContinueBtnText"
+				 style="float:right; height: 30px;font-size: 12px;">{{degradeRuleDialog.saveAndContinueBtnText}}</button>
+			</div>
+		</div>
+	</div>
+</div>
