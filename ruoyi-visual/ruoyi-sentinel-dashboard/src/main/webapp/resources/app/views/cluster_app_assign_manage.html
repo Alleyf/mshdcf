@@ -1,0 +1,118 @@
+<div class="row" style="margin-left: 1px; margin-top:10px; height: 50px;">
+    <div class="col-md-6" style="margin-bottom: 10px;">
+        <span style="font-size: 30px;font-weight: bold;">{{app}}</span>
+    </div>
+</div>
+
+<div class="separator"></div>
+<div class="container-fluid">
+    <div class="row" style="margin-top: 20px; margin-bottom: 20px;">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="inputs-header">
+                    <span class="brand" style="font-size: 13px;">集群限流 - 机器分配/管控</span>
+                </div>
+
+                <!-- error panel -->
+                <div class="row clearfix" ng-if="loadError">
+                    <div class="col-md-6 col-md-offset-3">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <center>
+                                    <p>{{loadError.message}}</p>
+                                </center>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--.tools-header -->
+                <div class="card-body" ng-if="!loadError" style="padding: 0px 0px;">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Server 列表</label>
+                            <div class="col-sm-4">
+                                <select class="form-control" ng-change="onCurrentServerChange()" ng-model="tmp.curChosenServer"
+                                        ng-options="serverGroup.machineId for serverGroup in clusterMap"
+                                        size="8"></select>
+                            </div>
+                            <button class="btn btn-outline-warning" ng-click="removeFromServerList()" type="button">移除
+                            </button>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Token Server 端口</label>
+                            <div class="col-sm-4">
+                                <input class="form-control highlight-border" max="65535"
+                                       min="1"
+                                       ng-disabled="!tmp.curChosenServer.belongToApp" ng-model='tmp.curChosenServer.port' placeholder='port' type="number"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">命名空间集合</label>
+                            <div class="col-sm-4">
+                                <input class="form-control highlight-border" ng-disabled="!tmp.curChosenServer.belongToApp" ng-model='tmp.curChosenServer.namespaceSetStr'
+                                       placeholder='请指定服务端服务的命名空间集合（以,分隔）'
+                                       required
+                                       type="text"/>
+                            </div>
+                        </div>
+                    </form>
+                    <form class="form-inline" role="form" style="margin-top: 30px; margin-left: 20px;">
+                        <div>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <label class="control-label" style="width: 200px; text-align: center;">当前对应客户端列表</label>
+                                    <select class="form-control" multiple="multiple" ng-model="tmp.curClientChosen"
+                                            ng-options="ip for ip in tmp.curChosenServer.clientSet"
+                                            size="8" style="width: 100%;"></select>
+                                </div>
+
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <button class="btn btn-outline-primary" ng-click="moveToServerGroup()"
+                                            ng-disabled="!tmp.curChosenServer || !tmp.curChosenServer.machineId"
+                                            type="button">←
+                                    </button>
+                                    <button class="btn btn-outline-primary" ng-click="moveToRemainingSharePool()"
+                                            type="button">→
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <label class="control-label" style="width: 220px; text-align: center;">未分配机器列表</label>
+                                    <div>
+                                        <select class="form-control" multiple="multiple" ng-model="tmp.curRemainingClientChosen"
+                                                ng-options="ip for ip in remainingClientAddressList"
+                                                size="8" style="width: 100%;">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-6">
+                                    <button class="btn btn-outline-primary" ng-click="addToServerList()"
+                                            type="button">添加为 server
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="separator"></div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-outline-success" ng-click="saveAndApplyAssign()" style="margin: 0 10px 10px 10px;"
+                                type="button">保存并执行分配
+                        </button>
+                    </div>
+                </div>
+                <!-- .card-body -->
+            </div>
+            <!-- .card -->
+        </div>
+        <!-- .col-md-12 -->
+    </div>
+    <!-- -->
+</div>
+<!-- .container-fluid -->

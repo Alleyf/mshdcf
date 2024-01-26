@@ -1,0 +1,18 @@
+<div class="pagination" ng-if="1 < pages.length || !autoHide">
+  <a class="btn btn-default btn-xs" href="" ng-class="{ disabled : pagination.current == 1 }" ng-click="setCurrent(1)" ng-if="boundaryLinks">
+    <i class="fa fa-angle-double-left"></i>
+  </a>
+  <a class="btn btn-default btn-xs" href="" ng-class="{ disabled : pagination.current == 1 }" ng-click="setCurrent(pagination.current - 1)" ng-if="directionLinks">
+    <i class="fa fa-angle-left"></i>
+  </a>
+  <a class="btn btn-default btn-xs" href="" ng-class="{ active : pagination.current == pageNumber, disabled : pageNumber == '...' }" ng-click="setCurrent(pageNumber)"
+    ng-repeat="pageNumber in pages track by tracker(pageNumber, $index)">{{ pageNumber }}</a>
+  <a class="btn btn-default btn-xs" href="" ng-class="{ disabled : pagination.current == pagination.last }" ng-click="setCurrent(pagination.current + 1)"
+    ng-if="directionLinks">
+    <i class="fa fa-angle-right"></i>
+  </a>
+  <a class="btn btn-default btn-xs" href="" ng-class="{ disabled : pagination.current == pagination.last }" ng-click="setCurrent(pagination.last)"
+    ng-if="boundaryLinks">
+    <i class="fa fa-angle-double-right"></i>
+  </a>
+</div>
