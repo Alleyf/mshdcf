@@ -9,8 +9,8 @@
         <version>1.8.1</version>
     </parent>
 
-    <artifactId>ruoyi-crawler</artifactId>
-    <description>爬虫管理业务模块，管理爬虫项目、节点、爬虫和任务等</description>
+    <artifactId>ruoyi-retrieve</artifactId>
+    <description>数据检索管理业务模块，检索爬取到的司法案例和法律法规等数据</description>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -98,14 +98,7 @@
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-api-resource</artifactId>
         </dependency>
-
-        <!--        openfeign第三方服务调用-->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
-        </dependency>
-
-
+        
     </dependencies>
 
     <build>
@@ -125,4 +118,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

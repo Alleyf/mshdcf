@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import {createApp} from 'vue'
 
 import Cookies from 'js-cookie'
 
@@ -14,7 +14,7 @@ import directive from './directive' // directive
 
 // 注册指令
 import plugins from './plugins' // plugins
-import { download } from '@/utils/request'
+import {download} from '@/utils/request'
 
 // svg图标
 import 'virtual:svg-icons-register'
@@ -23,9 +23,9 @@ import elementIcons from '@/components/SvgIcon/svgicon'
 
 import './permission' // permission control
 
-import { useDict } from '@/utils/dict'
-import { getConfigKey, updateConfigByKey } from "@/api/system/config";
-import { parseTime, resetForm, addDateRange, handleTree, selectDictLabel, selectDictLabels } from '@/utils/ruoyi'
+import {useDict} from '@/utils/dict'
+import {getConfigKey, updateConfigByKey} from "@/api/system/config";
+import {parseTime, resetForm, addDateRange, handleTree, selectDictLabel, selectDictLabels} from '@/utils/ruoyi'
 
 // 分页组件
 import Pagination from '@/components/Pagination'
@@ -84,6 +84,6 @@ app.use(ElementPlus, {
 })
 
 // 修改 el-dialog 默认点击遮照为不关闭
-app._context.components.ElDialog.props.closeOnClickModal.default = false
+app._context.components.ElDialog.props.closeOnClickModal.default = true
 
 app.mount('#app')

@@ -1,12 +1,12 @@
 # Tomcat
 server:
-  port: 9205
+  port: 9207
 
 # Spring
 spring:
   application:
     # 应用名称
-    name: ruoyi-crawler
+    name: ruoyi-retrieve
   profiles:
     # 环境配置
     active: @profiles.active@
