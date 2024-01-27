@@ -43,9 +43,7 @@ const rules = reactive({
   sourceTypeId: [
     {required: true, message: "数据源类型不能为空", trigger: "change"}
   ],
-  remark: [
-    {required: true, message: "数据源备注说明不能为空", trigger: "blur"}
-  ],
+  remark: [],
   status: [
     {required: true, message: "状态不能为空", trigger: "change"}
   ],
@@ -214,8 +212,8 @@ onMounted(() => {
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button icon="Search" size="small" type="primary" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" size="small" @click="resetQuery">重置</el-button>
+        <el-button icon="Search" size="default" type="primary" @click="handleQuery">搜索</el-button>
+        <el-button icon="Refresh" size="default" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -223,7 +221,7 @@ onMounted(() => {
       <el-col :span="1.5">
         <el-button
           v-hasPermi="['crawlerdata:source:add']"
-          icon="el-icon-plus"
+          icon="Plus"
           plain
           size="default"
           type="primary"
@@ -235,7 +233,7 @@ onMounted(() => {
         <el-button
           v-hasPermi="['crawlerdata:source:edit']"
           :disabled="single"
-          icon="el-icon-edit"
+          icon="Edit"
           plain
           size="default"
           type="success"
@@ -247,7 +245,7 @@ onMounted(() => {
         <el-button
           v-hasPermi="['crawlerdata:source:remove']"
           :disabled="multiple"
-          icon="el-icon-delete"
+          icon="Delete"
           plain
           size="default"
           type="danger"
@@ -258,7 +256,7 @@ onMounted(() => {
       <el-col :span="1.5">
         <el-button
           v-hasPermi="['crawlerdata:source:export']"
-          icon="el-icon-download"
+          icon="Download"
           plain
           size="default"
           type="warning"

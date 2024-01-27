@@ -532,7 +532,7 @@ onMounted(() => {
           </template>
         </el-table-column>
         <!--        <el-table-column label="公开日期" prop="pubDate" width="150"></el-table-column>-->
-        <el-table-column label="法律依据" prop="legalBasis" width="150"></el-table-column>
+        <el-table-column label="法律依据" prop="legalBasis" style="overflow: hidden" width="150"></el-table-column>
         <!--        <el-table-column label="当事人" prop="party" width="150"></el-table-column>-->
         <!--        <el-table-column label="相关案件" prop="relatedCases" width="180"></el-table-column>-->
         <el-table-column label="状态" prop="status" width="150">
