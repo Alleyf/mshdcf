@@ -165,13 +165,19 @@ public interface BaseMapperPlus<M, T, V> extends BaseMapper<T> {
      * 根据 entity 条件，查询全部记录
      */
     default <C> List<C> selectVoList(Wrapper<T> wrapper, Class<C> voClass) {
+//        条件查询(wrapper)
         List<T> list = this.selectList(wrapper);
+//        判断是否查询结果为空
         if (CollUtil.isEmpty(list)) {
             return CollUtil.newArrayList();
         }
+//        返回entity集合到vo集合的拷贝结果
         return BeanCopyUtils.copyList(list, voClass);
     }
 
+    /**
+     * 分页查询VO
+     */
     default <P extends IPage<V>> P selectVoPage(IPage<T> page, Wrapper<T> wrapper) {
         return selectVoPage(page, wrapper, this.currentVoClass());
     }
@@ -185,6 +191,7 @@ public interface BaseMapperPlus<M, T, V> extends BaseMapper<T> {
         if (CollUtil.isEmpty(list)) {
             return (P) voPage;
         }
+//        将数据库查询结果批量拷贝到vo视图对象返回
         voPage.setRecords(BeanCopyUtils.copyList(list, voClass));
         return (P) voPage;
     }
