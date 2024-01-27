@@ -1,7 +1,7 @@
 package com.ruoyi.crawler.crawlab;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.ruoyi.crawler.domain.vo.CrawlerNodeVo;
+import com.ruoyi.crawler.domain.bo.CrawlerNodeBo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,7 +48,7 @@ public interface CrawlabManager {
     @RequestMapping(value = "/api/nodes/{id}", method = RequestMethod.PUT)
     JSONObject updateNode(@RequestHeader(value = "Authorization", defaultValue = "${crawlab.token}") String authentication,
                           @PathVariable("id") String id,
-                          @RequestBody CrawlerNodeVo node);
+                          @RequestBody CrawlerNodeBo node);
 
     /**
      * 删除节点

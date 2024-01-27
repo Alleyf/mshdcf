@@ -501,6 +501,11 @@ function handleDelete(row) {
 
 /** 导出按钮操作 */
 function handleExport() {
+  console.log({
+    ...queryParams.value
+  }, typeof {
+    ...queryParams.value
+  })
   proxy.download("system/user/export", {
     ...queryParams.value,
   }, `user_${new Date().getTime()}.xlsx`);

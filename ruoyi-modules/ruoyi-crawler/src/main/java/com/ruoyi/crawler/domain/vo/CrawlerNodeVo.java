@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Data
 @Builder
 public class CrawlerNodeVo {
-    private String _id;
+    private String id;
     private String name;
     private String key;
     private String ip;
@@ -28,14 +28,55 @@ public class CrawlerNodeVo {
     private String mac;
     private String hostname;
     private String description;
-    private Boolean is_master;
+    private Boolean isMaster;
     private String status;
     private Boolean enabled;
     private Boolean active;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime active_ts;
-    private Integer available_runners;
-    private Integer max_runners;
+    private LocalDateTime activeTs;
+    private Integer availableRunners;
+    private Integer maxRunners;
+
+    /**
+     * 将JSON数组转换为CrawlerNode列表
+     *
+     * @param jsonArray JSON数组
+     * @return CrawlerNode列表
+     */
+    public static List<CrawlerNodeVo> map(JSONArray jsonArray) {
+        return jsonArray.toJavaList(JSONObject.class).stream().map(CrawlerNodeVo::getCrawlerNode).collect(Collectors.toList());
+    }
+
+    /**
+     * 将JSON对象转换为CrawlerNode
+     *
+     * @param jsonObject JSON对象
+     * @return CrawlerNode
+     */
+    public static CrawlerNodeVo map(JSONObject jsonObject) {
+        return getCrawlerNode(jsonObject);
+    }
+
+    private static CrawlerNodeVo getCrawlerNode(JSONObject jsonObject) {
+        return CrawlerNodeVo.builder()
+            .id(jsonObject.getString("_id"))
+            .name(jsonObject.getString("name"))
+            .key(jsonObject.getString("key"))
+            .ip(jsonObject.getString("ip"))
+            .port(jsonObject.getString("port"))
+            .mac(jsonObject.getString("mac"))
+            .hostname(jsonObject.getString("hostname"))
+            .description(jsonObject.getString("description"))
+            .isMaster(jsonObject.getBoolean("is_master"))
+            .status(jsonObject.getString("status"))
+            .enabled(jsonObject.getBoolean("enabled"))
+            .active(jsonObject.getBoolean("active"))
+            // 对于日期时间类型的字段，需要使用Fastjson或其他库提供的相应方法进行转换
+            .activeTs(parseToLocalDateTime(jsonObject, "active_ts"))
+            .availableRunners(jsonObject.getInteger("available_runners"))
+            .maxRunners(jsonObject.getInteger("max_runners"))
+            .build();
+    }
 
 
     /**
