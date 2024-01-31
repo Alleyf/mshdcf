@@ -29,7 +29,7 @@
     <properties>
         <seata.version>1.6.1</seata.version>
         <jcommander.version>1.72</jcommander.version>
-        <druid.version>1.2.12</druid.version>
+        <druid.version>1.2.11</druid.version>
     </properties>
 
     <dependencyManagement>
