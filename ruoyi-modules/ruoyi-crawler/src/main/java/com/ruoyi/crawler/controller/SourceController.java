@@ -26,10 +26,10 @@ import javax.validation.constraints.NotNull;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * 爬虫数据源控制器
- * 前端访问路由地址为:/crawlerdata/source
+ * 数据源管理
  *
  * @author alleyf
+ * @description 前端访问路由地址为:/crawlerdata/source
  * @date 2024-01-26
  */
 @Validated

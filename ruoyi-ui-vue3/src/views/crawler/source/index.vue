@@ -1,5 +1,5 @@
 <script setup>
-import {listSource, getSource, delSource, addSource, updateSource} from "@/api/crawlerdata/source";
+import {listSource, getSource, delSource, addSource, updateSource} from "@/api/crawler/source";
 import {getCurrentInstance, onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 

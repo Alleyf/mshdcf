@@ -13,13 +13,15 @@ import java.io.Serializable;
 
 /**
  * @author fcs
- * @date 2024/1/31 15:37
+ * @date 2024/2/1 11:10
  * @site <a href="https://alleyf.github.io">getHelp</a>
- * @description 司法案例索引
+ * @description 法律法规索引
+ * <p>keyword: 精确匹配(eq)or模糊匹配(like);</p>
+ * <p>text: 模糊匹配(match or query_string);</p>
  */
 @Data
-@IndexName(aliasName = "case")
-public class CaseDoc implements Serializable {
+@IndexName(aliasName = "law")
+public class LawDoc implements Serializable {
     private static final long serialVersionUID = 1L;
     /**
      * es中的唯一id
@@ -42,35 +44,20 @@ public class CaseDoc implements Serializable {
     @NotBlank(message = "标题不能为空")
     private String name;
     /**
-     * 审判法院
+     * 所属领域
      */
-    private String court;
-    /**
-     * 案号
-     */
-    private String number;
+    private String field;
+
     /**
      * 原始链接
      */
     private String url;
+
     /**
-     * 案由（1：刑事；2：民事；3：行政；4：国家赔偿；5：执行）
-     */
-    @IndexField(fieldType = FieldType.KEYWORD_TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
-    private String cause;
-    /**
-     * 文书类型（1：判决书 2：裁定书 3：通知书 4：决定书 5：令 6：其他）
+     * 法规类型(1：法律 2：行政法规 3：地方性法规 4：司法解释 5：部门规章；6：其他)
      */
     @IndexField(fieldType = FieldType.KEYWORD_TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
     private String type;
-    /**
-     * 审理程序
-     */
-    private String process;
-    /**
-     * 详细案由
-     */
-    private String label;
 
     /**
      * 案件内容
@@ -83,26 +70,31 @@ public class CaseDoc implements Serializable {
      */
 //    @JsonFormat(pattern = "yyyy-MM-dd")
     @IndexField(fieldType = FieldType.DATE, dateFormat = "yyyy-MM-dd")
-    private String judgeDate;
+    private String releaseDate;
     /**
      * 公开日期
      */
-//    @JsonFormat(pattern = "yyyy-MM-dd")
     @IndexField(fieldType = FieldType.DATE, dateFormat = "yyyy-MM-dd")
-    private String pubDate;
-    /**
-     * 法律依据
-     */
-    private String legalBasis;
-    /**
-     * 当事人
-     */
-    private String party;
-    /**
-     * 相关案件（记录name并以|分隔,应该用json保存）
-     */
-    private String relatedCases;
+    private String executeDate;
 
+    /**
+     * 发文机关
+     */
+    private String releaseOrganization;
+
+    /**
+     * 法律结构
+     */
+    private String structure;
+
+    /**
+     * 修订次数
+     */
+    private String reviseNum;
+
+    /**
+     * 查询评分
+     */
     @Score
     @IndexField(exist = false)
     private Float score;
@@ -111,4 +103,5 @@ public class CaseDoc implements Serializable {
      * 高亮返回值被映射的字段
      */
     private String highlightContent;
+
 }

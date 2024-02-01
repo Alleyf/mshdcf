@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import java.util.Date;
 
 import com.ruoyi.common.core.web.domain.BaseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * 司法案例对象 doc_case
@@ -69,11 +70,13 @@ public class DocCase extends BaseEntity {
     /**
      * 判决日期
      */
-    private Date judgeDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private String judgeDate;
     /**
      * 公开日期
      */
-    private Date pubDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private String pubDate;
     /**
      * 法律依据
      */

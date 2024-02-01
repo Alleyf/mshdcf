@@ -1,6 +1,7 @@
 package com.ruoyi.manage.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.lang.Assert;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.core.utils.BeanCopyUtils;
 import com.ruoyi.common.core.utils.StringUtils;
@@ -9,8 +10,9 @@ import com.ruoyi.common.mybatis.core.page.TableDataInfo;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.ruoyi.retrieve.api.RemoteCaseDocService;
+import com.ruoyi.retrieve.api.RemoteRetrieveService;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
+import com.ruoyi.retrieve.api.domain.LawDoc;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
@@ -23,6 +25,7 @@ import com.ruoyi.manage.service.IDocCaseService;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 司法案例Service业务层处理
@@ -34,10 +37,10 @@ import java.util.*;
 @Slf4j
 public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> implements IDocCaseService {
 
+    @DubboReference(version = "1.0", group = "case")
+    public RemoteRetrieveService<CaseDoc> remoteRetrieveService;
     @Resource
     private DocCaseMapper baseMapper;
-    @DubboReference
-    private RemoteCaseDocService<CaseDoc> remoteCaseDocService;
 
     /**
      * 查询司法案例
@@ -105,14 +108,14 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         DocCase add = BeanUtil.toBean(bo, DocCase.class);
         validEntityBeforeSave(add);
         boolean sqlFlag = baseMapper.insert(add) > 0;
-        boolean esFlag = remoteCaseDocService.exist(bo.getId());
+        boolean esFlag = remoteRetrieveService.exist(bo.getId());
         boolean flag = sqlFlag && esFlag;
         if (flag) {
             log.info("新增司法案例成功，id：{}", add.getId());
             bo.setId(add.getId());
 //            添加es索引
             DocCase newCase = selectDocCaseByName(add.getName());
-            flag = remoteCaseDocService.insert(BeanCopyUtils.copy(newCase, CaseDoc.class)) > 0;
+            flag = remoteRetrieveService.insert(BeanCopyUtils.copy(newCase, CaseDoc.class)) > 0;
         }
         return flag;
     }
@@ -120,8 +123,29 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     @Override
     public Boolean insertBatch() {
         List<DocCase> allCase = baseMapper.selectList();
-        List<CaseDoc> allCaseDoc = BeanCopyUtils.copyList(allCase, CaseDoc.class);
-        return remoteCaseDocService.insertBatch(allCaseDoc) > 0;
+        List<CaseDoc> all = BeanCopyUtils.copyList(allCase, CaseDoc.class);
+//        设置mysqlId
+        Assert.notNull(all, "数据库暂无案例数据，请先新增数据");
+        all = all.stream().peek(caseDoc -> caseDoc.setMysqlId(caseDoc.getId())).collect(Collectors.toList());
+        int successNum = 0, insertNum = 300;
+        if (all.size() <= insertNum) {
+            successNum = remoteRetrieveService.insertBatch(all);
+        } else {
+//            判断是否为300的整数倍
+            boolean remain = all.size() % 300 != 0;
+//            查询批量插入总批次
+            int epoch = remain ? all.size() / 300 + 1 : all.size() / 300;
+            for (int i = 0; i < epoch; i += 1) {
+                List<CaseDoc> subList;
+                if (remain && i == epoch - 1) {
+                    subList = all.subList(i * 300, all.size());
+                } else {
+                    subList = all.subList(i * 300, (i + 1) * 300);
+                }
+                successNum += remoteRetrieveService.insertBatch(subList);
+            }
+        }
+        return successNum > 0;
     }
 
     /**
@@ -132,11 +156,11 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         DocCase update = BeanUtil.toBean(bo, DocCase.class);
         validEntityBeforeSave(update);
         boolean sqlFlag = baseMapper.updateById(update) > 0;
-        boolean esFlag = remoteCaseDocService.exist(bo.getId());
+        boolean esFlag = remoteRetrieveService.exist(bo.getId());
         boolean flag = sqlFlag && esFlag;
         if (flag) {
 //            更新es索引
-            flag = remoteCaseDocService.update(BeanCopyUtils.copy(update, CaseDoc.class)) > 0;
+            flag = remoteRetrieveService.update(BeanCopyUtils.copy(update, CaseDoc.class)) > 0;
         }
         return flag;
     }
@@ -159,7 +183,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         boolean flag = baseMapper.deleteBatchIds(ids) > 0;
         if (flag) {
 //            删除es索引
-            remoteCaseDocService.deleteBatch(ids.toArray(new Long[0]));
+            remoteRetrieveService.deleteBatch(ids.toArray(new Long[0]));
         }
         return flag;
     }

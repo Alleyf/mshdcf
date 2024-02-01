@@ -30,6 +30,8 @@ import javax.validation.constraints.NotNull;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * 司法案例
+ *
  * @author alleyf
  * @description 司法案例控制器前端访问路由地址为:/manage/case
  * @date 2024-01-26
@@ -122,8 +124,8 @@ public class DocCaseController extends BaseController {
     /**
      * 全量同步司法案例
      */
-    @SaCheckPermission("manage:case:add")
-    @Log(title = "司法案例", businessType = BusinessType.INSERT)
+//    @SaCheckPermission("manage:case:add")
+//    @Log(title = "司法案例", businessType = BusinessType.INSERT)
     @GetMapping("/syncAll")
     public R<Void> syncAll() {
         return toAjax(docCaseService.insertBatch());

@@ -45,3 +45,10 @@ easy-es:
   # 默认为http
   schema: http
   banner: false
+
+--- # Dubbo 配置
+dubbo:
+  protocol:
+    name: dubbo
+    port: -1
+    payload: 104857600 #10MB

@@ -1,7 +1,5 @@
 package com.ruoyi.manage.domain.vo;
 
-import java.util.Date;
-
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.ruoyi.common.excel.annotation.ExcelDictFormat;
@@ -9,18 +7,17 @@ import com.ruoyi.common.excel.convert.ExcelDictConvert;
 import lombok.Data;
 
 import java.io.Serializable;
-
+import java.util.Date;
 
 /**
- * 法律法规视图对象
- *
- * @author alleyf
- * @date 2024-01-27
+ * @author fcs
+ * @date 2024/2/1 13:10
+ * @site <a href="https://alleyf.github.io">getHelp</a>
+ * @description 法律法规导入视图对象
  */
 @Data
 @ExcelIgnoreUnannotated
-public class LawRegulationVo implements Serializable {
-
+public class LawRegulationImportVo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
@@ -111,18 +108,5 @@ public class LawRegulationVo implements Serializable {
     @ExcelProperty(value = "状态", converter = ExcelDictConvert.class)
     @ExcelDictFormat(dictType = "crawl_common_status")
     private Integer status;
-
-    /**
-     * 创建时间
-     */
-    @ExcelProperty(value = "创建时间")
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    @ExcelProperty(value = "更新时间")
-    private Date updateTime;
-
 
 }

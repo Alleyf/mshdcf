@@ -4,7 +4,6 @@ import cn.easyes.core.biz.EsPageInfo;
 import cn.easyes.core.conditions.select.LambdaEsQueryChainWrapper;
 import cn.easyes.core.conditions.select.LambdaEsQueryWrapper;
 import cn.easyes.core.core.EsWrappers;
-import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
@@ -25,7 +24,7 @@ import java.util.List;
  * @description
  */
 @Service
-public class ICaseDocServiceImpl implements ICaseDocService {
+public class CaseDocServiceImpl implements ICaseDocService {
 
     @Resource
     private CaseDocMapper caseDocMapper;
@@ -103,17 +102,37 @@ public class ICaseDocServiceImpl implements ICaseDocService {
     @Override
     public CaseDoc selectOne(String keyword, Boolean blurSearch) {
         if (blurSearch) {
-            return EsWrappers.lambdaChainQuery(caseDocMapper)
-                .match(CaseDoc::getName, keyword)
-                .or()
-                .match(CaseDoc::getContent, keyword)
-                .one();
+            return fuzzySearchList(keyword).get(0);
         }
+        return preciseSearchList(keyword).get(0);
+    }
+
+    /**
+     * 根据关键字精确查询案例名称
+     *
+     * @param keyword 关键字
+     * @return List<CaseDoc>
+     */
+    public List<CaseDoc> preciseSearchList(String keyword) {
         return EsWrappers.lambdaChainQuery(caseDocMapper)
-            .eq(CaseDoc::getName, keyword)
+            .eq(StringUtils.isNotEmpty(keyword), CaseDoc::getName, keyword)
             .or()
-            .match(CaseDoc::getContent, keyword)
-            .one();
+            .match(StringUtils.isNotEmpty(keyword), CaseDoc::getContent, keyword)
+            .list();
+    }
+
+    /**
+     * 根据关键字模糊查询案例名称
+     *
+     * @param keyword 关键字
+     * @return List<CaseDoc>
+     */
+    public List<CaseDoc> fuzzySearchList(String keyword) {
+        return EsWrappers.lambdaChainQuery(caseDocMapper)
+            .match(StringUtils.isNotEmpty(keyword), CaseDoc::getName, keyword)
+            .or()
+            .match(StringUtils.isNotEmpty(keyword), CaseDoc::getContent, keyword)
+            .list();
     }
 
     /**
@@ -126,17 +145,9 @@ public class ICaseDocServiceImpl implements ICaseDocService {
     @Override
     public List<CaseDoc> selectList(String keyword, Boolean blurSearch) {
         if (blurSearch) {
-            return EsWrappers.lambdaChainQuery(caseDocMapper)
-                .match(CaseDoc::getName, keyword)
-                .or()
-                .match(CaseDoc::getContent, keyword)
-                .list();
+            return fuzzySearchList(keyword);
         }
-        return EsWrappers.lambdaChainQuery(caseDocMapper)
-            .eq(CaseDoc::getName, keyword)
-            .or()
-            .match(CaseDoc::getContent, keyword)
-            .list();
+        return preciseSearchList(keyword);
     }
 
     /**
@@ -149,9 +160,9 @@ public class ICaseDocServiceImpl implements ICaseDocService {
     @Override
     public TableDataInfo<CaseDoc> selectPage(String keyword, PageQuery pageQuery) {
         LambdaEsQueryChainWrapper<CaseDoc> lqw = EsWrappers.lambdaChainQuery(caseDocMapper)
-            .match(CaseDoc::getName, keyword)
+            .match(StringUtils.isNotEmpty(keyword), CaseDoc::getName, keyword)
             .or()
-            .match(CaseDoc::getContent, keyword)
+            .match(StringUtils.isNotEmpty(keyword), CaseDoc::getContent, keyword)
             .sortByScore(SortOrder.DESC);
         // 物理分页
         EsPageInfo<CaseDoc> page = caseDocMapper.pageQuery(lqw, pageQuery.getPageNum(), pageQuery.getPageSize());
@@ -191,15 +202,15 @@ public class ICaseDocServiceImpl implements ICaseDocService {
         lqw.match(StringUtils.isNotEmpty(bo.getName()), CaseDoc::getName, bo.getName())
             .or()
             .match(StringUtils.isNotEmpty(bo.getContent()), CaseDoc::getContent, bo.getContent())
-            .eq(StringUtils.isNotEmpty(bo.getCourt()), CaseDoc::getCourt, bo.getCourt())
-            .eq(StringUtils.isNotEmpty(bo.getNumber()), CaseDoc::getNumber, bo.getNumber())
+            .like(StringUtils.isNotEmpty(bo.getCourt()), CaseDoc::getCourt, bo.getCourt())
+            .like(StringUtils.isNotEmpty(bo.getNumber()), CaseDoc::getNumber, bo.getNumber())
             .eq(StringUtils.isNotEmpty(bo.getCause()), CaseDoc::getCause, bo.getCause())
             .eq(StringUtils.isNotEmpty(bo.getType()), CaseDoc::getType, bo.getType())
-            .eq(StringUtils.isNotEmpty(bo.getProcess()), CaseDoc::getProcess, bo.getProcess())
-            .eq(StringUtils.isNotEmpty(bo.getJudgeDate()), CaseDoc::getJudgeDate, bo.getJudgeDate())
-            .eq(StringUtils.isNotEmpty(bo.getPubDate()), CaseDoc::getPubDate, bo.getPubDate())
-            .eq(StringUtils.isNotEmpty(bo.getLegalBasis()), CaseDoc::getLegalBasis, bo.getLegalBasis())
-            .eq(StringUtils.isNotEmpty(bo.getParty()), CaseDoc::getParty, bo.getParty())
+            .like(StringUtils.isNotEmpty(bo.getProcess()), CaseDoc::getProcess, bo.getProcess())
+            .ge(StringUtils.isNotEmpty(bo.getJudgeDate()), CaseDoc::getJudgeDate, bo.getJudgeDate())
+            .le(StringUtils.isNotEmpty(bo.getPubDate()), CaseDoc::getPubDate, bo.getPubDate())
+            .like(StringUtils.isNotEmpty(bo.getLegalBasis()), CaseDoc::getLegalBasis, bo.getLegalBasis())
+            .like(StringUtils.isNotEmpty(bo.getParty()), CaseDoc::getParty, bo.getParty())
             .sortByScore(SortOrder.DESC);
         return lqw;
     }

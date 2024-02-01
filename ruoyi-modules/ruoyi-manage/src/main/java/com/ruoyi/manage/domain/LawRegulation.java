@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import java.util.Date;
 
 import com.ruoyi.common.core.web.domain.BaseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * 法律法规对象 law_regulation
@@ -49,11 +50,13 @@ public class LawRegulation extends BaseEntity {
     /**
      * 发布日期
      */
-    private Date releaseDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private String releaseDate;
     /**
      * 实施日期
      */
-    private Date executeDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private String executeDate;
     /**
      * 发布机关
      */

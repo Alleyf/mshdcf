@@ -66,6 +66,8 @@ easy-es:
     print-dsl: true
     # 异步处理索引是否阻塞主线程 默认阻塞 数据量过大时调整为非阻塞异步进行 项目启动更快
     asyncProcessIndexBlocking: true
+    #smoothly:平滑模式, not_smoothly:非平滑模式, manual:手动模式
+    process_index_mode: not_smoothly
     db-config:
       # 是否开启下划线转驼峰 默认为false
       map-underscore-to-camel-case: true
@@ -79,3 +81,5 @@ easy-es:
       refresh-policy: immediate
       # 是否全局开启must查询类型转换为filter查询类型 默认为false不转换
       enable-must2-filter: false
+      # 是否自动添加keyword后缀 默认为true
+      smartAddKeywordSuffix: true

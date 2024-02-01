@@ -14,17 +14,18 @@ import com.ruoyi.common.satoken.utils.LoginHelper;
 import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.vo.DocCaseImportVo;
 import com.ruoyi.manage.service.IDocCaseService;
-import com.ruoyi.retrieve.api.RemoteCaseDocService;
+import com.ruoyi.retrieve.api.RemoteRetrieveService;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
- * 系统用户自定义导入
- *
- * @author Lion Li
+ * @author fcs
+ * @date 2024/2/1 13:14
+ * @site <a href="https://alleyf.github.io">getHelp</a>
+ * @description DocCase导入
  */
 @Slf4j
 public class DocCaseImportListener extends AnalysisEventListener<DocCaseImportVo> implements ExcelListener<DocCaseImportVo> {
@@ -34,8 +35,8 @@ public class DocCaseImportListener extends AnalysisEventListener<DocCaseImportVo
     private final String operName;
     private final StringBuilder successMsg = new StringBuilder();
     private final StringBuilder failureMsg = new StringBuilder();
-    @Resource
-    private RemoteCaseDocService remoteCaseDocService;
+    @DubboReference(version = "1.0", group = "case")
+    private RemoteRetrieveService<CaseDoc> remoteRetrieveService;
     private int successNum = 0;
     private int failureNum = 0;
 
@@ -58,13 +59,13 @@ public class DocCaseImportListener extends AnalysisEventListener<DocCaseImportVo
                 ValidatorUtils.validate(docCase);
                 docCase.setCreateBy(operName);
                 boolean sqlFlag = docCaseService.save(docCase);
-                boolean esFlag = remoteCaseDocService.exist(docCase.getName());
+                boolean esFlag = remoteRetrieveService.exist(docCase.getName());
                 boolean flag = sqlFlag && esFlag;
                 if (flag) {
 //                查询刚刚新建的案例
                     DocCase newCase = docCaseService.selectDocCaseByName(docCase.getName());
 //                添加es索引
-                    remoteCaseDocService.insert(BeanCopyUtils.copy(newCase, CaseDoc.class));
+                    remoteRetrieveService.insert(BeanCopyUtils.copy(newCase, CaseDoc.class));
                     successNum++;
                     successMsg.append("<br/>").append(successNum).append("、案例 ").append(docCase.getName()).append(" 导入成功");
                 }
@@ -76,11 +77,11 @@ public class DocCaseImportListener extends AnalysisEventListener<DocCaseImportVo
                 ValidatorUtils.validate(docCase);
                 docCase.setUpdateBy(operName);
                 boolean sqlFlag = docCaseService.updateById(docCase);
-                boolean esFlag = remoteCaseDocService.exist(docCase.getName());
+                boolean esFlag = remoteRetrieveService.exist(docCase.getName());
                 boolean flag = sqlFlag && esFlag;
                 if (flag) {
 //                更新es索引
-                    remoteCaseDocService.update(BeanCopyUtils.copy(docCase, CaseDoc.class));
+                    remoteRetrieveService.update(BeanCopyUtils.copy(docCase, CaseDoc.class));
                     successNum++;
                     successMsg.append("<br/>").append(successNum).append("、案例 ").append(docCase.getName()).append(" 更新成功");
                 }
