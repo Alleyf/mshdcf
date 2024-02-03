@@ -10,6 +10,8 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author fcs
@@ -18,14 +20,14 @@ import java.io.Serializable;
  * @description 司法案例索引
  */
 @Data
-@IndexName(aliasName = "case")
+@IndexName(aliasName = "case", maxResultWindow = 1000000)
 public class CaseDoc implements Serializable {
     private static final long serialVersionUID = 1L;
     /**
      * es中的唯一id
      */
     @IndexId(type = IdType.CUSTOMIZE)
-    @NotNull(message = "id不能为空")
+//    @NotNull(message = "id不能为空")
     private Long id;
 
     /**
@@ -39,7 +41,7 @@ public class CaseDoc implements Serializable {
      */
     @HighLight(mappingField = "highlightContent", preTag = "<text style='color:red'>", postTag = "</text>")
     @IndexField(fieldType = FieldType.KEYWORD_TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
-    @NotBlank(message = "标题不能为空")
+//    @NotBlank(message = "标题不能为空")
     private String name;
     /**
      * 审判法院
@@ -75,32 +77,37 @@ public class CaseDoc implements Serializable {
     /**
      * 案件内容
      */
-    @NotBlank(message = "内容不能为空")
+//    @NotBlank(message = "内容不能为空")
     @IndexField(fieldType = FieldType.TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
     private String content;
     /**
      * 判决日期
      */
-//    @JsonFormat(pattern = "yyyy-MM-dd")
     @IndexField(fieldType = FieldType.DATE, dateFormat = "yyyy-MM-dd")
     private String judgeDate;
     /**
      * 公开日期
      */
-//    @JsonFormat(pattern = "yyyy-MM-dd")
     @IndexField(fieldType = FieldType.DATE, dateFormat = "yyyy-MM-dd")
     private String pubDate;
     /**
      * 法律依据
      */
     private String legalBasis;
+
+    /**
+     * 来源id
+     */
+    private Long sourceId;
+
     /**
      * 当事人
      */
     private String party;
     /**
-     * 相关案件（记录name并以|分隔,应该用json保存）
+     * 相关案件（记录name并以|分隔,应该用json保存,等爬虫重新爬取保存json格式到数据库再替换为map类型）
      */
+//    private List<Map<String, Object>> relatedCases;
     private String relatedCases;
 
     @Score

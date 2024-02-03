@@ -51,12 +51,12 @@ public class LawRegulation extends BaseEntity {
      * 发布日期
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private String releaseDate;
+    private Date releaseDate;
     /**
      * 实施日期
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private String executeDate;
+    private Date executeDate;
     /**
      * 发布机关
      */

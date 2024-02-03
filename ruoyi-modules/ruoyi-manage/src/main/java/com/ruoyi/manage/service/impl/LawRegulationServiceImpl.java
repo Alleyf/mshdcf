@@ -92,9 +92,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
     public Boolean insertByBo(LawRegulationBo bo) {
         LawRegulation add = BeanUtil.toBean(bo, LawRegulation.class);
         validEntityBeforeSave(add);
-        boolean sqlFlag = baseMapper.insert(add) > 0;
-        boolean esFlag = remoteRetrieveService.exist(bo.getId());
-        boolean flag = sqlFlag && esFlag;
+        boolean flag = baseMapper.insert(add) > 0;
         if (flag) {
             bo.setId(add.getId());
             //            添加es索引
@@ -110,9 +108,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
     @Override
     public Boolean insertBatch() {
         List<LawRegulation> allLaw = baseMapper.selectList();
-        log.info("拷贝前的最后一个：" + allLaw.get(allLaw.size() - 1).toString());
         List<LawDoc> all = BeanCopyUtils.copyList(allLaw, LawDoc.class);
-        log.info("拷贝后的最后一个：" + all.get(all.size() - 1).toString());
         //        设置mysqlId
         Assert.notNull(all, "数据库暂无案例数据，请先新增数据");
         all = all.stream().peek(lawDoc -> lawDoc.setMysqlId(lawDoc.getId())).collect(Collectors.toList());
@@ -144,9 +140,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
     public Boolean updateByBo(LawRegulationBo bo) {
         LawRegulation update = BeanUtil.toBean(bo, LawRegulation.class);
         validEntityBeforeSave(update);
-        boolean sqlFlag = baseMapper.updateById(update) > 0;
-        boolean esFlag = remoteRetrieveService.exist(bo.getId());
-        boolean flag = sqlFlag && esFlag;
+        boolean flag = baseMapper.updateById(update) > 0;
         if (flag) {
 //            更新es索引
             flag = remoteRetrieveService.update(BeanCopyUtils.copy(update, LawDoc.class)) > 0;

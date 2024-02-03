@@ -31,6 +31,7 @@ public class DashboardApplication {
     public static void main(String[] args) {
         triggerSentinelInit();
         SpringApplication.run(DashboardApplication.class, args);
+        System.out.println("(♥◠‿◠)ﾉﾞ  服务熔断降级模块启动成功   ლ(´ڡ`ლ)ﾞ  ");
     }
 
     private static void triggerSentinelInit() {

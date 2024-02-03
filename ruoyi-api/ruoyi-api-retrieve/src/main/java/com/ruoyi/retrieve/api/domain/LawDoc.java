@@ -10,6 +10,7 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author fcs
@@ -20,7 +21,7 @@ import java.io.Serializable;
  * <p>text: 模糊匹配(match or query_string);</p>
  */
 @Data
-@IndexName(aliasName = "law")
+@IndexName(aliasName = "law", maxResultWindow = 1000000)
 public class LawDoc implements Serializable {
     private static final long serialVersionUID = 1L;
     /**
@@ -68,7 +69,7 @@ public class LawDoc implements Serializable {
     /**
      * 判决日期
      */
-//    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @IndexField(fieldType = FieldType.DATE, dateFormat = "yyyy-MM-dd")
     private String releaseDate;
     /**
@@ -91,6 +92,11 @@ public class LawDoc implements Serializable {
      * 修订次数
      */
     private String reviseNum;
+
+    /**
+     * 是否有效
+     */
+    private Long isValidity;
 
     /**
      * 查询评分

@@ -5,6 +5,7 @@ import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
+import com.ruoyi.retrieve.api.domain.CaseDoc;
 import com.ruoyi.retrieve.api.domain.LawDoc;
 import com.ruoyi.retrieve.esmapper.LawDocMapper;
 import com.ruoyi.retrieve.service.ILawDocService;
@@ -56,12 +57,25 @@ public class LawDocController extends BaseController {
      *
      * @return R
      */
-    @DeleteMapping("deleteIndex")
+    @DeleteMapping("/deleteIndex")
     public R<Void> deleteIndex() {
         // 指定要删除哪个索引
         String indexName = LawDoc.class.getSimpleName().toLowerCase();
         return toAjax(lawDocMapper.deleteIndex(indexName));
     }
+
+
+    /**
+     * 根据id查询
+     *
+     * @param id id
+     * @return R
+     */
+    @GetMapping("/{id}")
+    public R<LawDoc> get(@PathVariable("id") Long id) {
+        return R.ok(lawDocService.selectById(id));
+    }
+
 
     /**
      * 查询列表
@@ -70,7 +84,7 @@ public class LawDocController extends BaseController {
      * @param blurSearch 模糊搜索标志
      * @return R
      */
-    @GetMapping("list")
+    @GetMapping("/list")
     public R<List<LawDoc>> list(String keyword, Boolean blurSearch) {
         return R.ok(lawDocService.selectList(keyword, blurSearch));
     }
@@ -82,7 +96,7 @@ public class LawDocController extends BaseController {
      * @param pageQuery 分页参数
      * @return TableDataInfo
      */
-    @GetMapping("page/")
+    @GetMapping("/pageByKeyword")
     public TableDataInfo<LawDoc> page(String keyword, PageQuery pageQuery) {
         return lawDocService.selectPage(keyword, pageQuery);
     }
@@ -94,7 +108,7 @@ public class LawDocController extends BaseController {
      * @param pageQuery 分页参数
      * @return TableDataInfo
      */
-    @GetMapping("page")
+    @GetMapping("/page")
     public TableDataInfo<LawDoc> page(LawDoc lawDoc, PageQuery pageQuery) {
         return lawDocService.selectPage(lawDoc, pageQuery);
     }
@@ -105,7 +119,7 @@ public class LawDocController extends BaseController {
      * @param lawDoc 新增对象
      * @return R
      */
-    @PostMapping()
+    @PostMapping
     public R<Void> insert(@Validated @RequestBody LawDoc lawDoc) {
         return toAjax(lawDocService.insert(lawDoc));
     }
@@ -116,7 +130,7 @@ public class LawDocController extends BaseController {
      * @param lawDoc 修改对象
      * @return R
      */
-    @PutMapping()
+    @PutMapping
     public R<Void> edit(@Validated @RequestBody LawDoc lawDoc) {
         return toAjax(lawDocService.update(lawDoc));
     }

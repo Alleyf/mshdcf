@@ -302,17 +302,25 @@ onMounted(() => {
       >
         <el-table-column align="center" type="selection" width="55"/>
         <!--      <el-table-column v-if="true" align="center" label="法律法规主键id" prop="id"/>-->
-        <el-table-column align="center" fixed label="法规名称" prop="name" width="230"/>
-        <!--      <el-table-column align="center" label="领域类别" prop="field"/>-->
-        <el-table-column align="center" label="法规类型" prop="type"
-                         width="180">
-          <template #default="scope">
-            <dict-tag :options="law_type" :value="scope.row.type" width="180"/>
+        <el-table-column align="center" fixed label="法规名称" prop="name" width="230">
+          <template #default="{ row }">
+            <el-tooltip effect="dark" placement="top">
+              <template #content class="newLine">{{ row.name }}</template>
+              <span class="hidden">{{ row.name }}</span>
+            </el-tooltip>
           </template>
         </el-table-column>
-        <el-table-column align="center" label="原始链接" prop="url" width="190">
+        <!--      <el-table-column align="center" label="领域类别" prop="field"/>-->
+        <el-table-column align="center" label="法规类型" prop="type" width="180">
           <template #default="scope">
-            <el-link :href="scope.row.url" target="_blank" type="primary">{{ scope.row.url }}</el-link>
+            <dict-tag v-if="scope.row.type!==null" :options="law_type" :value="scope.row.type" width="180"/>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" label="原始链接" prop="url" width="120">
+          <template #default="scope">
+            <el-link :href="scope.row.url" target="_blank" type="primary">
+              <span class="hidden">{{ scope.row.url }}</span>
+            </el-link>
           </template>
         </el-table-column>
         <el-table-column align="center" label="有效性" prop="isValidity" width="180">
@@ -462,5 +470,17 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
+.hidden {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1; /* 表示显示3行 */
+  overflow: hidden;
+}
 
+.newLine * {
+  width: 10px; /* 设置一个宽度来触发换行 */
+  overflow-wrap: break-word; /* 当内容溢出容器边界时允许单词内部断行 */
+  word-break: break-word; /* 对于不区分单词的脚本（如中文、日文等），也可以使用此属性 */
+  white-space: normal; /* 这是默认值，保持常规空白处理和换行行为 */
+}
 </style>

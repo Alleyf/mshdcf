@@ -2,125 +2,15 @@
   <div class="app-container home">
     <el-row :gutter="20">
       <el-col :lg="12" :sm="24" style="padding-left: 20px">
-        <h2>RuoYi-Cloud-Plus后台管理系统</h2>
-        <p>
-          RuoYi-Cloud-Plus 微服务通用权限管理系统 重写 RuoYi-Cloud 全方位升级(不兼容原框架)
-          <br/>
-          * 前端开发框架 Vue、Element UI<br/>
-          * 后端开发框架 Spring Boot<br/>
-          * 微服务开发框架 Spring Cloud、Spring Cloud Alibaba<br/>
-          * 容器框架 Undertow 基于 XNIO 的高性能容器<br/>
-          * 权限认证框架 Sa-Token、Jwt 支持多终端认证系统<br/>
-          * 关系数据库 MySQL 适配 8.X 最低 5.7<br/>
-          * 关系数据库 Oracle 适配 11g 12c<br/>
-          * 关系数据库 PostgreSQL 适配 13 14<br/>
-          * 关系数据库 SQLServer 适配 2017 2019<br/>
-          * 缓存数据库 Redis 适配 6.X 最低 5.X<br/>
-          * 分布式注册中心 Alibaba Nacos 采用2.X 基于GRPC通信高性能<br/>
-          * 分布式配置中心 Alibaba Nacos 采用2.X 基于GRPC通信高性能<br/>
-          * 服务网关 Spring Cloud Gateway 响应式高性能网关<br/>
-          * 负载均衡 Spring Cloud Loadbalancer 负载均衡处理<br/>
-          * RPC远程调用 Apache Dubbo 原生态使用体验、高性能<br/>
-          * 分布式限流熔断 Alibaba Sentinel 无侵入、高扩展<br/>
-          * 分布式事务 Alibaba Seata 无侵入、高扩展 支持 四种模式<br/>
-          * 分布式消息队列 Spring Cloud Stream 门面框架兼容各种MQ集成<br/>
-          * 分布式消息队列 Apache Kafka 高性能高速度<br/>
-          * 分布式消息队列 Apache RocketMQ 高可用功能多样<br/>
-          * 分布式消息队列 RabbitMQ 支持各种扩展插件功能多样性<br/>
-          * 分布式搜索引擎 ElasticSearch 业界知名<br/>
-          * 分布式链路追踪 Apache SkyWalking 链路追踪、网格分析、度量聚合、可视化<br/>
-          * 分布式日志中心 ELK 业界成熟解决方案<br/>
-          * 分布式锁 Lock4j 注解锁、工具锁 多种多样<br/>
-          * 分布式幂等 Redisson 拦截重复提交<br/>
-          * 分布式任务调度 Xxl-Job 高性能 高可靠 易扩展<br/>
-          * 分布式文件存储 Minio 本地存储<br/>
-          * 分布式云存储 七牛、阿里、腾讯 云存储<br/>
-          * 分布式监控 Prometheus、Grafana 全方位性能监控<br/>
-          * 服务监控 SpringBoot-Admin 全方位服务监控<br/>
-          * 数据库框架 Mybatis-Plus 快速 CRUD 增加开发效率<br/>
-          * 数据库框架 p6spy 更强劲的 SQL 分析<br/>
-          * 多数据源框架 dynamic-datasource 支持主从与多种类数据库异构<br/>
-          * 序列化框架 Jackson 统一使用 jackson 高效可靠<br/>
-          * Redis客户端 Redisson 性能强劲、API丰富<br/>
-          * 校验框架 Validation 增强接口安全性 严谨性<br/>
-          * Excel框架 Alibaba EasyExcel 性能优异 扩展性强<br/>
-          * 文档框架 SpringDoc、javadoc 无注解零入侵基于java注释<br/>
-          * 工具类框架 Hutool、Lombok 减少代码冗余 增加安全性<br/>
-          * 代码生成器 适配MP、SpringDoc规范化代码 一键生成前后端代码<br/>
-          * 部署方式 Docker 容器编排 一键部署业务集群<br/>
-          * 国际化 SpringMessage Spring标准国际化方案<br/>
-        </p>
+        <el-carousel :interval="5000" arrow="never" indicator-position="outside">
+          <el-carousel-item v-for="item in imageLs" :key="item">
+            <el-image :src="item" fit="fill"/>
+            <!--            <h3 justify="center" text="2xl">{{ item }}</h3>-->
+          </el-carousel-item>
+        </el-carousel>
         <p>
           <b>当前版本:</b> <span>v{{ version }}</span>
         </p>
-        <p>
-          <el-tag type="danger">&yen;免费开源</el-tag>
-        </p>
-        <p>
-          <el-button
-            icon="Cloudy"
-            plain
-            type="primary"
-            @click="goTarget('https://gitee.com/JavaLionLi/RuoYi-Cloud-Plus')"
-          >访问码云
-          </el-button
-          >
-          <el-button
-            icon="Cloudy"
-            plain
-            type="primary"
-            @click="goTarget('https://github.com/JavaLionLi/RuoYi-Cloud-Plus')"
-          >访问GitHub
-          </el-button
-          >
-          <el-button
-            icon="Cloudy"
-            plain
-            type="primary"
-            @click="goTarget('https://gitee.com/JavaLionLi/RuoYi-Cloud-Plus/wikis/pages?sort_id=5303316&doc_id=2056143')"
-          >更新日志
-          </el-button
-          >
-        </p>
-      </el-col>
-
-      <el-col :lg="12" :sm="24" style="padding-left: 50px">
-        <el-row>
-          <el-col :span="12">
-            <h2>技术选型</h2>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="6">
-            <h4>后端技术</h4>
-            <ul>
-              <li>SpringBoot</li>
-              <li>SpringCloud</li>
-              <li>Nacos</li>
-              <li>Sentinel</li>
-              <li>Seata</li>
-              <li>Minio</li>
-              <li>...</li>
-            </ul>
-          </el-col>
-          <el-col :span="6">
-            <h4>前端技术</h4>
-            <ul>
-              <li>Vue</li>
-              <li>Vuex</li>
-              <li>Element-ui</li>
-              <li>Axios</li>
-              <li>Echarts</li>
-              <li>Quill</li>
-              <li>...</li>
-            </ul>
-          </el-col>
-        </el-row>
-      </el-col>
-    </el-row>
-    <el-divider/>
-    <el-row :gutter="20">
-      <el-col :lg="8" :md="12" :sm="24" :xs="24">
         <el-card class="update-log">
           <div slot="header" class="clearfix">
             <span>联系信息</span>
@@ -129,21 +19,122 @@
             <p>
               <i class="el-icon-s-promotion"></i> 官网：
               <el-link
-                href="https://gitee.com/JavaLionLi/RuoYi-Cloud-Plus"
+                href="https://github.com/Alleyf/MSHDCF"
                 target="_blank"
-              >https://gitee.com/JavaLionLi/RuoYi-Cloud-Plus
+              >https://github.com/Alleyf/MSHDCF
               </el-link
               >
             </p>
           </div>
         </el-card>
       </el-col>
+
+      <el-col :lg="12" :sm="24" style="padding-left: 50px">
+        <p>
+          <el-timeline>
+            <el-timeline-item
+              v-for="(log, index) in logs"
+              :key="index"
+              :color="log.color"
+              :hollow="log.hollow"
+              :icon="log.icon"
+              :size="log.size"
+              :timestamp="log.timestamp"
+              :type="log.type"
+              placement="top"
+            >
+              <el-card>
+                <el-link :href="log.url" target="_blank" type="default">
+                  <el-tag :type="log.type">
+                    {{ log.content }}
+                  </el-tag>
+                </el-link>
+              </el-card>
+            </el-timeline-item>
+          </el-timeline>
+        </p>
+      </el-col>
     </el-row>
+
   </div>
 </template>
 
 <script name="Index" setup>
+import {reactive, ref} from "vue";
+
 const version = ref('1.8.1')
+const now = () => {
+  return new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + ' ' + new Date().getDate() + '-' + new Date().getHours() + ':' + new Date().getMinutes()
+}
+const imageLs = ref([
+  'https://qnpicmap.fcsluck.top/pics/202402040033310.png',
+  'https://qnpicmap.fcsluck.top/pics/202402040034979.png',
+  'https://qnpicmap.fcsluck.top/pics/202402040035166.png'
+])
+
+const logs = ref([
+  {
+    content: '添加采集模块，完成crawlab的node节点管理（增删改查）接口功能',
+    timestamp: now(),
+    color: '#409EFF',
+    icon: 'el-icon-s-promotion',
+    size: 'large',
+    hollow: false,
+    type: 'primary',
+    url: 'https://github.com/Alleyf/MSHDCF'
+  },
+  {
+    content: '完成爬虫模块的爬虫数据源基本管理和数据检索模块的司法案例和法律法规基本管理业务功能',
+    timestamp: now(),
+    color: '#67C23A',
+    icon: 'el-icon-s-promotion',
+    size: 'large',
+    hollow: false,
+    type: 'success',
+    url: 'https://github.com/Alleyf/MSHDCF'
+  },
+  {
+    content: '调整数据源管理前端样式和全局标签缓存机制（默认全部缓存）',
+    timestamp: now(),
+    color: '#E6A23C',
+    icon: 'el-icon-s-promotion',
+    size: 'large',
+    hollow: false,
+    type: 'warning',
+    url: 'https://github.com/Alleyf/MSHDCF'
+  },
+  {
+    content: '完成es检索模块后端对司法案例的基本检索和分页功能',
+    timestamp: now(),
+    color: '#F56C6C',
+    icon: 'el-icon-s-promotion',
+    size: 'large',
+    hollow: false,
+    type: 'danger',
+    url: 'https://github.com/Alleyf/MSHDCF'
+  },
+  {
+    content: '完成es检索模块后端对法律法规的基本检索、分页以及数据全量同步功能',
+    timestamp: now(),
+    color: '#e7f611',
+    icon: 'el-icon-s-promotion',
+    size: 'large',
+    hollow: false,
+    type: 'primary',
+    url: 'https://github.com/Alleyf/MSHDCF'
+  },
+  {
+    content: '添加采集模块，完成crawlab的node节点管理（增删改查）接口功能',
+    timestamp: now(),
+    color: '#9950d5',
+    icon: 'MoreFilled',
+    size: 'large',
+    hollow: false,
+    type: 'success',
+    url: 'https://github.com/Alleyf/MSHDCF'
+  }
+])
+
 
 function goTarget(url) {
   window.open(url, '__blank')
@@ -151,6 +142,23 @@ function goTarget(url) {
 </script>
 
 <style lang="scss" scoped>
+
+.el-carousel__item h3 {
+  display: flex;
+  color: #475669;
+  opacity: 0.75;
+  line-height: 300px;
+  margin: 0;
+}
+
+.el-carousel__item:nth-child(2n) {
+  background-color: #99a9bf;
+}
+
+.el-carousel__item:nth-child(2n + 1) {
+  background-color: #d3dce6;
+}
+
 .home {
   blockquote {
     padding: 10px 20px;

@@ -256,7 +256,7 @@ const handleDelete = row => {
   const idLs = row.id || ids.value
   ElMessageBox.confirm(`是否确认删除司法案例编号为"${idLs}"的数据项？`).then(() => {
     loading.value = true
-    return delCase(ids)
+    return delCase(idLs)
   }).then(() => {
     loading.value = false
     getList()
@@ -340,16 +340,16 @@ onMounted(() => {
           label-position="left"
           label-width="80px"
         >
-          <el-form-item label="案件名称" label-width="80">
+          <el-form-item label="案件名称" label-width="80" prop="name">
             <el-input v-model="queryParams.name"></el-input>
           </el-form-item>
-          <el-form-item label="审判法院" label-width="80">
+          <el-form-item label="审判法院" label-width="80" prop="court">
             <el-input v-model="queryParams.court"></el-input>
           </el-form-item>
-          <el-form-item label="案号" label-width="40">
+          <el-form-item label="案号" label-width="40" prop="number">
             <el-input v-model="queryParams.number"></el-input>
           </el-form-item>
-          <el-form-item label="案由" label-width="80">
+          <el-form-item label="案由" label-width="80" prop="cause">
             <el-select v-model="queryParams.cause">
               <el-option
                 v-for="item in doc_case_cause"
@@ -359,7 +359,7 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="文书类型" label-width="80">
+          <el-form-item label="文书类型" label-width="80" prop="type">
             <el-select v-model="queryParams.type">
               <el-option
                 v-for="item in doc_case_type"
@@ -375,7 +375,7 @@ onMounted(() => {
           <!--        <el-form-item label="详细案由">-->
           <!--          <el-input v-model="queryParams.label"/>-->
           <!--        </el-form-item>-->
-          <el-form-item label="案件来源" label-width="80">
+          <el-form-item label="案件来源" label-width="80" prop="sourceId">
             <el-select v-model="queryParams.sourceId">
               <el-option
                 v-for="item in crawler_source"
@@ -385,7 +385,7 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="判决日期">
+          <el-form-item label="判决日期" prop="judgeDate">
             <el-date-picker
               v-model="queryParams.judgeDate"
               placeholder="选择日期"
@@ -393,7 +393,7 @@ onMounted(() => {
               value-format="YYYY-MM-DD"
             />
           </el-form-item>
-          <el-form-item label="公开日期">
+          <el-form-item label="公开日期" prop="pubDate">
             <el-date-picker
               v-model="queryParams.pubDate"
               placeholder="选择日期"
@@ -410,7 +410,7 @@ onMounted(() => {
           <!--        <el-form-item label="相关案件">-->
           <!--          <el-input v-model="queryParams.relatedCases"></el-input>-->
           <!--        </el-form-item>-->
-          <el-form-item label="状态">
+          <el-form-item label="状态" prop="status">
             <el-select v-model="queryParams.status">
               <el-option
                 v-for="item in crawl_common_status"
@@ -499,17 +499,28 @@ onMounted(() => {
       >
         <el-table-column type="selection" width="55"></el-table-column>
         <!--        <el-table-column label="案件主键id" prop="id" width="150"></el-table-column>-->
-        <el-table-column fixed label="案件名称" prop="name" width="200"></el-table-column>
-        <el-table-column
-          label="审判法院"
-          prop="court"
-          width="180"></el-table-column>
+        <el-table-column fixed label="案件名称" prop="name" width="200">
+          <template #default="{ row }">
+            <el-tooltip effect="dark" placement="top">
+              <template #content class="newLine">{{ row.name }}</template>
+              <span class="hidden">{{ row.name }}</span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column label="审判法院" prop="court" width="180">
+          <template #default="{ row }">
+            <el-tooltip effect="dark" placement="top">
+              <template #content class="newLine">{{ row.court }}</template>
+              <span class="hidden">{{ row.court }}</span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
         <el-table-column label="案号" prop="number" width="210"></el-table-column>
         <el-table-column label="案由" prop="cause" width="150"></el-table-column>
         <el-table-column label="原始链接" prop="url" width="150">
           <template #default="scope">
-            <el-link :href="scope.row.url" :title="scope.row.url" target="_blank" type="primary">
-              {{ scope.row.url }}
+            <el-link :href="scope.row.url" target="_blank" type="primary">
+              <span class="hidden"> {{ scope.row.url }}</span>
             </el-link>
           </template>
         </el-table-column>
@@ -532,7 +543,14 @@ onMounted(() => {
           </template>
         </el-table-column>
         <!--        <el-table-column label="公开日期" prop="pubDate" width="150"></el-table-column>-->
-        <el-table-column label="法律依据" prop="legalBasis" style="overflow: hidden" width="150"></el-table-column>
+        <el-table-column label="法律依据" prop="legalBasis" style="overflow: hidden" width="150">
+          <template #default="{ row }">
+            <el-tooltip effect="dark" placement="top">
+              <template #content class="newLine">{{ row.legalBasis }}</template>
+              <span class="hidden">{{ row.legalBasis }}</span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
         <!--        <el-table-column label="当事人" prop="party" width="150"></el-table-column>-->
         <!--        <el-table-column label="相关案件" prop="relatedCases" width="180"></el-table-column>-->
         <el-table-column label="状态" prop="status" width="150">
@@ -653,9 +671,9 @@ onMounted(() => {
           <el-form-item label="当事人" prop="party">
             <el-input v-model="form.party" placeholder="请输入当事人"/>
           </el-form-item>
-          <el-form-item label="相关案件" prop="relatedCases">
-            <el-input v-model="form.relatedCases" placeholder="请输入内容" type="textarea"/>
-          </el-form-item>
+          <!--          <el-form-item label="相关案件" prop="relatedCases">-->
+          <!--            <el-input v-model="form.relatedCases" placeholder="请输入内容" type="textarea"/>-->
+          <!--          </el-form-item>-->
           <el-form-item label="状态" prop="status">
             <el-select v-model="form.status" placeholder="请选择状态">
               <el-option
@@ -732,4 +750,20 @@ onMounted(() => {
   align-content: center;
 
 }
+
+.hidden {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1; /* 表示显示3行 */
+  overflow: hidden;
+}
+
+.newLine * {
+  width: 10px; /* 设置一个宽度来触发换行 */
+  overflow-wrap: break-word; /* 当内容溢出容器边界时允许单词内部断行 */
+  word-break: break-word; /* 对于不区分单词的脚本（如中文、日文等），也可以使用此属性 */
+  white-space: normal; /* 这是默认值，保持常规空白处理和换行行为 */
+}
+
+
 </style>

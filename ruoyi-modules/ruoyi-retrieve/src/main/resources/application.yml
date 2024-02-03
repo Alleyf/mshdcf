@@ -66,8 +66,12 @@ easy-es:
     print-dsl: true
     # 异步处理索引是否阻塞主线程 默认阻塞 数据量过大时调整为非阻塞异步进行 项目启动更快
     asyncProcessIndexBlocking: true
+    # 分布式环境下,平滑模式,当前客户端激活最新索引最大重试次数,若数据量过大,重建索引数据迁移时间超过4320/60=72H,可调大此参数值,此参数值决定最大重试次数,超出此次数后仍未成功,则终止重试并记录异常日志
+    active-release-index-max-retry: 4320
+    # 分布式环境下,平滑模式,当前客户端激活最新索引最大重试次数 分布式环境下,平滑模式,当前客户端激活最新索引重试时间间隔 若您期望最终一致性的时效性更高,可调小此值,但会牺牲一些性能
+    active-release-index-fixed-delay: 60
     #smoothly:平滑模式, not_smoothly:非平滑模式, manual:手动模式
-    process_index_mode: not_smoothly
+    process_index_mode: smoothly
     db-config:
       # 是否开启下划线转驼峰 默认为false
       map-underscore-to-camel-case: true
@@ -79,7 +83,5 @@ easy-es:
       enable-track-total-hits: true
       # 数据刷新策略,默认为不刷新
       refresh-policy: immediate
-      # 是否全局开启must查询类型转换为filter查询类型 默认为false不转换
-      enable-must2-filter: false
       # 是否自动添加keyword后缀 默认为true
       smartAddKeywordSuffix: true

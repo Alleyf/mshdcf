@@ -1,9 +1,12 @@
 package com.ruoyi.retrieve.service.impl;
 
 import cn.easyes.core.biz.EsPageInfo;
+import cn.easyes.core.biz.SAPageInfo;
 import cn.easyes.core.conditions.select.LambdaEsQueryChainWrapper;
 import cn.easyes.core.conditions.select.LambdaEsQueryWrapper;
 import cn.easyes.core.core.EsWrappers;
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
@@ -16,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author fcs
@@ -49,6 +53,7 @@ public class CaseDocServiceImpl implements ICaseDocService {
      */
     @Override
     public Integer update(CaseDoc caseDoc) {
+        // TODO: 2024/2/2 更新和新建司法案例和法律法规均报错？
         return caseDocMapper.updateById(caseDoc);
     }
 
@@ -83,12 +88,15 @@ public class CaseDocServiceImpl implements ICaseDocService {
      */
     @Override
     public CaseDoc selectById(Long id) {
+//        System.out.println("id=" + id);
+//        LambdaEsQueryChainWrapper<CaseDoc> lqw = EsWrappers.lambdaChainQuery(caseDocMapper).eq(ObjectUtil.isNotNull(id), CaseDoc::getMysqlId, id);
+//        return caseDocMapper.selectOne(lqw);
         return caseDocMapper.selectById(id);
     }
 
     @Override
     public CaseDoc selectByName(String name) {
-        LambdaEsQueryChainWrapper<CaseDoc> lqw = EsWrappers.lambdaChainQuery(caseDocMapper).eq(CaseDoc::getName, name);
+        LambdaEsQueryChainWrapper<CaseDoc> lqw = EsWrappers.lambdaChainQuery(caseDocMapper).eq(StringUtils.isNotEmpty(name), CaseDoc::getName, name);
         return caseDocMapper.selectOne(lqw);
     }
 
@@ -144,6 +152,10 @@ public class CaseDocServiceImpl implements ICaseDocService {
      */
     @Override
     public List<CaseDoc> selectList(String keyword, Boolean blurSearch) {
+        System.out.println(keyword);
+        if (ObjectUtil.isNull(blurSearch)) {
+            blurSearch = true;
+        }
         if (blurSearch) {
             return fuzzySearchList(keyword);
         }
@@ -159,14 +171,27 @@ public class CaseDocServiceImpl implements ICaseDocService {
      */
     @Override
     public TableDataInfo<CaseDoc> selectPage(String keyword, PageQuery pageQuery) {
+        System.out.println("keyword:" + keyword + " pageQuery:" + pageQuery);
+//        keyword不能为null
         LambdaEsQueryChainWrapper<CaseDoc> lqw = EsWrappers.lambdaChainQuery(caseDocMapper)
             .match(StringUtils.isNotEmpty(keyword), CaseDoc::getName, keyword)
             .or()
             .match(StringUtils.isNotEmpty(keyword), CaseDoc::getContent, keyword)
             .sortByScore(SortOrder.DESC);
         // 物理分页
-        EsPageInfo<CaseDoc> page = caseDocMapper.pageQuery(lqw, pageQuery.getPageNum(), pageQuery.getPageSize());
+        validatePageQuery(pageQuery);
+        int from = (pageQuery.getPageNum() - 1) * pageQuery.getPageSize();
+        EsPageInfo<CaseDoc> page = caseDocMapper.pageQuery(lqw, from, pageQuery.getPageSize());
         return TableDataInfo.build(page.getList(), page.getTotal());
+    }
+
+    private void validatePageQuery(PageQuery pageQuery) {
+        if (ObjectUtil.isNull(pageQuery.getPageSize())) {
+            pageQuery.setPageSize(PageQuery.DEFAULT_PAGE_SIZE);
+        }
+        if (ObjectUtil.isNull(pageQuery.getPageNum())) {
+            pageQuery.setPageNum(1);
+        }
     }
 
     /**
@@ -180,9 +205,33 @@ public class CaseDocServiceImpl implements ICaseDocService {
     public TableDataInfo<CaseDoc> selectPage(CaseDoc caseDoc, PageQuery pageQuery) {
 //        构造查询条件
         LambdaEsQueryWrapper<CaseDoc> lqw = buildQueryWrapper(caseDoc);
-        // 物理分页
-        EsPageInfo<CaseDoc> page = caseDocMapper.pageQuery(lqw, pageQuery.getPageNum(), pageQuery.getPageSize());
-        return TableDataInfo.build(page.getList());
+//        校验分页参数
+        validatePageQuery(pageQuery);
+//        // 方法1：物理分页
+//        int from = (pageQuery.getPageNum() - 1) * pageQuery.getPageSize();
+//        EsPageInfo<CaseDoc> page = caseDocMapper.pageQuery(lqw, from, pageQuery.getPageSize());
+////        去除unicode异常字符
+//        List<CaseDoc> collect = page.getList().stream().peek(doc -> doc.setContent(doc.getContent().replaceAll("\\\\u\\S{4}", ""))).collect(Collectors.toList());
+//        return TableDataInfo.build(collect);
+
+//        方法2：search_after
+        lqw.size(pageQuery.getPageSize());
+        // 必须指定一种排序规则,且排序字段值必须唯一 此处我选择用id进行排序 实际可根据业务场景自由指定,不推荐用创建时间,因为可能会相同
+        lqw.orderByDesc(CaseDoc::getId);
+        // 第一页
+        SAPageInfo<CaseDoc> saPageInfo = caseDocMapper.searchAfterPage(lqw, null, pageQuery.getPageSize());
+        List<CaseDoc> result = saPageInfo.getList();
+//        去除unicode异常字符
+        result = result.stream().peek(doc -> doc.setContent(doc.getContent().replaceAll("\\\\ue[0-9a-fA-F]{3}", "|\n"))).collect(Collectors.toList());
+        long total = saPageInfo.getTotal();
+        for (int i = 0; i < pageQuery.getPageNum() - 1; i++) {
+            // 获取下一页
+            List<Object> nextSearchAfter = saPageInfo.getNextSearchAfter();
+            SAPageInfo<CaseDoc> next = caseDocMapper.searchAfterPage(lqw, nextSearchAfter, pageQuery.getPageSize());
+            result = next.getList();
+            total = next.getTotal();
+        }
+        return TableDataInfo.build(result, total);
     }
 
     @Override
@@ -201,7 +250,7 @@ public class CaseDocServiceImpl implements ICaseDocService {
         // 必须指定一种排序规则,且排序字段值必须唯一 此处我选择用id进行排序 实际可根据业务场景自由指定,不推荐用创建时间,因为可能会相同
         lqw.match(StringUtils.isNotEmpty(bo.getName()), CaseDoc::getName, bo.getName())
             .or()
-            .match(StringUtils.isNotEmpty(bo.getContent()), CaseDoc::getContent, bo.getContent())
+            .match(CaseDoc::getContent, StringUtils.isNotEmpty(bo.getContent()) ? bo.getContent() : bo.getName())
             .like(StringUtils.isNotEmpty(bo.getCourt()), CaseDoc::getCourt, bo.getCourt())
             .like(StringUtils.isNotEmpty(bo.getNumber()), CaseDoc::getNumber, bo.getNumber())
             .eq(StringUtils.isNotEmpty(bo.getCause()), CaseDoc::getCause, bo.getCause())

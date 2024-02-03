@@ -1,12 +1,15 @@
 package com.ruoyi.retrieve.service.impl;
 
 import cn.easyes.core.biz.EsPageInfo;
+import cn.easyes.core.biz.SAPageInfo;
 import cn.easyes.core.conditions.select.LambdaEsQueryChainWrapper;
 import cn.easyes.core.conditions.select.LambdaEsQueryWrapper;
 import cn.easyes.core.core.EsWrappers;
+import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
+import com.ruoyi.retrieve.api.domain.LawDoc;
 import com.ruoyi.retrieve.api.domain.LawDoc;
 import com.ruoyi.retrieve.esmapper.LawDocMapper;
 import com.ruoyi.retrieve.esmapper.LawDocMapper;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author fcs
@@ -89,7 +93,7 @@ public class LawDocServiceImpl implements ILawDocService {
 
     @Override
     public LawDoc selectByName(String name) {
-        LambdaEsQueryChainWrapper<LawDoc> lqw = EsWrappers.lambdaChainQuery(lawDocMapper).eq(LawDoc::getName, name);
+        LambdaEsQueryChainWrapper<LawDoc> lqw = EsWrappers.lambdaChainQuery(lawDocMapper).eq(StringUtils.isNotEmpty(name), LawDoc::getName, name);
         return lawDocMapper.selectOne(lqw);
     }
 
@@ -145,6 +149,9 @@ public class LawDocServiceImpl implements ILawDocService {
      */
     @Override
     public List<LawDoc> selectList(String keyword, Boolean blurSearch) {
+        if (ObjectUtil.isNull(blurSearch)) {
+            blurSearch = true;
+        }
         if (blurSearch) {
             return fuzzySearchList(keyword);
         }
@@ -166,8 +173,19 @@ public class LawDocServiceImpl implements ILawDocService {
             .match(StringUtils.isNotEmpty(keyword), LawDoc::getContent, keyword)
             .sortByScore(SortOrder.DESC);
         // 物理分页
-        EsPageInfo<LawDoc> page = lawDocMapper.pageQuery(lqw, pageQuery.getPageNum(), pageQuery.getPageSize());
+        validatePageQuery(pageQuery);
+        int from = (pageQuery.getPageNum() - 1) * pageQuery.getPageSize();
+        EsPageInfo<LawDoc> page = lawDocMapper.pageQuery(lqw, from, pageQuery.getPageSize());
         return TableDataInfo.build(page.getList(), page.getTotal());
+    }
+
+    private void validatePageQuery(PageQuery pageQuery) {
+        if (ObjectUtil.isNull(pageQuery.getPageSize())) {
+            pageQuery.setPageSize(PageQuery.DEFAULT_PAGE_SIZE);
+        }
+        if (ObjectUtil.isNull(pageQuery.getPageNum())) {
+            pageQuery.setPageNum(1);
+        }
     }
 
     /**
@@ -181,14 +199,30 @@ public class LawDocServiceImpl implements ILawDocService {
     public TableDataInfo<LawDoc> selectPage(LawDoc lawDoc, PageQuery pageQuery) {
 //        构造查询条件
         LambdaEsQueryWrapper<LawDoc> lqw = buildQueryWrapper(lawDoc);
-        // 物理分页
-        EsPageInfo<LawDoc> page = lawDocMapper.pageQuery(lqw, pageQuery.getPageNum(), pageQuery.getPageSize());
-        return TableDataInfo.build(page.getList());
+        //       校验分页参数
+        validatePageQuery(pageQuery);
+        lqw.size(pageQuery.getPageSize());
+        // 必须指定一种排序规则,且排序字段值必须唯一 此处我选择用id进行排序 实际可根据业务场景自由指定,不推荐用创建时间,因为可能会相同
+        lqw.orderByDesc(LawDoc::getId);
+        // 第一页
+        SAPageInfo<LawDoc> saPageInfo = lawDocMapper.searchAfterPage(lqw, null, pageQuery.getPageSize());
+        List<LawDoc> result = saPageInfo.getList();
+//        去除unicode异常字符
+        result = result.stream().peek(doc -> doc.setContent(doc.getContent().replaceAll("\\\\u\\e[0-9a-fA-F]{3}", "|\n"))).collect(Collectors.toList());
+        long total = saPageInfo.getTotal();
+        for (int i = 0; i < pageQuery.getPageNum() - 1; i++) {
+            // 获取下一页
+            List<Object> nextSearchAfter = saPageInfo.getNextSearchAfter();
+            SAPageInfo<LawDoc> next = lawDocMapper.searchAfterPage(lqw, nextSearchAfter, pageQuery.getPageSize());
+            result = next.getList();
+            total = next.getTotal();
+        }
+        return TableDataInfo.build(result, total);
     }
 
     @Override
     public Integer insertBatch(List<LawDoc> entityList) {
-        System.out.println(entityList.get(entityList.size() - 1));
+//        System.out.println(entityList.get(entityList.size() - 1));
         return lawDocMapper.insertBatch(entityList);
     }
 
@@ -203,13 +237,13 @@ public class LawDocServiceImpl implements ILawDocService {
         // 必须指定一种排序规则,且排序字段值必须唯一 此处我选择用id进行排序 实际可根据业务场景自由指定,不推荐用创建时间,因为可能会相同
         lqw.match(StringUtils.isNotEmpty(bo.getName()), LawDoc::getName, bo.getName())
             .or()
-            .match(StringUtils.isNotEmpty(bo.getContent()), LawDoc::getContent, bo.getContent())
+            .match(LawDoc::getContent, StringUtils.isNotEmpty(bo.getContent()) ? bo.getContent() : bo.getName())
             .like(StringUtils.isNotEmpty(bo.getField()), LawDoc::getField, bo.getField())
             .eq(StringUtils.isNotEmpty(bo.getReviseNum()), LawDoc::getReviseNum, bo.getReviseNum())
             .eq(StringUtils.isNotEmpty(bo.getType()), LawDoc::getType, bo.getType())
             .like(StringUtils.isNotEmpty(bo.getStructure()), LawDoc::getStructure, bo.toString())
-            .ge(StringUtils.isNotEmpty(bo.getReleaseDate()), LawDoc::getReleaseDate, bo.getReleaseDate())
-            .le(StringUtils.isNotEmpty(bo.getExecuteDate()), LawDoc::getExecuteDate, bo.getExecuteDate())
+            .ge(ObjectUtil.isNotNull(bo.getReleaseDate()), LawDoc::getReleaseDate, bo.getReleaseDate())
+            .le(ObjectUtil.isNotNull(bo.getExecuteDate()), LawDoc::getExecuteDate, bo.getExecuteDate())
             .like(StringUtils.isNotEmpty(bo.getReleaseOrganization()), LawDoc::getReleaseOrganization, bo.getReleaseOrganization())
             .sortByScore(SortOrder.DESC);
         return lqw;

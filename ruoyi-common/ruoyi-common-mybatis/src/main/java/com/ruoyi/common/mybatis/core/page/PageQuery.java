@@ -29,7 +29,8 @@ public class PageQuery implements Serializable {
     /**
      * 每页显示记录数 默认值 默认查全部
      */
-    public static final int DEFAULT_PAGE_SIZE = Integer.MAX_VALUE;
+    public static final int DEFAULT_PAGE_SIZE = 10;
+    //    public static final int DEFAULT_PAGE_SIZE = Integer.MAX_VALUE;
     private static final long serialVersionUID = 1L;
     /**
      * 分页大小
@@ -64,7 +65,7 @@ public class PageQuery implements Serializable {
 
     /**
      * 构建排序
-     *
+     * <p>
      * 支持的用法如下:
      * {isAsc:"asc",orderByColumn:"id"} order by id asc
      * {isAsc:"asc",orderByColumn:"id,createTime"} order by id asc,create_time asc

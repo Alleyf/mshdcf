@@ -9,6 +9,9 @@ import lombok.EqualsAndHashCode;
 import javax.validation.constraints.*;
 
 import com.ruoyi.common.core.web.domain.BaseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.util.Date;
 
 /**
  * 司法案例业务对象
@@ -92,15 +95,17 @@ public class DocCaseBo extends BaseEntity {
      * 判决日期
      */
     @NotNull(message = "判决日期不能为空", groups = {AddGroup.class, EditGroup.class})
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private String judgeDate;
+    private Date judgeDate;
 
     /**
      * 公开日期
      */
 //    @NotNull(message = "公开日期不能为空", groups = {AddGroup.class, EditGroup.class})
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private String pubDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date pubDate;
 
     /**
      * 法律依据

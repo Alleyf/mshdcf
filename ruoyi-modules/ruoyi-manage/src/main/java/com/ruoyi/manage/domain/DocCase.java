@@ -1,10 +1,13 @@
 package com.ruoyi.manage.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import com.ruoyi.common.core.web.domain.BaseEntity;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -71,12 +74,12 @@ public class DocCase extends BaseEntity {
      * 判决日期
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private String judgeDate;
+    private Date judgeDate;
     /**
      * 公开日期
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private String pubDate;
+    private Date pubDate;
     /**
      * 法律依据
      */
@@ -88,6 +91,8 @@ public class DocCase extends BaseEntity {
     /**
      * 相关案件（记录name并以|分隔）
      */
+//    @TableField(typeHandler = JacksonTypeHandler.class)
+//    private List<Map<String, Object>> relatedCases;
     private String relatedCases;
     /**
      * 状态（0：停用；1：正常）

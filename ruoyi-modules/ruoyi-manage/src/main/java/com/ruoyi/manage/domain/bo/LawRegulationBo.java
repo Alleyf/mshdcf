@@ -9,6 +9,9 @@ import lombok.EqualsAndHashCode;
 import javax.validation.constraints.*;
 
 import com.ruoyi.common.core.web.domain.BaseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.util.Date;
 
 /**
  * 法律法规业务对象
@@ -62,14 +65,16 @@ public class LawRegulationBo extends BaseEntity {
      */
     @NotNull(message = "发布日期不能为空", groups = {AddGroup.class, EditGroup.class})
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private String releaseDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date releaseDate;
 
     /**
      * 实施日期
      */
 //    @NotNull(message = "实施日期不能为空", groups = {AddGroup.class, EditGroup.class})
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private String executeDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date executeDate;
 
     /**
      * 发布机关

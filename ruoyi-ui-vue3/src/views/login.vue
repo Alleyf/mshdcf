@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <el-form ref="loginRef" :model="loginForm" :rules="loginRules" class="login-form">
-      <h3 class="title">RuoYi-Cloud-Plus后台管理系统</h3>
+      <h3 class="title">多源异构司法数据汇聚融合平台</h3>
       <el-form-item prop="username">
         <el-input
           v-model="loginForm.username"

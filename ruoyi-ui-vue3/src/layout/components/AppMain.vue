@@ -1,10 +1,27 @@
+<script setup>
+import iframeToggle from "./IframeToggle/index"
+import useTagsViewStore from '@/store/modules/tagsView'
+import {computed} from "vue";
+import {useRoute} from "vue-router";
+
+const route = useRoute();
+
+const key = computed(() => {
+  return route.path + Math.random();
+});
+const tagsViewStore = useTagsViewStore()
+
+// 显示组件时，替换组件 name，解决同个组件路由不一致问题
+
+</script>
+
+
 <template>
   <section class="app-main">
-    <router-view v-slot="{ Component, route }">
+    <router-view :key="key" v-slot="{ Component, route }">
       <transition mode="out-in" name="fade-transform">
-        <!--        <keep-alive :include="tagsViewStore.cachedViews">-->
-        <keep-alive>
-          <component :is="Component" v-if="!route.meta.link" :key="route.path"/>
+        <keep-alive :include="tagsViewStore.cachedViews">
+          <component :is="Component" :key="route.fullPath"/>
         </keep-alive>
       </transition>
     </router-view>
@@ -12,12 +29,6 @@
   </section>
 </template>
 
-<script setup>
-import iframeToggle from "./IframeToggle/index"
-import useTagsViewStore from '@/store/modules/tagsView'
-
-const tagsViewStore = useTagsViewStore()
-</script>
 
 <style lang="scss" scoped>
 .app-main {

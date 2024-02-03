@@ -58,11 +58,22 @@ public class CaseDocController extends BaseController {
      *
      * @return R
      */
-    @DeleteMapping("deleteIndex")
+    @DeleteMapping("/deleteIndex")
     public R<Void> deleteIndex() {
         // 指定要删除哪个索引
         String indexName = CaseDoc.class.getSimpleName().toLowerCase();
         return toAjax(caseDocMapper.deleteIndex(indexName));
+    }
+
+    /**
+     * 根据id查询
+     *
+     * @param id id
+     * @return R
+     */
+    @GetMapping("/{id}")
+    public R<CaseDoc> get(@PathVariable("id") Long id) {
+        return R.ok(caseDocService.selectById(id));
     }
 
     /**
@@ -72,7 +83,7 @@ public class CaseDocController extends BaseController {
      * @param blurSearch 模糊搜索标志
      * @return R
      */
-    @GetMapping("list")
+    @GetMapping("/list")
     public R<List<CaseDoc>> list(String keyword, Boolean blurSearch) {
         return R.ok(caseDocService.selectList(keyword, blurSearch));
     }
@@ -84,8 +95,8 @@ public class CaseDocController extends BaseController {
      * @param pageQuery 分页参数
      * @return TableDataInfo
      */
-    @GetMapping("page/")
-    public TableDataInfo<CaseDoc> page(String keyword, PageQuery pageQuery) {
+    @GetMapping("/pageByKeyword")
+    public TableDataInfo<CaseDoc> pageByKeyword(String keyword, PageQuery pageQuery) {
         return caseDocService.selectPage(keyword, pageQuery);
     }
 
@@ -96,7 +107,7 @@ public class CaseDocController extends BaseController {
      * @param pageQuery 分页参数
      * @return TableDataInfo
      */
-    @GetMapping("page")
+    @GetMapping("/page")
     public TableDataInfo<CaseDoc> page(CaseDoc caseDoc, PageQuery pageQuery) {
         return caseDocService.selectPage(caseDoc, pageQuery);
     }
@@ -107,7 +118,7 @@ public class CaseDocController extends BaseController {
      * @param caseDoc 新增对象
      * @return R
      */
-    @PostMapping()
+    @PostMapping
     public R<Void> insert(@Validated @RequestBody CaseDoc caseDoc) {
         return toAjax(caseDocService.insert(caseDoc));
     }
@@ -118,7 +129,7 @@ public class CaseDocController extends BaseController {
      * @param caseDoc 修改对象
      * @return R
      */
-    @PutMapping()
+    @PutMapping
     public R<Void> edit(@Validated @RequestBody CaseDoc caseDoc) {
         return toAjax(caseDocService.update(caseDoc));
     }

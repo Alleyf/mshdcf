@@ -107,12 +107,10 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     public Boolean insertByBo(DocCaseBo bo) {
         DocCase add = BeanUtil.toBean(bo, DocCase.class);
         validEntityBeforeSave(add);
-        boolean sqlFlag = baseMapper.insert(add) > 0;
-        boolean esFlag = remoteRetrieveService.exist(bo.getId());
-        boolean flag = sqlFlag && esFlag;
+        boolean flag = baseMapper.insert(add) > 0;
         if (flag) {
             log.info("新增司法案例成功，id：{}", add.getId());
-            bo.setId(add.getId());
+//            bo.setId(add.getId());
 //            添加es索引
             DocCase newCase = selectDocCaseByName(add.getName());
             flag = remoteRetrieveService.insert(BeanCopyUtils.copy(newCase, CaseDoc.class)) > 0;
@@ -155,9 +153,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     public Boolean updateByBo(DocCaseBo bo) {
         DocCase update = BeanUtil.toBean(bo, DocCase.class);
         validEntityBeforeSave(update);
-        boolean sqlFlag = baseMapper.updateById(update) > 0;
-        boolean esFlag = remoteRetrieveService.exist(bo.getId());
-        boolean flag = sqlFlag && esFlag;
+        boolean flag = baseMapper.updateById(update) > 0;
         if (flag) {
 //            更新es索引
             flag = remoteRetrieveService.update(BeanCopyUtils.copy(update, CaseDoc.class)) > 0;
@@ -170,6 +166,13 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
      */
     private void validEntityBeforeSave(DocCase entity) {
         //TODO 做一些数据校验,如唯一约束
+        String relatedCasesJson = entity.getRelatedCases();
+        if (StringUtils.isBlank(relatedCasesJson)) {
+            // 确保字符串是一个有效的JSON对象或数组,允许插入null
+            relatedCasesJson = null;
+//            relatedCasesJson = "{}"; // 或者提供一个空JSON对象作为默认值
+        }
+        entity.setRelatedCases(relatedCasesJson);
     }
 
     /**
