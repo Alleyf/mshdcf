@@ -1,6 +1,3 @@
-<img src="https://foruda.gitee.com/images/1679673780944866919/d908a86f_1766278.png" width="56%" height="56%">
-<div style="height: 10px; clear: both;"></div>
-
 **Read this in other languages: [English](README.md), [中文](README_zh.md).**
 
 # MSHDCF
