@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, LawRegulation> implements ILawRegulationService {
 
-    @DubboReference(version = "1.0", group = "law")
+    @DubboReference(version = "1.0", group = "law", timeout = 200000)
     public RemoteRetrieveService<LawDoc> remoteRetrieveService;
     @Resource
     private LawRegulationMapper baseMapper;

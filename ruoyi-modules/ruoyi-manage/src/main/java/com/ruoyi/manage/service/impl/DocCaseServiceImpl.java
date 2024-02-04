@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> implements IDocCaseService {
 
-    @DubboReference(version = "1.0", group = "case")
+    @DubboReference(version = "1.0", group = "case", timeout = 200000)
     public RemoteRetrieveService<CaseDoc> remoteRetrieveService;
     @Resource
     private DocCaseMapper baseMapper;

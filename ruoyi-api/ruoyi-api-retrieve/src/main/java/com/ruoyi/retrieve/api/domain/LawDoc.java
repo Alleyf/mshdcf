@@ -40,7 +40,7 @@ public class LawDoc implements Serializable {
     /**
      * 案件名称
      */
-    @HighLight(mappingField = "highlightContent", preTag = "<text style='color:red'>", postTag = "</text>")
+    @HighLight(mappingField = "highlightName", preTag = "<text style='color:red'>", postTag = "</text>")
     @IndexField(fieldType = FieldType.KEYWORD_TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
     @NotBlank(message = "标题不能为空")
     private String name;
@@ -63,7 +63,8 @@ public class LawDoc implements Serializable {
     /**
      * 案件内容
      */
-    @NotBlank(message = "内容不能为空")
+//    @NotBlank(message = "内容不能为空")
+    @HighLight(mappingField = "highlightContent", preTag = "<text style='color:red'>", postTag = "</text>")
     @IndexField(fieldType = FieldType.TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
     private String content;
     /**
@@ -106,8 +107,19 @@ public class LawDoc implements Serializable {
     private Float score;
 
     /**
-     * 高亮返回值被映射的字段
+     * 标题高亮返回值被映射的字段
      */
+    @IndexField(exist = false)
+    private String highlightName;
+    /**
+     * 正文高亮返回值被映射的字段
+     */
+    @IndexField(exist = false)
     private String highlightContent;
+
+    /**
+     * 词云图
+     */
+    private String wordCloud;
 
 }

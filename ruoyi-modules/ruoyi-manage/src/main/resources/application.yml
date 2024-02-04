@@ -52,3 +52,5 @@ dubbo:
     name: dubbo
     port: -1
     payload: 104857600 #10MB
+  consumer:
+    timeout: 200000

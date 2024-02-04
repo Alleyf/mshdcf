@@ -277,16 +277,13 @@ const handleSearch = () => {
   pageCase(advancedForm.value).then(res => {
     caseList.value = res.rows
     total.value = res.total
-
     if (res.total === 0) {
       proxy.$message.warning("未检索到相关数据");
     } else {
       proxy.$message.success("检索成功");
     }
     // 打开查询得到的列表
-
   }).catch(err => {
-    console.log(advancedForm.value)
     proxy.$message.error(err.message);
   })
   // 关闭遮罩层

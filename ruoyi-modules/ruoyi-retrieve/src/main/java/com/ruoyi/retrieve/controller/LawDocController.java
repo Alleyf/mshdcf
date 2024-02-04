@@ -2,10 +2,13 @@ package com.ruoyi.retrieve.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.utils.BeanCopyUtils;
+import com.ruoyi.common.core.utils.StringUtils;
+import com.ruoyi.common.core.utils.WorldCloudUtils;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
-import com.ruoyi.retrieve.api.domain.CaseDoc;
+import com.ruoyi.retrieve.api.domain.LawDoc;
 import com.ruoyi.retrieve.api.domain.LawDoc;
 import com.ruoyi.retrieve.esmapper.LawDocMapper;
 import com.ruoyi.retrieve.service.ILawDocService;
@@ -15,7 +18,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * 法律法规检索
@@ -72,8 +78,19 @@ public class LawDocController extends BaseController {
      * @return R
      */
     @GetMapping("/{id}")
-    public R<LawDoc> get(@PathVariable("id") Long id) {
-        return R.ok(lawDocService.selectById(id));
+    public R<Object> get(@PathVariable("id") Long id) {
+        LawDoc lawDoc = lawDocService.selectById(id);
+        if (StringUtils.isNotEmpty(lawDoc.getWordCloud())) {
+            return R.ok(lawDoc.getWordCloud(), lawDoc);
+        }
+        String worldCloud = WorldCloudUtils.genWorldCloud(lawDoc.getName(), lawDoc.getContent());
+        Map<String, Object> map = BeanCopyUtils.copyToMap(lawDoc);
+        if (map == null) {
+            map = new HashMap<>();
+        }
+        // 将worldCloud放入Map中
+        map.put("worldCloud", worldCloud);
+        return R.ok(worldCloud, map);
     }
 
 

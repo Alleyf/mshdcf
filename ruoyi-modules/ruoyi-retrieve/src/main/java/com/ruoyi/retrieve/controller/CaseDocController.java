@@ -2,6 +2,9 @@ package com.ruoyi.retrieve.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.utils.BeanCopyUtils;
+import com.ruoyi.common.core.utils.StringUtils;
+import com.ruoyi.common.core.utils.WorldCloudUtils;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
@@ -15,7 +18,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * 司法案例检索
@@ -72,8 +78,19 @@ public class CaseDocController extends BaseController {
      * @return R
      */
     @GetMapping("/{id}")
-    public R<CaseDoc> get(@PathVariable("id") Long id) {
-        return R.ok(caseDocService.selectById(id));
+    public R<Object> get(@PathVariable("id") Long id) {
+        CaseDoc caseDoc = caseDocService.selectById(id);
+        if (StringUtils.isNotEmpty(caseDoc.getWordCloud())) {
+            return R.ok(caseDoc.getWordCloud(), caseDoc);
+        }
+        String worldCloud = WorldCloudUtils.genWorldCloud(caseDoc.getName(), caseDoc.getContent());
+        Map<String, Object> map = BeanCopyUtils.copyToMap(caseDoc);
+        if (map == null) {
+            map = new HashMap<>();
+        }
+        // 将worldCloud放入Map中
+        map.put("worldCloud", worldCloud);
+        return R.ok(worldCloud, map);
     }
 
     /**

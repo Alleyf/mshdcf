@@ -7,8 +7,10 @@ import cn.easyes.core.conditions.select.LambdaEsQueryWrapper;
 import cn.easyes.core.core.EsWrappers;
 import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.utils.StringUtils;
+import com.ruoyi.common.core.utils.WorldCloudUtils;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
+import com.ruoyi.retrieve.api.domain.CaseDoc;
 import com.ruoyi.retrieve.api.domain.LawDoc;
 import com.ruoyi.retrieve.api.domain.LawDoc;
 import com.ruoyi.retrieve.esmapper.LawDocMapper;
@@ -34,6 +36,16 @@ public class LawDocServiceImpl implements ILawDocService {
     @Resource
     private LawDocMapper lawDocMapper;
 
+    /**
+     * 获取词云
+     *
+     * @param name 名称
+     * @param text 内容
+     * @return 词云
+     */
+    public String getWordCloud(String name, String text) {
+        return WorldCloudUtils.genWorldCloud(name, text);
+    }
 
     /**
      * 插入
@@ -43,6 +55,9 @@ public class LawDocServiceImpl implements ILawDocService {
      */
     @Override
     public Integer insert(LawDoc lawDoc) {
+        //        设置词云
+        String wordCloud = getWordCloud(lawDoc.getName(), lawDoc.getContent());
+        lawDoc.setWordCloud(wordCloud);
         return lawDocMapper.insert(lawDoc);
     }
 
@@ -54,6 +69,9 @@ public class LawDocServiceImpl implements ILawDocService {
      */
     @Override
     public Integer update(LawDoc lawDoc) {
+        //        设置词云
+        String wordCloud = getWordCloud(lawDoc.getName(), lawDoc.getContent());
+        lawDoc.setWordCloud(wordCloud);
         return lawDocMapper.updateById(lawDoc);
     }
 
@@ -222,7 +240,9 @@ public class LawDocServiceImpl implements ILawDocService {
 
     @Override
     public Integer insertBatch(List<LawDoc> entityList) {
-//        System.out.println(entityList.get(entityList.size() - 1));
+        if (ObjectUtil.isEmpty(entityList)) {
+            return 0;
+        }
         return lawDocMapper.insertBatch(entityList);
     }
 

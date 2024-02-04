@@ -17,6 +17,7 @@ const text = ref("")
 const displayedText = ref('');
 const typeSpeed = 1; // 字符间隔时间，单位：毫秒
 const typewriter = ref(null);
+const wordCloud = ref(null);
 
 let index = 0;
 
@@ -28,6 +29,7 @@ onMounted(() => {
   }
   getRegulation(id).then(res => {
     lawItem.value = res.data;
+    wordCloud.value = res.msg;
     proxy.$modal.msgSuccess(`获取数据成功`);
     text.value = lawItem.value.content;
     lawItem.value.sourceId = 1;
@@ -60,15 +62,15 @@ onMounted(() => {
           }}
         </el-link>
         <p style="display: flex;justify-content: space-between">
-          <span>
+          <span v-if="lawItem.releaseOrganization">
             <School style="width: 1em; height: 1em; margin-right: 2px"/>
             {{ lawItem.releaseOrganization }}
           </span>
-          <span>
+          <span v-if="lawItem.type">
             <Discount style="width: 1em; height: 1em; margin-right: 1px"/>
             {{ lawItem.type }}
           </span>
-          <span>
+          <span v-if="lawItem.releaseDate">
              <Timer style="width: 1em; height: 1em; margin-right: 2px"/>
               {{ lawItem.releaseDate }}
           </span>
@@ -102,6 +104,13 @@ onMounted(() => {
                   </el-link>
                 </el-col>
               </el-row>
+            </el-card>
+          </el-tab-pane>
+          <el-tab-pane :lazy="true" label="法条词云">
+            <el-card :shadow="'always'">
+              <el-tag style="font-weight: bold;font-size: large" type="warning">法条词云</el-tag>
+              <el-divider/>
+              <el-image :loading="'lazy'" :src="wordCloud" style="margin-left: 52px;height: 80%;width: 80%"/>
             </el-card>
           </el-tab-pane>
           <!--          <el-tab-pane label="法律依据">-->
@@ -161,7 +170,6 @@ $secondary-color: #e1c199;
 .content {
   text-shadow: #ebeee8 1px 10px 1px;
   text-align: justify;
-  text-justify: auto;
   text-indent: 2em;
 }
 

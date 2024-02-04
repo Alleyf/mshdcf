@@ -8,6 +8,8 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.util.AntPathMatcher;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -21,6 +23,24 @@ import java.util.stream.Collectors;
 public class StringUtils extends org.apache.commons.lang3.StringUtils {
 
     public static final String SEPARATOR = ",";
+
+    /**
+     * 将str转换为inputStream
+     *
+     * @param str
+     * @return InputStream
+     */
+    public static InputStream str2InputStream(String str) {
+        return new ByteArrayInputStream(str.getBytes());
+    }
+
+    public static String stripUnicode(String str, String replacementCharacter) {
+//        String originalString = "这是一个Unicode转义序列的例子：\\u263A";
+        // 使用正则表达式匹配Unicode转义序列
+        String regex = "(?i)\\\\u[0-9a-fA-F]{4}";
+        // 替换所有的Unicode转义序列为指定的字符
+        return str.replaceAll(regex, replacementCharacter);
+    }
 
     /**
      * 获取参数不为空值

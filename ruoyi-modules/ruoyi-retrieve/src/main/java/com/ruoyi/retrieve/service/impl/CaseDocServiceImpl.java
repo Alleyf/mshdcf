@@ -8,6 +8,7 @@ import cn.easyes.core.core.EsWrappers;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.utils.StringUtils;
+import com.ruoyi.common.core.utils.WorldCloudUtils;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
@@ -33,6 +34,16 @@ public class CaseDocServiceImpl implements ICaseDocService {
     @Resource
     private CaseDocMapper caseDocMapper;
 
+    /**
+     * 获取词云
+     *
+     * @param name 名称
+     * @param text 内容
+     * @return 词云
+     */
+    public String getWordCloud(String name, String text) {
+        return WorldCloudUtils.genWorldCloud(name, text);
+    }
 
     /**
      * 插入
@@ -42,6 +53,9 @@ public class CaseDocServiceImpl implements ICaseDocService {
      */
     @Override
     public Integer insert(CaseDoc caseDoc) {
+//        设置词云
+        String wordCloud = getWordCloud(caseDoc.getName(), caseDoc.getContent());
+        caseDoc.setWordCloud(wordCloud);
         return caseDocMapper.insert(caseDoc);
     }
 
@@ -54,6 +68,9 @@ public class CaseDocServiceImpl implements ICaseDocService {
     @Override
     public Integer update(CaseDoc caseDoc) {
         // TODO: 2024/2/2 更新和新建司法案例和法律法规均报错？
+        //        设置词云
+        String wordCloud = getWordCloud(caseDoc.getName(), caseDoc.getContent());
+        caseDoc.setWordCloud(wordCloud);
         return caseDocMapper.updateById(caseDoc);
     }
 
@@ -234,8 +251,21 @@ public class CaseDocServiceImpl implements ICaseDocService {
         return TableDataInfo.build(result, total);
     }
 
+    /**
+     * 批量插入
+     *
+     * @param entityList 实体集合
+     * @return 结果
+     */
     @Override
     public Integer insertBatch(List<CaseDoc> entityList) {
+        if (ObjectUtil.isEmpty(entityList)) {
+            return 0;
+        }
+//        for (int i = 0; i < entityList.size(); i++) {
+//            String wordCloud = getWordCloud(entityList.get(i).getName(), entityList.get(i).getContent());
+//            entityList.get(i).setWordCloud(wordCloud);
+//        }
         return caseDocMapper.insertBatch(entityList);
     }
 

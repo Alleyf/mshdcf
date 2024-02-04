@@ -17,8 +17,8 @@ const caseItem = ref({});
 const text = ref("")
 const displayedText = ref('');
 const typeSpeed = 1; // 字符间隔时间，单位：毫秒
-// const typewriter = ref.value;
 const typewriter = ref(null);
+const wordCloud = ref(null);
 
 let index = 0;
 
@@ -30,6 +30,7 @@ onMounted(() => {
   }
   getCase(id).then(res => {
     caseItem.value = res.data;
+    wordCloud.value = res.msg;
     proxy.$modal.msgSuccess(`获取数据成功`);
     text.value = caseItem.value.content;
     caseItem.value.sourceId = 1;
@@ -47,7 +48,7 @@ onMounted(() => {
       typewriter.scrollLeft = typewriter.scrollWidth; // 滚动到最新输入字符位置
     }, typeSpeed);
   }).catch(err => {
-    proxy.$modal.msgError(err.msg, text.value)
+    // proxy.$modal.msgError(err.msg)
   })
 })
 </script>
@@ -86,6 +87,8 @@ onMounted(() => {
           <el-tab-pane label="基本信息">
             <el-card :shadow="'always'" class="el-space--vertical">
               <el-tag style="font-weight: bold;font-size: large">基本信息</el-tag>
+              <el-divider/>
+
               <el-row :gutter="20" :justify="'space-between'">
                 <el-col v-if="caseItem.court">审判法院：{{
                     caseItem.court
@@ -109,19 +112,27 @@ onMounted(() => {
           <el-tab-pane label="法律依据">
             <el-card :shadow="'always'">
               <el-tag style="font-weight: bold;font-size: large" type="danger">法律依据</el-tag>
-              <ul>
+              <el-divider/>
+              <ol>
                 <li>{{ caseItem.legalBasis }}</li>
                 <!--                <el-divider/>-->
-              </ul>
+              </ol>
             </el-card>
           </el-tab-pane>
           <el-tab-pane label="相关案例">
             <el-card :shadow="'always'">
               <el-tag style="font-weight: bold;font-size: large" type="warning">相关案例</el-tag>
+              <el-divider/>
               <ul>
                 <li>{{ caseItem.relatedCases }}</li>
-                <!--                <el-divider/>-->
               </ul>
+            </el-card>
+          </el-tab-pane>
+          <el-tab-pane :lazy="true" label="案例词云">
+            <el-card :shadow="'always'">
+              <el-tag style="font-weight: bold;font-size: large" type="warning">案例词云</el-tag>
+              <el-divider/>
+              <el-image :loading="'lazy'" :src="wordCloud" style="margin-left: 52px;height: 80%;width: 80%"/>
             </el-card>
           </el-tab-pane>
         </el-tabs>

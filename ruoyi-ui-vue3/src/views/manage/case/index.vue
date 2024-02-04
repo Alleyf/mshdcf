@@ -10,6 +10,7 @@ import {download} from '@/utils/request'
 import {getCurrentInstance, onMounted, reactive, ref, toRefs} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {getToken} from "@/utils/auth";
+import QEditor from "@/components/Editor/index.vue";
 
 const {proxy} = getCurrentInstance();
 const {
@@ -120,6 +121,11 @@ const openContent = ref(false)
 
 const queryForm = ref(null)
 const dialogForm = ref(null)
+
+const handleOpenContent = () => {
+  openContent.value = true
+  console.log(form.value)
+}
 
 const getList = () => {
   loading.value = true
@@ -632,9 +638,9 @@ onMounted(() => {
             <el-input v-model="form.label" placeholder="请输入详细案由"/>
           </el-form-item>
           <el-form-item label="案件正文" prop="content">
-            <el-link href="javascript:void(0);" type="primary" @click="openContent=true">进入案件正文</el-link>
+            <el-link href="javascript:void(0);" type="primary" @click="handleOpenContent">进入案件正文</el-link>
             <el-dialog v-model="openContent" title="输入案件正文">
-              <editor v-model="form.content" :min-height="300"/>
+              <q-editor v-model="form.content" :min-height="400"/>
             </el-dialog>
           </el-form-item>
           <el-form-item label="案件来源" prop="sourceId">
