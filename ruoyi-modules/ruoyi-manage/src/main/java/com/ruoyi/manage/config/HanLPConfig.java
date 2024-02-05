@@ -28,6 +28,6 @@ public class HanLPConfig {
             log.info("token {} is null", token);
             return new HanLPClient(url, null);
         }
-        return new HanLPClient(url, token);
+        return new HanLPClient(url, token, "zh", 100000);
     }
 }

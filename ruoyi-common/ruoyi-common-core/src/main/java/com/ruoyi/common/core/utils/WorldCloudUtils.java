@@ -50,8 +50,8 @@ public class WorldCloudUtils {
     public static String genWorldCloud(String name, String text) {
         try {
             //指定源文本，生成词频集合
-            text = StringUtils.stripUnicode(text, "@");
-            List<String> textLs = StringUtils.str2List(text, "@", true, true);
+            text = StringUtils.stripUnicode(text);
+            List<String> textLs = StringUtils.str2List(text, "\n", true, true);
 //            System.out.println("词频集合大小：" + textLs.size());
             final List<WordFrequency> wordFrequencyList = FREQUENCY_ANALYZER.load(textLs);
             //设置图片分辨率
