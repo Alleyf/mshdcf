@@ -15,7 +15,7 @@
         ruoyi-common-seata 分布式事务
     </description>
 
-	<dependencies>
+    <dependencies>
 
         <dependency>
             <groupId>org.apache.dubbo.extensions</groupId>
@@ -41,6 +41,14 @@
                 <exclusion>
                     <groupId>org.apache.dubbo.extensions</groupId>
                     <artifactId>dubbo-filter-seata</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>checker-qual</artifactId>
+                    <groupId>org.checkerframework</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>error_prone_annotations</artifactId>
+                    <groupId>com.google.errorprone</groupId>
                 </exclusion>
             </exclusions>
         </dependency>

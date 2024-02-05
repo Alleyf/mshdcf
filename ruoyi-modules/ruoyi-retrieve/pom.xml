@@ -3,6 +3,7 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>com.ruoyi</groupId>
         <artifactId>ruoyi-modules</artifactId>
@@ -10,16 +11,13 @@
     </parent>
 
     <artifactId>ruoyi-retrieve</artifactId>
-    <description>数据检索管理业务模块，检索爬取到的司法案例和法律法规等数据</description>
+    <description>数据检索业务模块，检索爬取到的司法案例和法律法规等数据</description>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <easy-es.version>2.0.0-beta1</easy-es.version>
     </properties>
 
     <dependencies>
-
         <!-- SpringCloud Alibaba Nacos -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -34,10 +32,15 @@
 
         <dependency>
             <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-api-retrieve</artifactId>
+            <version>${ruoyi.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-common-sentinel</artifactId>
         </dependency>
 
-        <!-- RuoYi Common Log -->
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-common-log</artifactId>
@@ -45,12 +48,12 @@
 
         <dependency>
             <groupId>com.ruoyi</groupId>
-            <artifactId>ruoyi-common-dict</artifactId>
+            <artifactId>ruoyi-common-doc</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.ruoyi</groupId>
-            <artifactId>ruoyi-common-doc</artifactId>
+            <artifactId>ruoyi-common-security</artifactId>
         </dependency>
 
         <dependency>
@@ -70,23 +73,70 @@
 
         <dependency>
             <groupId>com.ruoyi</groupId>
-            <artifactId>ruoyi-common-seata</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>checker-qual</artifactId>
-                    <groupId>org.checkerframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>error_prone_annotations</artifactId>
-                    <groupId>com.google.errorprone</groupId>
-                </exclusion>
-            </exclusions>
+            <artifactId>ruoyi-common-idempotent</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.ruoyi</groupId>
-            <artifactId>ruoyi-common-security</artifactId>
+            <artifactId>ruoyi-common-mail</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-common-sms</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-common-encrypt</artifactId>
+        </dependency>
+
+        <!-- 短信 用哪个导入哪个依赖 -->
+        <!--        <dependency>-->
+        <!--            <groupId>com.aliyun</groupId>-->
+        <!--            <artifactId>dysmsapi20170525</artifactId>-->
+        <!--        </dependency>-->
+
+        <!--        <dependency>-->
+        <!--            <groupId>com.tencentcloudapi</groupId>-->
+        <!--            <artifactId>tencentcloud-sdk-java-sms</artifactId>-->
+        <!--        </dependency>-->
+
+
+        <!--        &lt;!&ndash;        easy-es&ndash;&gt;-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.ruoyi</groupId>-->
+        <!--            <artifactId>ruoyi-common-elasticsearch</artifactId>-->
+        <!--        </dependency>-->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-common-dict</artifactId>
+        </dependency>
+
+
+        <!--        <dependency>-->
+        <!--            <groupId>com.ruoyi</groupId>-->
+        <!--            <artifactId>ruoyi-common-seata</artifactId>-->
+        <!--            <exclusions>-->
+        <!--                <exclusion>-->
+        <!--                    <artifactId>checker-qual</artifactId>-->
+        <!--                    <groupId>org.checkerframework</groupId>-->
+        <!--                </exclusion>-->
+        <!--                <exclusion>-->
+        <!--                    <artifactId>error_prone_annotations</artifactId>-->
+        <!--                    <groupId>com.google.errorprone</groupId>-->
+        <!--                </exclusion>-->
+        <!--            </exclusions>-->
+        <!--        </dependency>-->
+
 
         <!-- RuoYi Api System -->
         <dependency>
@@ -98,7 +148,7 @@
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-api-resource</artifactId>
         </dependency>
-        
+
     </dependencies>
 
     <build>

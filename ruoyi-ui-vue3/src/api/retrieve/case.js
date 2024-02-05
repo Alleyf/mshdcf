@@ -1,13 +1,5 @@
 import request from '@/utils/request'
 
-// 查询司法案例列表
-export function listCase(query) {
-  return request({
-    url: '/retrieve/case/list',
-    method: 'get',
-    params: query
-  })
-}
 
 // 查询司法案例详细
 export function getCase(id) {
@@ -17,28 +9,26 @@ export function getCase(id) {
   })
 }
 
-// 新增司法案例
-export function addCase(data) {
+// 查询司法案例列表
+export function listCase(query) {
   return request({
-    url: '/retrieve/case',
-    method: 'post',
-    data: data
+    url: '/retrieve/case/list',
+    method: 'get',
+    params: {
+      keyword: query.name,
+      blurSearch: true
+    }
+
   })
 }
 
-// 修改司法案例
-export function updateCase(data) {
+export function pageCase(query) {
   return request({
-    url: '/retrieve/case',
-    method: 'put',
-    data: data
+    url: '/retrieve/case/page',
+    method: 'get',
+    params: query
   })
 }
 
-// 删除司法案例
-export function delCase(id) {
-  return request({
-    url: '/retrieve/case/' + id,
-    method: 'delete'
-  })
-}
+
+

@@ -19,6 +19,6 @@ public class RuoYiCrawlerApplication {
         SpringApplication application = new SpringApplication(RuoYiCrawlerApplication.class);
         application.setApplicationStartup(new BufferingApplicationStartup(2048));
         application.run(args);
-        System.out.println("(♥◠‿◠)ﾉﾞ  爬虫服务模块启动成功   ლ(´ڡ`ლ)ﾞ  ");
+        System.out.println("(♥◠‿◠)ﾉﾞ  采集管理模块启动成功   ლ(´ڡ`ლ)ﾞ  ");
     }
 }

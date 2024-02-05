@@ -8,7 +8,7 @@ RUN mkdir -p /ruoyi/gateway/logs  \
 
 WORKDIR /ruoyi/gateway
 
-ENV SERVER_PORT=8080
+ENV SERVER_PORT=8280
 
 EXPOSE ${SERVER_PORT}
 

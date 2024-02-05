@@ -32,7 +32,10 @@ import Pagination from '@/components/Pagination'
 // 自定义表格工具组件
 import RightToolbar from '@/components/RightToolbar'
 // 富文本组件
-import Editor from "@/components/Editor"
+import QEditor from "@/components/Editor"
+// 富文本组件
+import WEditor from "@/components/WEditor"
+
 // 文件上传组件
 import FileUpload from "@/components/FileUpload"
 // 图片上传组件
@@ -43,6 +46,8 @@ import ImagePreview from "@/components/ImagePreview"
 import TreeSelect from '@/components/TreeSelect'
 // 字典标签组件
 import DictTag from '@/components/DictTag'
+// iframe组件
+import IFrame from "@/components/IFrame";
 
 const app = createApp(App)
 
@@ -66,7 +71,9 @@ app.component('FileUpload', FileUpload)
 app.component('ImageUpload', ImageUpload)
 app.component('ImagePreview', ImagePreview)
 app.component('RightToolbar', RightToolbar)
-app.component('Editor', Editor)
+app.component('WEditor', WEditor)
+app.component('QEditor', QEditor)
+app.component('IFrame', IFrame)
 
 app.use(router)
 app.use(store)

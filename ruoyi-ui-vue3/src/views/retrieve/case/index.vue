@@ -1,17 +1,248 @@
-<script setup>
-import {
-  listCase,
-  getCase,
-  delCase,
-  addCase,
-  updateCase,
-} from '@/api/retrieve/case'
-import {download} from '@/utils/request'
-import {getCurrentInstance, onMounted, reactive, ref, toRefs} from "vue";
-import {ElMessage, ElMessageBox} from "element-plus";
-import {getToken} from "@/utils/auth";
+<template>
+  <el-container style="height: 80vh;display: flex">
+    <el-header v-show="headerShow" class="search">
+      <el-input
+        v-model="advancedForm.name"
+        class="input-with-select keyword"
+        clearable
+        maxlength="20"
+        placeholder="请输入关键词进行搜索..."
+        prefix-icon="Document"
+        show-word-limit
+        suffix-icon="Search"
+        @keydown.enter.native="handleSearch()"
+      >
+        <template #prepend>
+          <el-select v-model="selectAdvance" placeholder="请选择检索类型">
+            <el-option key="1" label="常规搜索" value="false"/>
+            <el-option key="2" label="高级搜索" value="true" @click="handleAdvanced()"/>
+          </el-select>
+        </template>
+      </el-input>
+    </el-header>
+    <right-toolbar v-model:showSearch="headerShow" class="toolbar" @queryTable="handleSearch()"></right-toolbar>
+    <el-main v-show="!headerShow" style="margin-top: 10%">
+      <el-carousel
+        v-show="caseList.length > 0"
+        :interval="5000"
+        arrow="hover"
+        autoplay
+        direction="horizontal"
+        indicator-position="none"
+        type="card"
+      >
+        <el-carousel-item v-for="(item,index) in caseList" :key="item.id">
+          <el-card class="box-card" shadow="always">
+            <template #header>
+              <el-row :align="'middle'" :gutter="10" :justify="'center'" class="card-header">
+                <el-col :span="12" class="horFlex">
+                  <el-badge :value="index+1" class="mr-1" type="success"/>
+                  <el-link :href="item.url" :underline="false" class="hidden" target="_blank" type="primary"
+                           v-html="item.highlightContent?item.highlightContent:item.name">
+                  </el-link>
+                  <el-button circle icon="View" style="font-size: 1em" @click="handleDetail(item)"/>
+                </el-col>
+                <el-col :span="12" class="horFlex">
+                  <el-tag type="success">{{ item.court }}</el-tag>
+                  <el-tag type="danger">{{ item.judgeDate }}</el-tag>
+                </el-col>
+              </el-row>
+            </template>
+            <template #default>
+              <el-row :gutter="10" :justify="'center'" class="card-content">
+                <el-col :span="16">
+                  <el-tabs style="height: 100%" tab-position="left" type="card">
+                    <el-tab-pane label="案件摘要">
+                      <el-tooltip placement="bottom" style="width: 50%;height: 100%">
+                        <template #content>
+                          <p class="newLine">
+                            {{ item.legalBasis }}
+                          </p>
+                        </template>
+                        <p class="hidden content"> {{ item.content }}</p>
+                      </el-tooltip>
+                    </el-tab-pane>
+                    <el-tab-pane label="关联案件">
+                      <el-container v-if="item.relatedCases!==''" class="text-muted hidden content">
+                        {{ item.relatedCases }}
+                      </el-container>
+                      <el-container v-else>
+                        <strong class="text-center" style="color: coral">暂无相关案件</strong>
+                      </el-container>
+                    </el-tab-pane>
+                  </el-tabs>
+                </el-col>
+                <el-col :span="8" class="" style="text-align: left">
+                  <el-tag v-if="item.court" size="large" type="success">法院：{{ item.court }}</el-tag>
+                  <el-tag v-if="item.number" size="large">案号：{{ item.number }}</el-tag>
+                  <el-tag v-if="item.type" size="large" type="danger">类型：{{ item.type }}</el-tag>
+                  <el-tag v-if="item.process" size="large" type="info">程序：{{ item.process }}</el-tag>
+                  <el-tag v-if="item.cause" size="large" type="warning">案由：{{ item.cause }}</el-tag>
+                </el-col>
+              </el-row>
+
+            </template>
+          </el-card>
+        </el-carousel-item>
+      </el-carousel>
+      <pagination
+        v-show="total>0"
+        v-model:limit="advancedForm.pageSize"
+        v-model:page="advancedForm.pageNum"
+        :total="total"
+        @pagination="handleSearch"
+      />
+    </el-main>
+    <!--  高级检索条件选择对话框-->
+    <el-dialog
+      v-model="dialogVisible"
+      align-center
+      draggable
+      title="检索条件"
+      width="30%"
+    >
+      <el-form
+        ref="advancedFormRef"
+        :inline="true"
+        :label-width="formLabelWidth"
+        :model="advancedForm"
+        class="form-inline"
+        label-position="top"
+      >
+        <el-row :gutter="10">
+          <el-col :span="12">
+            <el-form-item label="案件名称" label-width="80" prop="name">
+              <el-input v-model="advancedForm.name"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="审判法院" label-width="80" prop="court">
+              <el-input v-model="advancedForm.court"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="10">
+          <el-col :span="12">
+            <el-form-item label="文书类型" label-width="80" prop="type">
+              <el-select v-model="advancedForm.type">
+                <el-option
+                  v-for="item in doc_case_type"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="案由" label-width="80" prop="cause">
+              <el-select v-model="advancedForm.cause">
+                <el-option
+                  v-for="item in doc_case_cause"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="10">
+          <el-col :span="12">
+            <el-form-item label="案号" label-width="40" prop="number">
+              <el-input v-model="advancedForm.number"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="审理程序" label-width="80" prop="process">
+              <el-input v-model="advancedForm.process"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="10">
+          <el-col :span="12">
+            <el-form-item label="判决日期" prop="judgeDate">
+              <el-date-picker
+                v-model="advancedForm.judgeDate"
+                placeholder="选择日期"
+                type="date"
+                value-format="YYYY-MM-DD"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="公开日期" prop="pubDate">
+              <el-date-picker
+                v-model="advancedForm.pubDate"
+                placeholder="选择日期"
+                type="date"
+                value-format="YYYY-MM-DD"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="10">
+          <el-col :span="12">
+            <el-form-item label="法律依据" prop="legalBasis">
+              <el-input v-model="advancedForm.legalBasis"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="当事人" prop="party">
+              <el-input v-model="advancedForm.party"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <template #footer>
+      <span class="dialog-footer">
+        <el-button icon="Close" @click="clearForm()">取消</el-button>
+        <el-button icon="Search" type="primary" @click="handleSearch()">
+          确认
+        </el-button>
+      </span>
+      </template>
+    </el-dialog>
+  </el-container>
+
+
+</template>
+
+<script name="Case" setup>
+import {getCurrentInstance, reactive, ref, toRefs} from 'vue';
+import {pageCase, getCase, listCase} from "@/api/retrieve/case";
+import {ElInput, ElHeader, ElMain, ElFooter} from 'element-plus';
 
 const {proxy} = getCurrentInstance();
+
+// 创建一个响应式的搜索文本
+const headerShow = ref(true);
+const dialogVisible = ref(false);
+const advancedFormRef = ref(null);
+const formLabelWidth = ref('100px');
+const selectAdvance = ref("常规检索");
+const caseList = ref([]);
+const total = ref(0);
+
+
+const advancedForm = ref({
+  pageNum: 1,
+  pageSize: 10,
+  name: "",
+  court: null,
+  number: null,
+  cause: null,
+  type: null,
+  process: null,
+  judgeDate: null,
+  pubDate: null,
+  legalBasis: null,
+  party: null,
+  content: name,
+})
+
+
 const {
   doc_case_cause,
   doc_case_type,
@@ -19,717 +250,162 @@ const {
   crawl_common_status
 } = proxy.useDict("doc_case_cause", "doc_case_type", "crawler_source", "crawl_common_status");
 
+const handleAdvanced = () => {
+  dialogVisible.value = true;
+  proxy.resetForm("advancedFormRef");
+}
 
-const caseList = ref([]);
-const total = ref(0);
-const loading = ref(true);
-const buttonLoading = ref(false);
-const ids = ref([]);
-const single = ref(true);
-const multiple = ref(true);
-const showSearch = ref(true);
-
-/*** 案例导入参数 */
-const upload = reactive({
-  // 是否显示弹出层（案例导入）
-  open: false,
-  // 弹出层标题（案例导入）
-  title: "",
-  // 是否禁用上传
-  isUploading: false,
-  // 是否更新已经存在的案例数据
-  updateSupport: 0,
-  // 设置上传的请求头部
-  headers: {Authorization: "Bearer " + getToken()},
-  // 上传的地址
-  url: import.meta.env.VITE_APP_BASE_API + "/retrieve/case/importData"
-});
-
-
-const data = reactive({
-  queryParams: {
-    pageNum: 1,
-    pageSize: 10,
-    name: null,
-    court: null,
-    number: null,
-    cause: null,
-    type: null,
-    process: null,
-    label: null,
-    sourceId: null,
-    judgeDate: null,
-    pubDate: null,
-    legalBasis: null,
-    party: null,
-    status: null,
-  },
-
-  form: {},
-
-  rules: {
-    id: [
-      {required: true, message: '案件主键id不能为空', trigger: 'blur'},
-    ],
-    name: [
-      {required: true, message: '案件名称不能为空', trigger: 'blur'},
-    ],
-    court: [
-      {required: true, message: '审判法院不能为空', trigger: 'blur'},
-    ],
-    number: [
-      {required: true, message: '案号不能为空', trigger: 'blur'},
-    ],
-    url: [
-      {pattern: /http:\/\/|https:\/\//, message: '请输入正确的链接', trigger: 'blur'},
-    ],
-    cause: [
-      {required: true, message: '案由不能为空', trigger: 'change'},
-    ],
-    type: [
-      {required: true, message: '文书类型不能为空', trigger: 'change'},
-    ],
-    process: [],
-    label: [],
-    content: [
-      {required: true, message: '案件正文不能为空', trigger: 'blur'},
-    ],
-    sourceId: [
-      {required: true, message: '案件来源不能为空', trigger: 'change'},
-    ],
-    judgeDate: [
-      {required: true, message: '判决日期不能为空', trigger: 'blur'},
-    ],
-    pubDate: [],
-    legalBasis: [],
-    party: [],
-    relatedCases: [],
-    status: [
-      {required: true, message: '状态不能为空', trigger: 'change'},
-    ],
-  }
-})
-
-const {queryParams, form, rules} = toRefs(data);
-
-
-const title = ref('')
-const open = ref(false)
-const openContent = ref(false)
-
-
-const queryForm = ref(null)
-const dialogForm = ref(null)
+const clearForm = () => {
+  proxy.resetForm("advancedFormRef");
+  dialogVisible.value = false;
+  selectAdvance.value = "常规检索";
+}
 
 const getList = () => {
-  loading.value = true
-  console.log(queryParams.value)
-  listCase(queryParams.value).then(res => {
+  advancedForm.value.pageSize = 10;
+  listCase(advancedForm.value).then(res => {
+    total.value = res.data.length
+  })
+}
+
+const handleSearch = () => {
+  // 打开遮罩层
+  proxy?.$modal.loading("正在检索数据，请稍后...");
+  headerShow.value = false;
+  dialogVisible.value = false;
+  console.log(advancedForm.value)
+  pageCase(advancedForm.value).then(res => {
     caseList.value = res.rows
     total.value = res.total
-    loading.value = false
-  })
-
-}
-
-const handleQuery = () => {
-  queryParams.value.pageNum = 1
-  getList()
-}
-
-const resetQueryForm = () => {
-  if (queryForm.value) {
-    queryForm.value.resetFields()
-    queryForm.value.clearValidate()
-  }
-  proxy.resetForm("queryForm");
-  queryParams.value = {
-    pageNum: 1,
-    pageSize: 10,
-    name: null,
-    court: null,
-    number: null,
-    cause: null,
-    type: null,
-    process: null,
-    label: null,
-    sourceId: null,
-    judgeDate: null,
-    pubDate: null,
-    legalBasis: null,
-    party: null,
-    status: null,
-  }
-
-
-}
-
-const resetQuery = () => {
-  resetQueryForm()
-  handleQuery()
-}
-
-const handleSelectionChange = selection => {
-  ids.value = selection.map(item => item.id)
-  single.value = selection.length !== 1
-  multiple.value = !selection.length
-  proxy.$modal.msgSuccess("已选中" + selection.length + "条数据");
-}
-
-const resetForm = () => {
-  if (dialogForm.value) {
-    dialogForm.value.resetFields()
-    dialogForm.value.clearValidate()
-  }
-  proxy.resetForm("dialogForm");
-  form.value = {
-    id: null,
-    name: null,
-    court: null,
-    number: null,
-    url: null,
-    cause: null,
-    type: null,
-    process: null,
-    label: null,
-    content: null,
-    sourceId: null,
-    judgeDate: null,
-    pubDate: null,
-    legalBasis: null,
-    party: null,
-    relatedCases: null,
-    status: null,
-    createBy: null,
-  }
-}
-
-const cancelDialog = () => {
-  open.value = false
-  resetForm()
-}
-
-const handleAdd = () => {
-  resetForm()
-  open.value = true
-  title.value = '添加司法案例'
-}
-
-const handleUpdate = row => {
-  loading.value = true
-  resetForm()
-  const id = row.id || ids.value
-  getCase(id).then(res => {
-    loading.value = false
-    form.value = res.data
-    open.value = true
-    title.value = '修改司法案例'
-  })
-}
-
-const submitForm = () => {
-  dialogForm.value.validate(valid => {
-    if (valid) {
-      buttonLoading.value = true
-      if (form.value.id != null) {
-        updateCase(form.value).then(() => {
-          ElMessage.success('修改成功')
-          open.value = false
-          getList()
-        }).finally(() => {
-          buttonLoading.value = false
-        })
-      } else {
-        addCase(form.value).then(() => {
-          ElMessage.success('新增成功')
-          open.value = false
-          getList()
-        }).finally(() => {
-          buttonLoading.value = false
-        })
-      }
+    if (res.total === 0) {
+      proxy.$message.warning("未检索到相关数据");
+    } else {
+      proxy.$message.success("检索成功");
     }
+    // 打开查询得到的列表
+  }).catch(err => {
+    proxy.$message.error(err.message);
   })
+  // 关闭遮罩层
+  proxy?.$modal.closeLoading();
+}
+const handleDetail = (item) => {
+  // 打开遮罩层
+  proxy?.$modal.loading("正在打开" + item.name + "案例文书，请稍后...");
+  proxy.$router.push("/retrieve/case/caseDetail/" + item.id)
+  // 关闭遮罩层
+  proxy?.$modal.closeLoading();
 }
 
-const handleDelete = row => {
-  const idLs = row.id || ids.value
-  ElMessageBox.confirm(`是否确认删除司法案例编号为"${idLs}"的数据项？`).then(() => {
-    loading.value = true
-    return delCase(ids)
-  }).then(() => {
-    loading.value = false
-    getList()
-    ElMessage.success('删除成功')
-  }).catch(() => {
-  }).finally(() => {
-    loading.value = false
-  })
-}
 
-/** 导入按钮操作 */
-const handleImport = () => {
-  upload.title = "案例导入";
-  upload.open = true;
-};
-
-/** 下载模板操作 */
-const importTemplate = () => {
-  proxy.download("retrieve/case/importTemplate", {}, `case_template_${new Date().getTime()}.xlsx`);
-};
-/**文件上传中处理 */
-const handleFileUploadProgress = (event, file, fileList) => {
-  upload.isUploading = true;
-};
-/** 文件上传成功处理 */
-const handleFileSuccess = (response, file, fileList) => {
-  upload.open = false;
-  upload.isUploading = false;
-  proxy.$refs["uploadRef"].handleRemove(file);
-  proxy.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", {dangerouslyUseHTMLString: true});
-  getList();
-};
-
-/** 提交上传文件 */
-function submitFileForm() {
-  proxy.$refs["uploadRef"].submit();
-};
-
-const handleExport = () => {
-  console.log({
-    ...queryParams.value
-  }, typeof {
-    ...queryParams.value
-  })
-  proxy.download('retrieve/case/export',
-    {...queryParams.value}
-    , `case_${new Date().getTime()}.xlsx`)
-}
-
-const handleExportSelected = () => {
-  const idLs = []
-  if (!ids.value.length) {
-    ElMessage.warning('请选择要导出的项目')
-    return
-  }
-  for (let id in ids.value) {
-    idLs.push(parseInt(ids.value[id]))
-  }
-  console.log(idLs, typeof idLs)
-  download('retrieve/case/exportSelected',
-    idLs
-    , `case_${new Date().getTime()}.xlsx`)
-}
-
-onMounted(() => {
-  getList()
-
-})
 </script>
 
+<style lang="scss" scoped>
 
-<template>
-  <div class="app-container">
-    <el-card class="box-card" shadow="hover">
-      <el-row :gutter="10" align="middle" class="header" justify="space-between">
-        <el-form
-          v-show="showSearch"
-          ref="queryForm"
-          :inline="true"
-          :model="queryParams"
-          label-position="left"
-          label-width="80px"
-        >
-          <el-form-item label="案件名称" label-width="80">
-            <el-input v-model="queryParams.name"></el-input>
-          </el-form-item>
-          <el-form-item label="审判法院" label-width="80">
-            <el-input v-model="queryParams.court"></el-input>
-          </el-form-item>
-          <el-form-item label="案号" label-width="40">
-            <el-input v-model="queryParams.number"></el-input>
-          </el-form-item>
-          <el-form-item label="案由" label-width="80">
-            <el-select v-model="queryParams.cause">
-              <el-option
-                v-for="item in doc_case_cause"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="文书类型" label-width="80">
-            <el-select v-model="queryParams.type">
-              <el-option
-                v-for="item in doc_case_type"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
-          <!--        <el-form-item label="审理程序">-->
-          <!--          <el-input v-model="queryParams.process"/>-->
-          <!--        </el-form-item>-->
-          <!--        <el-form-item label="详细案由">-->
-          <!--          <el-input v-model="queryParams.label"/>-->
-          <!--        </el-form-item>-->
-          <el-form-item label="案件来源" label-width="80">
-            <el-select v-model="queryParams.sourceId">
-              <el-option
-                v-for="item in crawler_source"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="判决日期">
-            <el-date-picker
-              v-model="queryParams.judgeDate"
-              placeholder="选择日期"
-              type="date"
-              value-format="YYYY-MM-DD"
-            />
-          </el-form-item>
-          <el-form-item label="公开日期">
-            <el-date-picker
-              v-model="queryParams.pubDate"
-              placeholder="选择日期"
-              type="date"
-              value-format="YYYY-MM-DD"
-            />
-          </el-form-item>
-          <!--        <el-form-item label="法律依据">-->
-          <!--          <el-input v-model="queryParams.legalBasis"></el-input>-->
-          <!--        </el-form-item>-->
-          <!--        <el-form-item label="当事人">-->
-          <!--          <el-input v-model="queryParams.party"></el-input>-->
-          <!--        </el-form-item>-->
-          <!--        <el-form-item label="相关案件">-->
-          <!--          <el-input v-model="queryParams.relatedCases"></el-input>-->
-          <!--        </el-form-item>-->
-          <el-form-item label="状态">
-            <el-select v-model="queryParams.status">
-              <el-option
-                v-for="item in crawl_common_status"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button icon="Search" size="default" type="primary" @click="handleQuery">搜索</el-button>
-            <el-button icon="Refresh" size="default" @click="resetQuery">重置</el-button>
-          </el-form-item>
-        </el-form>
-      </el-row>
-      <el-divider/>
-      <el-row slot="header" :gutter="10" class="mb8" clearfix>
-        <el-col :span="1.5">
-          <el-button
-            v-hasPermi="['retrieve:case:add']"
-            icon="Plus"
-            plain
-            size="default"
-            type="primary"
-            @click="handleAdd"
-          >新增
-          </el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
-            v-hasPermi="['retrieve:case:edit']"
-            :disabled="single"
-            icon="Edit"
-            plain
-            size="default"
-            type="success"
-            @click="handleUpdate"
-          >修改
-          </el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
-            v-hasPermi="['retrieve:case:remove']"
-            :disabled="multiple"
-            icon="Delete"
-            plain
-            size="default"
-            type="danger"
-            @click="handleDelete"
-          >删除
-          </el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
-            v-hasPermi="['retrieve:case:import']"
-            icon="Upload"
-            plain
-            type="info"
-            @click="handleImport"
-          >导入
-          </el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
-            v-hasPermi="['retrieve:case:export']"
-            icon="Download"
-            plain
-            size="default"
-            type="warning"
-            @click="handleExport"
-          >导出
-          </el-button>
-        </el-col>
-        <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
-      </el-row>
-      <el-table
-        v-loading="loading"
-        :data="caseList"
-        :default-sort="{ prop: 'judgeDate', order: 'descending' }"
-        border
-        height="500"
-        stripe
-        style="width: 100%;text-align: center"
-        table-layout="auto"
-        @selection-change="handleSelectionChange"
-      >
-        <el-table-column type="selection" width="55"></el-table-column>
-        <!--        <el-table-column label="案件主键id" prop="id" width="150"></el-table-column>-->
-        <el-table-column fixed label="案件名称" prop="name" width="200"></el-table-column>
-        <el-table-column
-          label="审判法院"
-          prop="court"
-          width="180"></el-table-column>
-        <el-table-column label="案号" prop="number" width="210"></el-table-column>
-        <el-table-column label="案由" prop="cause" width="150"></el-table-column>
-        <el-table-column label="原始链接" prop="url" width="150">
-          <template #default="scope">
-            <el-link :href="scope.row.url" :title="scope.row.url" target="_blank" type="primary">
-              {{ scope.row.url }}
-            </el-link>
-          </template>
-        </el-table-column>
-        <el-table-column label="文书类型" prop="type" width="150"></el-table-column>
-        <el-table-column label="审理程序" prop="process" width="150"></el-table-column>
-        <el-table-column label="详细案由" prop="label" width="180"></el-table-column>
-        <el-table-column label="案件来源" prop="sourceId" width="150">
-          <template #default="scope">
-            <dict-tag :options="crawler_source" :value="scope.row.sourceId"/>
-          </template>
-        </el-table-column>
-        <el-table-column label="判决日期" prop="judgeDate" sortable width="150">
-          <template #default="scope">
-            <div style="display: flex; align-items: center">
-              <el-icon>
-                <timer/>
-              </el-icon>
-              <span style="margin-left: 10px">{{ scope.row.judgeDate }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <!--        <el-table-column label="公开日期" prop="pubDate" width="150"></el-table-column>-->
-        <el-table-column label="法律依据" prop="legalBasis" style="overflow: hidden" width="150"></el-table-column>
-        <!--        <el-table-column label="当事人" prop="party" width="150"></el-table-column>-->
-        <!--        <el-table-column label="相关案件" prop="relatedCases" width="180"></el-table-column>-->
-        <el-table-column label="状态" prop="status" width="150">
-          <template #default="scope">
-            <dict-tag :options="crawl_common_status" :value="scope.row.status"/>
-          </template>
-        </el-table-column>
-        <el-table-column
-          align="center"
-          fixed="right"
-          label="操作"
-          width="180"
-        >
-          <template #default="scope">
-            <el-button
-              v-hasPermi="['dataRetrieve:case:edit']"
-              icon="Edit"
-              size="small"
-              type="primary"
-              @click="handleUpdate(scope.row)"
-            >
-              修改
-            </el-button>
-            <el-button
-              v-hasPermi="['dataRetrieve:case:remove']"
-              icon="Delete"
-              size="small"
-              type="danger"
-              @click="handleDelete(scope.row)"
-            >
-              删除
-            </el-button>
-          </template>
-        </el-table-column>
-        <template #empty>
-          <el-empty></el-empty>
-        </template>
-      </el-table>
+/* 隐藏垂直滚动条 */
+*::-webkit-scrollbar {
+  width: 0;
+}
 
-      <!-- 添加或修改司法案例对话框 -->
-      <el-dialog v-model="open" :title="title" align-center>
-        <el-form ref="dialogForm" :model="form" :rules="rules" label-width="100px">
-          <el-form-item label="案件名称" prop="name">
-            <el-input v-model="form.name" placeholder="请输入案件名称"/>
-          </el-form-item>
-          <el-form-item label="审判法院" prop="court">
-            <el-input v-model="form.court" placeholder="请输入审判法院"/>
-          </el-form-item>
-          <el-form-item label="案号" prop="number">
-            <el-input v-model="form.number" placeholder="请输入案号"/>
-          </el-form-item>
-          <el-form-item label="原始链接" prop="url">
-            <el-input v-model="form.url" placeholder="请输入原始链接"/>
-          </el-form-item>
-          <el-form-item label="案由" prop="cause">
-            <el-select v-model="form.cause" placeholder="请选择案由">
-              <el-option
-                v-for="dict in doc_case_cause"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="文书类型" prop="type">
-            <el-select v-model="form.type" placeholder="请选择文书类型">
-              <el-option
-                v-for="dict in doc_case_type"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="审理程序" prop="process">
-            <el-input v-model="form.process" placeholder="请输入审理程序"/>
-          </el-form-item>
-          <el-form-item label="详细案由" prop="label">
-            <el-input v-model="form.label" placeholder="请输入详细案由"/>
-          </el-form-item>
-          <el-form-item label="案件正文" prop="content">
-            <el-link href="javascript:void(0);" type="primary" @click="openContent=true">进入案件正文</el-link>
-            <el-dialog v-model="openContent" title="输入案件正文">
-              <editor v-model="form.content" :min-height="300"/>
-            </el-dialog>
-          </el-form-item>
-          <el-form-item label="案件来源" prop="sourceId">
-            <el-select v-model="form.sourceId" placeholder="请选择案件来源">
-              <el-option
-                v-for="dict in crawler_source"
-                :key="dict.value"
-                :label="dict.label"
-                :value="parseInt(dict.value)"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="判决日期" prop="judgeDate">
-            <el-date-picker v-model="form.judgeDate"
-                            clearable
-                            placeholder="请选择判决日期"
-                            type="date"
-                            value-format="YYYY-MM-DD"
-            >
-            </el-date-picker>
-          </el-form-item>
-          <el-form-item label="公开日期" prop="pubDate">
-            <el-date-picker v-model="form.pubDate"
-                            clearable
-                            placeholder="请选择公开日期"
-                            type="date"
-                            value-format="YYYY-MM-DD"
-            >
-            </el-date-picker>
-          </el-form-item>
-          <el-form-item label="法律依据" prop="legalBasis">
-            <el-input v-model="form.legalBasis" placeholder="请输入法律依据"/>
-          </el-form-item>
-          <el-form-item label="当事人" prop="party">
-            <el-input v-model="form.party" placeholder="请输入当事人"/>
-          </el-form-item>
-          <el-form-item label="相关案件" prop="relatedCases">
-            <el-input v-model="form.relatedCases" placeholder="请输入内容" type="textarea"/>
-          </el-form-item>
-          <el-form-item label="状态" prop="status">
-            <el-select v-model="form.status" placeholder="请选择状态">
-              <el-option
-                v-for="dict in crawl_common_status"
-                :key="dict.value"
-                :label="dict.label"
-                :value="parseInt(dict.value)"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-        </el-form>
-        <template #footer>
-          <span class="dialog-footer">
-            <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
-            <el-button @click="cancelDialog">取 消</el-button>
-          </span>
-        </template>
-      </el-dialog>
+/* 隐藏水平滚动条 */
+*::-webkit-scrollbar {
+  height: 0;
+}
 
-      <!-- 案例导入对话框 -->
-      <el-dialog v-model="upload.open" :title="upload.title" append-to-body width="400px">
-        <el-upload
-          ref="uploadRef"
-          :action="upload.url + '?updateSupport=' + upload.updateSupport"
-          :auto-upload="false"
-          :disabled="upload.isUploading"
-          :headers="upload.headers"
-          :limit="1"
-          :on-progress="handleFileUploadProgress"
-          :on-success="handleFileSuccess"
-          accept=".xlsx, .xls"
-          drag
-        >
-          <el-icon class="el-icon--upload">
-            <upload-filled/>
-          </el-icon>
-          <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-          <template #tip>
-            <div class="el-upload__tip text-center">
-              <div class="el-upload__tip">
-                <el-checkbox v-model="upload.updateSupport"/>
-                是否更新已经存在的司法案例数据
-              </div>
-              <span>仅允许导入xls、xlsx格式文件。</span>
-              <el-link :underline="false" style="font-size:12px;vertical-align: baseline;" type="primary"
-                       @click="importTemplate">下载模板
-              </el-link>
-            </div>
-          </template>
-        </el-upload>
-        <template #footer>
-          <div class="dialog-footer">
-            <el-button type="primary" @click="submitFileForm">确 定</el-button>
-            <el-button @click="upload.open = false">取 消</el-button>
-          </div>
-        </template>
-      </el-dialog>
-    </el-card>
-    <pagination
-      v-show="total>0"
-      v-model:limit="queryParams.pageSize"
-      v-model:page="queryParams.pageNum"
-      :total="total"
-      @pagination="getList"
-    />
-  </div>
-</template>
+.toolbar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
 
-<style scoped>
-.cell {
-  color: black;
-  text-align: center;
-  justify-content: center;
+}
+
+
+.horFlex {
+  display: flex;
+  justify-items: center;
+  justify-content: space-around;
   align-content: center;
+  align-items: center;
 
+  .el-tag {
+    margin: 20px;
+  }
+}
+
+.verFlex {
+  display: flex;
+  justify-content: space-between; /* 可选，如果需要同时水平居中对齐 */
+  justify-items: center;
+  //align-items: center; /* 主要用于垂直居中对齐，此属性适用于单行布局下的子元素 */
+  /* 对于多行布局且需要整个内容区域垂直居中，可以使用： */
+  flex-direction: column;
+  align-content: space-between; /* 在多行之间进行垂直居中对齐 */
+  height: 100%;
+
+  .el-tag {
+    margin: 5px 0;
+    text-align: left;
+  }
+}
+
+.hidden {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 8; /* 表示显示3行 */
+  overflow: hidden;
+  max-height: 100%; /* 设置一个固定的高度或者最大高度（例如：max-height） */
+}
+
+.newLine {
+  width: 20vw; /* 设置一个宽度来触发换行 */
+  overflow-wrap: break-word; /* 当内容溢出容器边界时允许单词内部断行 */
+  word-break: break-word; /* 对于不区分单词的脚本（如中文、日文等），也可以使用此属性 */
+  white-space: normal; /* 这是默认值，保持常规空白处理和换行行为 */
+}
+
+.search {
+  margin: 60px auto;
+  width: 55%;
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
+
+}
+
+.keyword {
+  overflow: hidden; /* 隐藏超出输入框的内容 */
+  text-overflow: ellipsis; /* 文本溢出时显示省略号 */
+  white-space: nowrap;
+
+  /* 默认样式 */
+  transition: all 0.3s ease;
+}
+
+.el-tag {
+  font-weight: bold;
+  font-size: small;
+  text-align: left;
+  margin: 10px 0;
+}
+
+.search .keyword:hover {
+  transform: scale(1.2);
+}
+
+.input-with-select .el-input-group__prepend {
+  background-color: var(--el-fill-color-blank);
+}
+
+.form-inline .el-input {
+  --el-input-width: 220px;
+}
+
+.form-inline .el-select {
+  --el-select-width: 220px;
+}
+
+.content {
+  text-shadow: #ebeee8 1px 10px 1px;
+  text-indent: 2em;
 }
 </style>

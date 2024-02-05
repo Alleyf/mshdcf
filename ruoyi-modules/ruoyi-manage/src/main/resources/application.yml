@@ -1,0 +1,57 @@
+# Tomcat
+server:
+  port: 9207
+
+# Spring
+spring:
+  application:
+    # 应用名称
+    name: ruoyi-manage
+  profiles:
+    # 环境配置
+    active: @profiles.active@
+
+--- # nacos 配置
+spring:
+  cloud:
+    nacos:
+      # nacos 服务地址
+      server-addr: @nacos.server@
+      discovery:
+        # 注册组
+        group: @nacos.discovery.group@
+        namespace: ${spring.profiles.active}
+      config:
+        # 配置组
+        group: @nacos.config.group@
+        namespace: ${spring.profiles.active}
+  config:
+    import:
+      - optional:nacos:application-common.yml
+      - optional:nacos:datasource.yml
+      - optional:nacos:${spring.application.name}.yml
+
+--- # HanLP 配置
+hanlp:
+  url: "https://www.hanlp.com/api"
+  #  url: https://www.hanlp.com/hanlp/v21/redirect
+  token: "NDE4OEBiYnMuaGFubHAuY29tOjBBa0hKY2p3YVhUelVoRFY="
+
+--- # elasticsearch 功能配置
+easy-es:
+  # 是否开启EE自动配置
+  enable: false
+  # es连接地址+端口 格式必须为ip:port,如果是集群则可用逗号隔开
+  address: 8.130.88.159:9200
+  # 默认为http
+  schema: http
+  banner: false
+
+--- # Dubbo 配置
+dubbo:
+  protocol:
+    name: dubbo
+    port: -1
+    payload: 104857600 #10MB
+  consumer:
+    timeout: 200000

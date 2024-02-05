@@ -30,6 +30,7 @@ public class RemoteMailServiceImpl implements RemoteMailService {
      * @param subject 标题
      * @param text    内容
      */
+    @Override
     public void send(String to, String subject, String text) throws ServiceException {
         MailUtils.sendText(to, subject, text);
     }
@@ -42,6 +43,7 @@ public class RemoteMailServiceImpl implements RemoteMailService {
      * @param text     内容
      * @param fileList 附件
      */
+    @Override
     public void sendWithAttachment(String to, String subject, String text, List<File> fileList) throws ServiceException {
         MailUtils.sendText(to, subject, text, ArrayUtil.toArray(fileList, File.class));
     }

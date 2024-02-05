@@ -1,7 +1,7 @@
 <template>
   <div class="register">
     <el-form ref="registerRef" :model="registerForm" :rules="registerRules" class="register-form">
-      <h3 class="title">RuoYi-Cloud-Plus后台管理系统</h3>
+      <h3 class="title">多源异构司法数据汇聚融合平台</h3>
       <el-form-item prop="username">
         <el-input
           v-model="registerForm.username"
@@ -78,7 +78,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-register-footer">
-      <span>Copyright © 2018-2023 疯狂的狮子Li All Rights Reserved.</span>
+      <span>Copyright © 2023-2024 csFan All Rights Reserved.</span>
     </div>
   </div>
 </template>

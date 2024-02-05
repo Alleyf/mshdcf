@@ -1,170 +1,274 @@
-<img src="https://foruda.gitee.com/images/1679673780944866919/d908a86f_1766278.png" width="56%" height="56%">
-<div style="height: 10px; clear: both;"></div>
+**Read this in other languages: [English](README.md), [中文](README_zh.md).**
 
-- - -
-## 平台简介
+# MSHDCF
 
-[![码云Gitee](https://gitee.com/dromara/RuoYi-Cloud-Plus/badge/star.svg?theme=blue)](https://gitee.com/dromara/RuoYi-Cloud-Plus)
-[![GitHub](https://img.shields.io/github/stars/JavaLionLi/RuoYi-Cloud-Plus.svg?style=social&label=Stars)](https://github.com/dromara/RuoYi-Cloud-Plus)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://gitee.com/dromara/RuoYi-Cloud-Plus/blob/master/LICENSE)
-[![使用IntelliJ IDEA开发维护](https://img.shields.io/badge/IntelliJ%20IDEA-提供支持-blue.svg)](https://www.jetbrains.com/?from=RuoYi-Cloud-Plus)
-<br>
-[![RuoYi-Cloud-Plus](https://img.shields.io/badge/RuoYi_Cloud_Plus-1.8.1-success.svg)](https://gitee.com/dromara/RuoYi-Cloud-Plus)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7-blue.svg)]()
-[![JDK-8+](https://img.shields.io/badge/JDK-8-green.svg)]()
-[![JDK-11](https://img.shields.io/badge/JDK-11-green.svg)]()
+<div align='center'>
+<img src="https://qnpicmap.fcsluck.top/pics/202312311949932.png" width="30%" height="30%" alt="coverage">
+</div>
+<div align='center'>
 
-> RuoYi-Cloud-Plus `微服务通用权限管理系统` 重写 RuoYi-Cloud 全方位升级(不兼容原框架)
+<img src="https://img.shields.io/github/stars/Alleyf/mshdcf.svg?style=social&label=Stars" alt="windows">
+<img src="https://img.shields.io/badge/windows-10-blue.svg" alt="windows">
+<img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="version">
+<img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license">
+<img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
+  <img src="https://img.shields.io/badge/node-%3E%3D16.13.0-blue.svg" />
+  <a href="https://github.com/Alleyf/big-event#readme" target="_blank">
+    <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
+  </a>
+  <a href="https://github.com/Alleyf/big-event/graphs/commit-activity" target="_blank">
+    <img alt="Maintenance" src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" />
+  </a>
+  <a href="https://github.com/Alleyf/big-event/blob/master/LICENSE" target="_blank">
+    <img alt="License: MIT" src="https://img.shields.io/github/license/Alleyf/big-event" />
+  </a>
+</div>
 
-> 项目代码、文档 均开源免费可商用 遵循开源协议在项目中保留开源协议文件即可<br>
-活到老写到老 为兴趣而开源 为学习而开源 为让大家真正可以学到技术而开源
+## Introduction
 
-> 系统演示: [传送门](https://gitee.com/dromara/RuoYi-Vue-Plus/wikis/pages?sort_id=4836388&doc_id=1469725) 分布式集群版本(功能一致)
+> This Project Uses Scrapy combined with Selenium to collect some judicial-related data for learning and research.
+> Currently, only the following website is being scraped:<br>
 
-# 本框架与RuoYi的功能差异
+> [OpenLaw](https://openlaw.cn/)
 
-| 功能          | 本框架                                                                                                               | RuoYi                                                                              |
-|-------------|-------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
-| 前端项目        | 基于vue3-element-admin开源项目重写<br/>Vue3 + TS + ElementPlus                                                            | 基于Vue2/Vue3 + JS                                                                   | 
-| 后端项目结构      | 采用插件化 + 扩展包形式 结构解耦 易于扩展                                                                                           | 模块相互注入耦合严重难以扩展                                                                     | 
-| 后端代码风格      | 严格遵守Alibaba规范与项目统一配置的代码格式化                                                                                        | 代码书写与常规结构不同阅读障碍大                                                                   |
-| 分布式注册中心     | 采用 Alibaba Nacos 源码集成便于调试扩展与二次开发 框架还为其增加了各种监控                                                                     | 采用 Alibaba Nacos 自行搭建纯官方版本不可靠                                                      | 
-| 分布式配置中心     | 采用 Alibaba Nacos 源码集成便于调试扩展与二次开发 框架还为其增加了各种监控                                                                     | 采用 Alibaba Nacos 自行搭建纯官方版本不可靠                                                      | 
-| 服务网关        | 采用 SpringCloud Gateway 框架扩展了多种功能<br/>例如:内网鉴权、请求体缓存、跨域配置、请求响应日志等                                                   | 采用 SpringCloud Gateway 功能单一                                                        | 
-| 负载均衡        | 采用 SpringCloud Loadbalancer 扩展支持了开发团队路由 便于多团队开发调试                                                                 | 采用 SpringCloud Loadbalancer 功能单一                                                   |
-| RPC远程调用     | 采用 全新 Apache Dubbo 3.X 历史悠远不用多说                                                                                   | 采用 feign 功能有限编写方式 网络波动大 不稳定                                                        | 
-| 分布式限流熔断     | 采用 Alibaba Sentinel 源码集成便于调试扩展与二次开发 框架还为其增加了各种监控                                                                  | 采用 Alibaba Sentinel 自行搭建纯官方版本不可靠                                                   | 
-| 分布式事务       | 采用 Alibaba Seata 源码集成对接了Nacos与各种监控 简化了搭建部署流程                                                                      | 采用 Alibaba Seata 自行搭建纯官方版本 搭建繁琐与Nacos不挂钩 代码内使用方式怪异等                                |
-| Web容器       | 采用 Undertow 基于 XNIO 的高性能容器                                                                                        | 采用 Tomcat                                                                          |
-| 权限认证        | 采用 Sa-Token、Jwt 静态使用功能齐全 低耦合 高扩展                                                                                  | Spring Security 配置繁琐扩展性极差                                                          |
-| 权限注解        | 采用 Sa-Token 支持注解 登录校验、角色校验、权限校验、二级认证校验、HttpBasic校验、忽略校验<br/>角色与权限校验支持多种条件 如 `AND` `OR` 或 `权限 OR 角色` 等复杂表达式        | 只支持是否存在匹配                                                                          |
-| 关系数据库支持     | 原生支持 MySQL、Oracle、PostgreSQL、SQLServer<br/>可同时使用异构切换                                                              | 支持 Mysql、Oracle 不支持同时使用、不支持异构切换                                                    |
-| 缓存数据库       | 支持 Redis 5-7 支持大部分新功能特性 如 分布式限流、分布式队列                                                                             | Redis 简单 get set 支持                                                                |
-| Redis客户端    | 采用 Redisson Redis官方推荐 基于Netty的客户端工具<br/>支持Redis 90%以上的命令 底层优化规避很多不正确的用法 例如: keys被转换为scan<br/>支持单机、哨兵、单主集群、多主集群等模式 | Lettuce + RedisTemplate 支持模式少 工具使用繁琐<br/>连接池采用 common-pool Bug多经常性出问题              |
-| 缓存注解        | 采用 Spring-Cache 注解 对其扩展了实现支持了更多功能<br/>例如 过期时间 最大空闲时间 组最大长度等 只需一个注解即可完成数据自动缓存                                      | 需手动编写Redis代码逻辑                                                                     |
-| ORM框架       | 采用 Mybatis-Plus 基于对象几乎不用写SQL全java操作 功能强大插件众多<br/>例如多租户插件 分页插件 乐观锁插件等等                                             | 采用 Mybatis 基于XML需要手写SQL                                                            |
-| SQL监控       | 采用 p6spy 可输出完整SQL与执行时间监控                                                                                          | log输出 需手动拼接sql与参数无法快速查看调试问题                                                        |
-| 数据分页        | 采用 Mybatis-Plus 分页插件<br/>框架对其进行了扩展 对象化分页对象 支持多种方式传参 支持前端多排序 复杂排序                                                  | 采用 PageHelper 仅支持单查询分页 参数只能从param传 只能单排序 功能扩展性差 体验不好                               |
-| 数据权限        | 采用 Mybatis-Plus 插件 自行分析拼接SQL 无感式过滤<br/>只需为Mapper设置好注解条件 支持多种自定义 不限于部门角色                                           | 采用 注解+aop 实现 基于部门角色 生成的sql兼容性差 不支持其他业务扩展<br/>生成sql后需手动拼接到具体业务sql上 对于多个Mapper查询不起作用 |
-| 数据脱敏        | 采用 注解 + jackson 序列化期间脱敏 支持不同模块不同的脱敏条件<br/>支持多种策略 如身份证、手机号、地址、邮箱、银行卡等 可自行扩展                                        | 无                                                                                  |
-| 数据加解密       | 采用 注解 + mybatis 拦截器 对存取数据期间自动加解密<br/>支持多种策略 如BASE64、AES、RSA、SM2、SM4等                                              | 无                                                                                  |
-| 数据翻译        | 采用 注解 + jackson 序列化期间动态修改数据 数据进行翻译<br/>支持多种模式: `映射翻译` `直接翻译` `其他扩展条件翻译` 接口化两步即可完成自定义扩展 内置多种翻译实现                   | 无                                                                                  |
-| 多数据源框架      | 采用 dynamic-datasource 支持世面大部分数据库<br/>通过yml配置即可动态管理异构不同种类的数据库 也可通过前端页面添加数据源<br/>支持spel表达式从请求头参数等条件切换数据源            | 基于 druid 手动编写代码配置数据源 配置繁琐 支持性差                                                     |
-| 多数据源事务      | 采用 dynamic-datasource 支持多数据源不同种类的数据库事务回滚                                                                          | 不支持                                                                                |
-| 数据库连接池      | 采用 HikariCP Spring官方内置连接池 配置简单 以性能与稳定性闻名天下                                                                        | 采用 druid bug众多 社区维护差 活跃度低 配置众多繁琐性能一般                                               |
-| 数据库主键       | 采用 雪花ID 基于时间戳的 有序增长 唯一ID 再也不用为分库分表 数据合并主键冲突重复而发愁                                                                  | 采用 数据库自增ID 支持数据量有限 不支持多数据源主键唯一                                                     |
-| WebSocket协议 | 基于 Spring 封装的 WebSocket 协议 扩展了Token鉴权与分布式会话同步 不再只是基于单机的废物                                                         | 无                                                                                  |
-| 序列化         | 采用 Jackson Spring官方内置序列化 靠谱!!!                                                                                    | 采用 fastjson bugjson 远近闻名                                                           | 
-| 分布式幂等       | 参考美团GTIS防重系统简化实现(细节可看文档)                                                                                          | 手动编写注解基于aop实现                                                                      |
-| 分布式任务调度     | 采用 Xxl-Job 天生支持分布式 统一的管理中心                                                                                        | 采用 Quartz 基于数据库锁性能差 集群需要做很多配置与改造                                                   | 
-| 分布式日志中心     | 采用 ELK 业界成熟解决方案 实时收集所有服务的运行日志 快速发现定位问题                                                                            | 无                                                                                  | 
-| 分布式搜索引擎     | 采用 ElasticSearch、Easy-Es 以 Mybatis-Plus 方式操作 ElasticSearch                                                        | 无                                                                                  | 
-| 分布式消息队列     | 采用 SpringCloud-Stream 支持 Kafka、RocketMQ、RabbitMQ                                                                  | 无                                                                                  | 
-| 文件存储        | 采用 Minio 分布式文件存储 天生支持多机、多硬盘、多分片、多副本存储<br/>支持权限管理 安全可靠 文件可加密存储                                                     | 采用 本机文件存储 文件裸漏 易丢失泄漏 不支持集群有单点效应                                                    |
-| 云存储         | 采用 AWS S3 协议客户端 支持 七牛、阿里、腾讯 等一切支持S3协议的厂家                                                                          | 不支持                                                                                |
-| 短信          | 支持 阿里、腾讯 只需在yml配置好厂家密钥即可使用 接口化支持扩展其他厂家                                                                            | 不支持                                                                                |
-| 邮件          | 采用 mail-api 通用协议支持大部分邮件厂商                                                                                         | 不支持                                                                                |
-| 接口文档        | 采用 SpringDoc、javadoc 无注解零入侵基于java注释<br/>只需把注释写好 无需再写一大堆的文档注解了                                                     | 采用 Springfox 已停止维护 需要编写大量的注解来支持文档生成                                                | 
-| 校验框架        | 采用 Validation 支持注解与工具类校验 注解支持国际化                                                                                  | 仅支持注解 且注解不支持国际化                                                                    |
-| Excel框架     | 采用 Alibaba EasyExcel 基于插件化<br/>框架对其增加了很多功能 例如 自动合并相同内容 自动排列布局 字典翻译等                                               | 基于 POI 手写实现 功能有限 复杂 扩展性差                                                           |
-| 工具类框架       | 采用 Hutool、Lombok 上百种工具覆盖90%的使用需求 基于注解自动生成 get set 等简化框架大量代码                                                       | 手写工具稳定性差易出问题 工具数量有限 代码臃肿需自己手写 get set 等                                            | 
-| 服务监控框架      | 采用 SpringBoot-Admin 基于SpringBoot官方 actuator 探针机制<br/>实时监控服务状态 框架还为其扩展了在线日志查看监控                                    | 无                                                                                  | 
-| 全方位监控报警     | 采用 Prometheus、Grafana 多样化采集 多模板大屏展示 实时报警监控 提供详细的搭建文档                                                              | 无                                                                                  | 
-| 链路追踪        | 采用 Apache SkyWalking 还在为请求不知道去哪了 到哪出了问题而烦恼吗<br/>用了它即可实时查看请求经过的每一处每一个节点                                            | 无                                                                                  |
-| 代码生成器       | 只需设计好表结构 一键生成所有crud代码与页面<br/>降低80%的开发量 把精力都投入到业务设计上<br/>框架为其适配MP、SpringDoc规范化代码 同时支持动态多数据源代码生成                    | 代码生成原生结构 只支持单数据源生成                                                                 |
-| 部署方式        | 支持 Docker 编排 一键搭建所有环境 让开发人员从此不再为搭建环境而烦恼                                                                           | 原生jar部署 其他环境需手动下载安装 自行搭建                                                           | 
-| 项目路径修改      | 提供详细的修改方案文档 并为其做了一些改动 非常简单即可修改成自己想要的                                                                              | 需要做很多改造 文档说明有限                                                                     |
-| 国际化         | 基于请求头动态返回不同语种的文本内容 开发难度低 有对应的工具类 支持大部分注解内容国际化                                                                     | 只提供基础功能 其他需自行编写扩展                                                                  |
-| 代码单例测试      | 提供单例测试 使用方式编写方法与maven多环境单测插件                                                                                      | 只提供基础功能 其他需自行编写扩展                                                                  |
-| Demo案例      | 提供框架功能的实际使用案例 单独一个模块提供了很多很全                                                                                       | 无                                                                                  |
+## 提示模板
 
-## 本框架与RuoYi的业务差异
+### 司法案例
 
-| 业务     | 功能说明                                    | 本框架 | RuoYi            |
-|--------|-----------------------------------------|-----|------------------|
-| 租户管理   | 系统内租户的管理 如:租户套餐、过期时间、用户数量、企业信息等         | 支持  | 无                |
-| 租户套餐管理 | 系统内租户所能使用的套餐管理 如:套餐内所包含的菜单等             | 支持  | 无                |
-| 用户管理   | 用户的管理配置 如:新增用户、分配用户所属部门、角色、岗位等          | 支持  | 支持               |
-| 部门管理   | 配置系统组织机构（公司、部门、小组） 树结构展现支持数据权限          | 支持  | 支持               |
-| 岗位管理   | 配置系统用户所属担任职务                            | 支持  | 支持               |
-| 菜单管理   | 配置系统菜单、操作权限、按钮权限标识等                     | 支持  | 支持               |
-| 角色管理   | 角色菜单权限分配、设置角色按机构进行数据范围权限划分              | 支持  | 支持               |
-| 字典管理   | 对系统中经常使用的一些较为固定的数据进行维护                  | 支持  | 支持               |
-| 参数管理   | 对系统动态配置常用参数                             | 支持  | 支持               |
-| 通知公告   | 系统通知公告信息发布维护                            | 支持  | 支持               |
-| 操作日志   | 系统正常操作日志记录和查询 系统异常信息日志记录和查询             | 支持  | 支持               |
-| 登录日志   | 系统登录日志记录查询包含登录异常                        | 支持  | 支持               |
-| 文件管理   | 系统文件展示、上传、下载、删除等管理                      | 支持  | 无                |
-| 文件配置管理 | 系统文件上传、下载所需要的配置信息动态添加、修改、删除等管理          | 支持  | 无                |
-| 在线用户管理 | 已登录系统的在线用户信息监控与强制踢出操作                   | 支持  | 支持               |
-| 定时任务   | 运行报表、任务管理(添加、修改、删除)、日志管理、执行器管理等         | 支持  | 仅支持任务与日志管理       |
-| 代码生成   | 多数据源前后端代码的生成（java、html、xml、sql）支持CRUD下载 | 支持  | 仅支持单数据源          |
-| 系统接口   | 根据业务代码自动生成相关的api接口文档                    | 支持  | 支持               |
-| 服务监控   | 监视集群系统CPU、内存、磁盘、堆栈、在线日志、Spring相关配置等     | 支持  | 仅支持单机CPU、内存、磁盘监控 |
-| 缓存监控   | 对系统的缓存信息查询，命令统计等。                       | 支持  | 支持               |
-| 在线构建器  | 拖动表单元素生成相应的HTML代码。                      | 支持  | 支持               |
-| 使用案例   | 系统的一些功能案例                               | 支持  | 不支持              |
+返回结构：
+{
+"keyword": "",
+"summary": "",
+"plea": "",
+"label": "",
+"plai": "",
+"defe": "",
+"article": "xx",
+"party": {
+"plaintiff": "",
+"defendant": ""
+},
+"fact": "",
+"note": ""
+}
 
-## 参考文档
+字段说明：
+keyword(关键词，至多4个司法要素相关的词语，必要)
+summary(摘要总结至少100字，必要)
+plea(诉讼要求，必要)
+label(案件类型，必要)
+plai(原告诉述，必要)
+defe(被告辩称，必要)
+article(法律依据 第xx条，必要)
+party(当事人，即plaintiff（原告），defendant（被告），必要)
+fact(法院意见，如:认定如下../本院裁定如下...等，必要)
+note（审判员xxx，日期xxx，书记员xxx，必要）
 
-使用框架前请仔细阅读文档重点注意事项
-<br>
->[初始化项目 必看](https://gitee.com/dromara/RuoYi-Cloud-Plus/wikis/pages?sort_id=5279751&doc_id=2056143)
->>[https://gitee.com/dromara/RuoYi-Cloud-Plus/wikis/pages?sort_id=5279751&doc_id=2056143](https://gitee.com/dromara/RuoYi-Cloud-Plus/wikis/pages?sort_id=5279751&doc_id=2056143)
->
->[专栏与视频 入门必看](https://gitee.com/dromara/RuoYi-Cloud-Plus/wikis/pages?sort_id=5873351&doc_id=2056143)
->>[https://gitee.com/dromara/RuoYi-Cloud-Plus/wikis/pages?sort_id=5873351&doc_id=2056143](https://gitee.com/dromara/RuoYi-Cloud-Plus/wikis/pages?sort_id=5873351&doc_id=2056143)
->
->[部署项目 必看](https://gitee.com/dromara/RuoYi-Cloud-Plus/wikis/pages?sort_id=5305504&doc_id=2056143)
->>[https://gitee.com/dromara/RuoYi-Cloud-Plus/wikis/pages?sort_id=5305504&doc_id=2056143](https://gitee.com/dromara/RuoYi-Cloud-Plus/wikis/pages?sort_id=5305504&doc_id=2056143)
->
->[参考文档 Wiki](https://gitee.com/dromara/RuoYi-Cloud-Plus/wikis/pages)
->>[https://gitee.com/dromara/RuoYi-Cloud-Plus/wikis/pages](https://gitee.com/dromara/RuoYi-Cloud-Plus/wikis/pages)
+参考示例：
+{
+"keyword": "行政处罚、冻结、划拨、银行存款、动产、不动产、民事诉讼法",
+"summary": "
+本案为申请执行人瓜州县消防救援大队与被执行人瓜州县三元物业服务有限公司之间的行政非诉执行案件。被执行人未履行生效法律文书确定的给付义务，法院根据相关法律规定裁定冻结、划拨被执行人银行存款，扣留、提取其应当履行部分的收入，或查封、扣押同等价值的财产。",
+"plea": "瓜州县消防救援大队要求瓜州县三元物业服务有限公司交纳12500元案款和88元执行费",
+"label": "行政非诉执行案",
+"plai": "瓜州县消防救援大队认为瓜州县三元物业服务有限公司未按规定交纳应缴费用",
+"defe": "瓜州县三元物业服务有限公司认为其无违规行为，不应交纳相关费用",
+"article": "
+《中华人民共和国民事诉讼法》第二百四十九条、第二百五十条、第二百五十一条；《最高人民法院关于适用《中华人民共和国民事诉讼法》的解释》第四百八十五条",
+"party": {
+"plaintiff": "瓜州县消防救援大队",
+"defendant": "瓜州县三元物业服务有限公司"
+},
+"fact": "
+因被执行人瓜州县三元物业服务有限公司拒不履行生效法律文书确定的给付义务，法院裁定冻结、划拨被执行人瓜州县三元物业服务有限公司银行存款人民币12588元，银行存款不足清偿的，扣留、提取被执行人应当履行部分的收入或查封、扣押其同等价值的财产。",
+"note": "审判员陈典二〇二三年三月二十三日书记员丁宇婕"
+}
 
+目标文本：
 
-## 软件架构图
+结果要求：
+将上述目标文本（司法案例文书正文内容）根据上述字段说明进行提取、修正，对为空字段值的按照理解生成补充对应内容，最后按照上述返回结构的json字符串返回给我
 
-<img src="https://images.gitee.com/uploads/images/2022/0520/152809_0edbfaf1_1766278.png"/>
+---
 
-## 贡献代码
+### 法律法规
 
-[参与贡献的方式 https://javalionli.gitee.io/plus-doc/#/common/contribution](https://javalionli.gitee.io/plus-doc/#/common/contribution)
+---
 
-### 其他
+## Structure
 
-* 定期同步升级 RuoYi-Cloud 有用的更新
-* github 地址 [RuoYi-Cloud-Plus](https://github.com/dromara/RuoYi-Cloud-Plus)
-* 分离版分支 [RuoYi-Vue-Plus](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus)
-* 单模块 fast 分支 [RuoYi-Vue-Plus-fast](https://gitee.com/JavaLionLi/RuoYi-Vue-Plus/tree/fast/)
+```
+.
+├---openlaw
+    |   decrypt.py
+    |   items.py
+    |   list-data-process.js
+    |   middlewares.py
+    |   openlaw_util.py
+    |   pipelines.py
+    |   settings.py
+    |   start.py
+    |   __init__.py
+    |
+    +---spiders
+    |   |   openlaw_case_spider.py
+    |   |   openlaw_law_spider.py
+    |   |   __init__.py
+├── README.md
+├── requirements.txt
+└── scrapy.cfg
+└── .gitignore
+└── LICENSE
+└── openlaw_case.json
+└── openlaw_law.json
+```
 
-## 捐献作者
+## Install
 
-作者为兼职做开源,平时还需要工作,如果帮到了您可以请作者吃个盒饭  
-<img src="https://images.gitee.com/uploads/images/2022/0218/213734_b1b8197f_1766278.jpeg" width="300px" height="450px" />
-<img src="https://images.gitee.com/uploads/images/2021/0525/101713_3d18b119_1766278.jpeg" width="300px" height="450px" />
+Install project dependencies
 
-## 演示图例
+```python
+pip install -r requirements.txt 
+```
 
-|                                                                                            |                                                                                            |
-|--------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
-| ![输入图片说明](https://foruda.gitee.com/images/1680077524361362822/270bb429_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680077619939771291/989bf9b6_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680077681751513929/1c27c5bd_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680077721559267315/74d63e23_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680077765638904515/1b75d4a6_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680078026375951297/eded7a4b_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680078237104531207/0eb1b6a7_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680078254306078709/5931e22f_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680078287971528493/0b9af60a_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680078308138770249/8d3b6696_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680078352553634393/db5ef880_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680078378238393374/601e4357_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680078414983206024/2aae27c1_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680078446738419874/ecce7d59_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680078475971341775/149e8634_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680078491666717143/3fadece7_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680078558863188826/fb8ced2a_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680078574561685461/ae68a0b2_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680078594932772013/9d8bfec6_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680078626493093532/fcfe4ff6_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680078643608812515/0295bd4f_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680078685196286463/d7612c81_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680078703877318597/56fce0bc_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680078716586545643/b6dbd68f_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680078734103217688/eb1e6aa6_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680078759131415480/73c525d8_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680078779416197879/75e3ed02_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680078802329118061/77e10915_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680078893627848351/34a1c342_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680078928175016986/f126ec4a_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680078941718318363/b68a0f72_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680078963175518631/3bb769a1_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680078982294090567/b31c343d_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680079000642440444/77ca82a9_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680079020995074177/03b7d52e_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680079039367822173/76811806_1766278.png "屏幕截图") |
-| ![输入图片说明](https://foruda.gitee.com/images/1680079274333484664/4dfdc7c0_1766278.png "屏幕截图") | ![输入图片说明](https://foruda.gitee.com/images/1680079290467458224/d6715fcf_1766278.png "屏幕截图") |
+- <img src="https://img.shields.io/badge/python-3.9.8-blue.svg" alt="python">
+- <img src="https://img.shields.io/badge/scrapy-2.11.0-blue.svg" alt="scrapy">
+- <img src="https://img.shields.io/badge/selenium-4.16.0-blue.svg" alt="selenium">
+- <img src="https://img.shields.io/badge/mysql-8.0.27-blue.svg" alt="mysql">
+- <img src="https://img.shields.io/badge/mysqlclient-2.0.3-blue.svg" alt="mysqlclient">
+- <img src="https://img.shields.io/badge/chrome-91.0.4472.114-blue.svg" alt="chrome">
+- <img src="https://img.shields.io/badge/chromedriver-91.0.4472.106-blue.svg" alt="chromedriver">
+- <img src="https://img.shields.io/badge/geckodriver-120.0.9-blue.svg" alt="geckodriver">
+- <img src="https://img.shields.io/badge/firefox-120.0.10-blue.svg" alt="firefox">
+- ···
 
+## Usage
 
+Modify the `ITEM_PIPELINES` in `settings.py` according to the two crawlers
+
+```python
+ITEM_PIPELINES = {
+   "openlaw.pipelines.OpenlawCasePipeline": 300,
+  #  "openlaw.pipelines.OpenlawLawPipeline": 300,
+   "openlaw.pipelines.SaveCaseFilePipeline": 320,
+  #  "openlaw.pipelines.SaveLawFilePipeline": 320,
+   "openlaw.pipelines.MysqlCasePipeline": 420,
+  #  "openlaw.pipelines.MysqlLawPipeline": 420,
+}
+```
+
+Also, modify the file storage location according to the crawler in `settings.py`, set `FILES_STORE`
+
+```python
+FILES_STORE = "./data/files"
+```
+
+Run the crawler
+
+```sh
+scrapy crawl open_case -o openlaw_case.json
+scrapy crawl open_law -o openlaw_law.json
+```
+
+eg: `openlaw_case.json`
+
+```json
+{
+    "case_url_code": "7346d81943904086948430cd3aae94ff",
+    "case_name": "张某、刘某等赌博二审刑事裁定书",
+    "case_date": "2023-03-27",
+    "case_court": "辽宁省沈阳市中级人民法院",
+    "case_number": "（2023）辽01刑终142号",
+    "case_content": "原公诉机关沈阳市辽中区人民检察院。\n上诉人张某某1\n因涉嫌犯赌博罪于2021年3月3日被取保候审，2022年3月2日被监视居住，2023年1月31日被逮捕。\n现羁押于沈阳市第一看守所。\n原审被告人刘某某1\n曾于2010年3月20日因犯非法拘禁罪被判处有期徒刑六个月。\n因涉嫌犯赌博罪于2021年3月3日被取保候审，2022年3月2日被监视居住。\n原审被告人田某某1\n因涉嫌犯赌博罪于2021年3月3日被取保候审，2022年3月2日被监视居住。\n沈阳市辽中区人民法院审理沈阳市辽中区人民检察院指控原审被告人张某某1、刘某某1、田某某1犯赌博罪一案，于2023年1月31日作出（2022）辽0115刑初214号刑事判决，认定被告人张某某1犯赌博罪，判处有期徒刑七个月，并处罚金人民币二万元；被告人刘某某1犯赌博罪，判处有期徒刑六个月，缓刑一年，并处罚金人民币二万元；被告人田某某1犯赌博罪，判处有期徒刑六个月，缓刑一年，并处罚金人民币二万元。\n原审被告人张某某1不服原判，以原判对其量刑过重为由提出上诉。\n本院审理过程中，上诉人张某某1申请撤回上诉。\n本院认为，原审判决认定事实及适用法律正确，量刑适当，审判程序合法。\n上诉人张某某1撤回上诉的申请符合法律规定，应予准许。\n依照《最高人民法院关于适用《中华人民共和国刑事诉讼法》的解释》第三百八十三条  第二款  之规定，裁定如下：\n准许上诉人张某某1撤回上诉。\n沈阳市辽中区人民法院（2022）辽0115刑初214号刑事判决自本裁定送达之日起发生法律效力。\n本裁定为终审裁定。\n审判长王宁\n审判员韩宇川\n审判员李楠\n二〇二三年三月二十七日\n法官助理程英楠\n书记员姚雨彤",
+    "case_cause": "赌博罪",
+    "case_type_id": 2,
+    "case_process": "二审",
+    "source": "openlaw",
+    "case_label": "取保候审#监视居住",
+    "related_cases": "[{\"caseCode\": \"f89748ef29f8452d961839a23baafc19\", \"caseName\": \"\\u4f55\\u6587\\u82f1\\u4e0e\\u674e\\u79c0\\u6770\\u3001\\u4e01\\u7acb\\u519b\\u7b2c\\u4e09\\u4eba\\u64a4\\u9500\\u4e4b\\u8bc9\\u4e8c\\u5ba1\\u88c1\\u5b9a\\u4e66\"}, {\"caseCode\": \"0ec5f6eb9d7e47c79d50cc529353fde3\", \"caseName\": \"\\u738b\\u723d\\u3001\\u8d75\\u598d\\u8d4c\\u535a\\u4e8c\\u5ba1\\u5211\\u4e8b\\u88c1\\u5b9a\\u4e66\"}, {\"caseCode\": \"93a53b8c49dc469d9ce42b097e5c903f\", \"caseName\": \"\\u5f90\\u67d0\\u67d0\\u8d4c\\u535a\\u5211\\u4e8b\\u4e8c\\u5ba1\\u5211\\u4e8b\\u88c1\\u5b9a\\u4e66\"}, {\"caseCode\": \"81f05113ebb242b68a4d505fe7350788\", \"caseName\": \"\\u5468\\u5c0f\\u83b9\\u3001\\u5f20\\u6625\\u9633\\u7b49\\u63a9\\u9970\\u3001\\u9690\\u7792\\u72af\\u7f6a\\u6240\\u5f97\\u3001\\u72af\\u7f6a\\u6240\\u5f97\\u6536\\u76ca\\u5211\\u4e8b\\u4e8c\\u5ba1\\u5211\\u4e8b\\u88c1\\u5b9a\\u4e66\"}]",
+    "file_urls": [
+        "http://openlaw.cn/pdf/judgement/7346d81943904086948430cd3aae94ff"
+    ]
+}
+```
+
+eg: `openlaw_law.json`
+
+```json
+{
+    "law_url_code": "7fc80cce64794b7c8ece212c8eef6922",
+    "law_name": "全国人民代表大会常务委员会关于修改《中华人民共和国工会法》的决定",
+    "source_id": 1,
+    "release_organization": "全国人民代表大会常务委员会",
+    "law_type_id": 1,
+    "is_validity": 1,
+    "release_date": "2021-12-24",
+    "execute_date": "2022-01-01",
+    "law_structure": null,
+    "revise_num": null,
+    "law_content": "\n\t\t\t\t\t\t\t\n全国人民代表大会常务委员会关于修改\n《中华人民共和国工会法》的决定\n（2021年12月24日第十三届全国人民代表大会常务\n委员会第三十二次会议通过）\n第十三届全国人民代表大会常务委员会第三十二次会议决定对《中华人民共和国工会法》作如下修改:\n一、将第二条第一款修改为:“工会是中国共产党领导的职工自愿结合的工人阶级群众组织，是中国共产党联系职工群众的桥梁和纽带。”···",
+    "file_urls": [
+        "http://openlaw.cn/pdf/law/7fc80cce64794b7c8ece212c8eef6922"
+    ],
+    "files": [
+        {
+            "url": "http://openlaw.cn/pdf/law/7fc80cce64794b7c8ece212c8eef6922",
+            "path": "全国人民代表大会常务委员会关于修改《中华人民共和国工会法》的决定.pdf",
+            "checksum": "e56206382d050ba4b2250fec63bebd1a",
+            "status": "uptodate"
+        }
+    ]
+}
+```
+
+## Tips
+
+> 1. Vue 子路由地址不能一样，名称一样只有一个生效，导致另外的404报错
+
+## Contributing
+
+1. Fork it!
+2. Create your feature branch: `git checkout -b my-new-feature`
+3. Commit your changes: `git commit -am 'Add some feature'`
+4. Push to the branch: `git push origin my-new-feature`
+5. Submit a pull request
+
+## Show your support
+
+Give a ⭐️ if this project helped you!
+
+## License
+
+Copyright © 2024 [Alleyf](https://github.com/Alleyf).<br />
+This project is [MIT](https://github.com/Alleyf/LawCrawler/main/LICENSE) licensed.
+
+## Plans
+
+- [ ] 
+  支持更多司法相关网站数据采集（eg：[北大法宝](https://www.pkulaw.com/)、[国家法律法规数据库](https://flk.npc.gov.cn/)、[把手案例](https://www.lawsdata.com/#/home)
+  等）
+- [ ] 集成该爬虫到SpringBoot项目中构建多源异构数据汇聚融合处理平台
+- [ ] 采用[HanNLP](https://www.hanlp.com/)对采集到的法文进行分词、提取关键信息等
+- [ ] 采用深度学习技术对法文进行分类、识别、纠错等数据清洗操作
+
+## Author
+
+👤 **Alleyf**
+
+* Website: https://alleyf.github.io/
+* Github: [@Alleyf](https://github.com/Alleyf)
+
+## Credits
+
+- [@Alleyf](https://github.com/Alleyf)
+- 其他贡献者
+
+### 🏠 [Homepage](https://github.com/Alleyf/MSHDCF#readme)
+
+## Star History
+
+<picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Alleyf/LawCrawler&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Alleyf/LawCrawler&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Alleyf/LawCrawler&type=Date" />
+</picture>

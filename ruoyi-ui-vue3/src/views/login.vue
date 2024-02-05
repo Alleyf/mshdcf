@@ -1,11 +1,12 @@
 <template>
   <div class="login">
-    <el-form ref="loginRef" :model="loginForm" :rules="loginRules" class="login-form">
-      <h3 class="title">RuoYi-Cloud-Plus后台管理系统</h3>
+    <el-form ref="loginRef" :model="loginForm" :rules="loginRules" class="login-form form">
+      <h3 class="title">多源异构司法数据汇聚融合平台</h3>
       <el-form-item prop="username">
         <el-input
           v-model="loginForm.username"
           auto-complete="off"
+          class="input"
           placeholder="账号"
           size="large"
           type="text"
@@ -19,6 +20,7 @@
         <el-input
           v-model="loginForm.password"
           auto-complete="off"
+          class="input"
           placeholder="密码"
           size="large"
           type="password"
@@ -33,6 +35,7 @@
         <el-input
           v-model="loginForm.code"
           auto-complete="off"
+          class="input"
           placeholder="验证码"
           size="large"
           style="width: 63%"
@@ -46,10 +49,18 @@
           <img :src="codeUrl" class="login-code-img" @click="getCode"/>
         </div>
       </el-form-item>
-      <el-checkbox v-model="loginForm.rememberMe" style="margin:0px 0px 25px 0px;">记住密码</el-checkbox>
+      <el-row :gutter="10" :justify="'space-between'" align="middle">
+        <!--        <el-col :span="12">-->
+        <el-checkbox v-model="loginForm.rememberMe" style="margin:0px 0px 15px 0px;">记住密码</el-checkbox>
+        <!--        </el-col>-->
+        <!--        <el-col :span="12">-->
+        <el-link :underline="false" class="" style="margin:0px 0px 15px 0px;" type="danger">忘记密码？</el-link>
+        <!--        </el-col>-->
+      </el-row>
       <el-form-item style="width:100%;">
         <el-button
           :loading="loading"
+          class="login-button"
           size="large"
           style="width:100%;"
           type="primary"
@@ -65,7 +76,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-login-footer">
-      <span>Copyright © 2018-2023 疯狂的狮子Li All Rights Reserved.</span>
+      <span>Copyright © 2023-2024 csFan All Rights Reserved.</span>
     </div>
   </div>
 </template>
@@ -99,7 +110,7 @@ const loading = ref(false);
 // 验证码开关
 const captchaEnabled = ref(true);
 // 注册开关
-const register = ref(false);
+const register = ref(true);
 const redirect = ref(undefined);
 
 function handleLogin() {

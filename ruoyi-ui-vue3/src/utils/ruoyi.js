@@ -1,5 +1,3 @@
-
-
 /**
  * 通用js方法封装处理
  * Copyright (c) 2019 ruoyi
@@ -37,7 +35,9 @@ export function parseTime(time, pattern) {
   const time_str = format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
     let value = formatObj[key]
     // Note: getDay() returns 0 on Sunday
-    if (key === 'a') { return ['日', '一', '二', '三', '四', '五', '六'][value] }
+    if (key === 'a') {
+      return ['日', '一', '二', '三', '四', '五', '六'][value]
+    }
     if (result.length > 0 && value < 10) {
       value = '0' + value
     }
@@ -88,7 +88,7 @@ export function selectDictLabel(datas, value) {
 
 // 回显数据字典（字符串数组）
 export function selectDictLabels(datas, value, separator) {
-  if (value === undefined || value.length ===0) {
+  if (value === undefined || value.length === 0) {
     return "";
   }
   if (Array.isArray(value)) {
@@ -198,19 +198,21 @@ export function handleTree(data, id, parentId, children) {
       }
     }
   }
+
   return tree;
 }
 
 /**
-* 参数处理
-* @param {*} params  参数
-*/
+ * 参数处理
+ * @param {*} params  参数
+ */
 export function tansParams(params) {
   let result = ''
   for (const propName of Object.keys(params)) {
     const value = params[propName];
     var part = encodeURIComponent(propName) + "=";
-    if (value !== null && value !== "" && typeof (value) !== "undefined") {
+    if (value !== null && typeof (value) !== "undefined") {
+      // if (value !== null && value !== "" && typeof (value) !== "undefined") {
       if (typeof value === 'object') {
         for (const key of Object.keys(value)) {
           if (value[key] !== null && value[key] !== "" && typeof (value[key]) !== 'undefined') {
@@ -232,7 +234,8 @@ export function tansParams(params) {
 export function getNormalPath(p) {
   if (p.length === 0 || !p || p == 'undefined') {
     return p
-  };
+  }
+  ;
   let res = p.replace('//', '/')
   if (res[res.length - 1] === '/') {
     return res.slice(0, res.length - 1)

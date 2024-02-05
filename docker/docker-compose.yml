@@ -188,12 +188,12 @@ services:
       # 时区上海
       TZ: Asia/Shanghai
     ports:
-      - "8080:8080"
+      - "8280:8280"
     volumes:
       # 配置文件
-      - /docker/ruoyi-gateway/logs/:/ruoyi/gateway/logs
+      - /home/docker/ruoyiCloudPlus/ruoyi-gateway/logs/:/ruoyi/gateway/logs
       # skywalking 探针
-      - /docker/skywalking/agent/:/ruoyi/skywalking/agent
+      - /home/docker/ruoyiCloudPlus/skywalking/agent/:/ruoyi/skywalking/agent
     privileged: true
     network_mode: "host"
 
@@ -278,9 +278,9 @@ services:
     network_mode: "host"
 
 
-#################################################################################################
-#################################### 以下为扩展根据需求搭建 #########################################
-#################################################################################################
+  #################################################################################################
+  #################################### 以下为扩展根据需求搭建 #########################################
+  #################################################################################################
 
   elasticsearch:
     image: elasticsearch:7.17.6

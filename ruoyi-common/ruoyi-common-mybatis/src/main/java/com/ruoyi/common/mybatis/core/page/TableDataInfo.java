@@ -98,4 +98,12 @@ public class TableDataInfo<T> implements Serializable {
         return rspData;
     }
 
+    public static <T> TableDataInfo<T> build(List<T> list, Long total) {
+        TableDataInfo<T> rspData = new TableDataInfo<>();
+        rspData.setCode(HttpStatus.HTTP_OK);
+        rspData.setMsg("查询成功");
+        rspData.setRows(list);
+        rspData.setTotal(total);
+        return rspData;
+    }
 }

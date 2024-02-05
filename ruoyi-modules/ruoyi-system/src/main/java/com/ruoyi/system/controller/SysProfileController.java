@@ -3,6 +3,8 @@ package com.ruoyi.system.controller;
 import cn.dev33.satoken.secure.BCrypt;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.csp.sentinel.adapter.dubbo3.config.DubboAdapterGlobalConfig;
+import com.alibaba.csp.sentinel.adapter.dubbo3.fallback.DefaultDubboFallback;
 import com.ruoyi.common.core.constant.UserConstants;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.utils.StringUtils;
@@ -14,6 +16,7 @@ import com.ruoyi.common.satoken.utils.LoginHelper;
 import com.ruoyi.resource.api.RemoteFileService;
 import com.ruoyi.resource.api.domain.SysFile;
 import com.ruoyi.system.api.domain.SysUser;
+import com.ruoyi.system.dubbo.ResourceDubboFallback;
 import com.ruoyi.system.service.ISysUserService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
@@ -39,8 +42,11 @@ import java.util.Map;
 @RequestMapping("/user/profile")
 public class SysProfileController extends BaseController {
 
-    private final ISysUserService userService;
+    static {
+        DubboAdapterGlobalConfig.setConsumerFallback(new ResourceDubboFallback());
+    }
 
+    private final ISysUserService userService;
     @DubboReference
     private RemoteFileService remoteFileService;
 

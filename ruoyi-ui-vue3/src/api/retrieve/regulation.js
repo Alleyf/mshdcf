@@ -3,7 +3,19 @@ import request from '@/utils/request'
 // 查询法律法规列表
 export function listRegulation(query) {
   return request({
-    url: '/retrieve/regulation/list',
+    url: '/retrieve/law/list',
+    method: 'get',
+    params: {
+      keyword: query.name,
+      blurSearch: true
+    }
+  })
+}
+
+
+export function pageRegulation(query) {
+  return request({
+    url: '/retrieve/law/page',
     method: 'get',
     params: query
   })
@@ -12,33 +24,8 @@ export function listRegulation(query) {
 // 查询法律法规详细
 export function getRegulation(id) {
   return request({
-    url: '/retrieve/regulation/' + id,
+    url: '/retrieve/law/' + id,
     method: 'get'
   })
 }
 
-// 新增法律法规
-export function addRegulation(data) {
-  return request({
-    url: '/retrieve/regulation',
-    method: 'post',
-    data: data
-  })
-}
-
-// 修改法律法规
-export function updateRegulation(data) {
-  return request({
-    url: '/retrieve/regulation',
-    method: 'put',
-    data: data
-  })
-}
-
-// 删除法律法规
-export function delRegulation(id) {
-  return request({
-    url: '/retrieve/regulation/' + id,
-    method: 'delete'
-  })
-}
