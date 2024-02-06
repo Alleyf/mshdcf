@@ -14,6 +14,7 @@ import com.ruoyi.common.satoken.utils.LoginHelper;
 import com.ruoyi.manage.domain.LawRegulation;
 import com.ruoyi.manage.domain.vo.LawRegulationImportVo;
 import com.ruoyi.manage.service.ILawRegulationService;
+import com.ruoyi.retrieve.api.RemoteLawDocRetrieveService;
 import com.ruoyi.retrieve.api.RemoteRetrieveService;
 import com.ruoyi.retrieve.api.domain.LawDoc;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class LawRegulationImportListener extends AnalysisEventListener<LawRegula
     private final StringBuilder successMsg = new StringBuilder();
     private final StringBuilder failureMsg = new StringBuilder();
     @DubboReference(version = "1.0", group = "law")
-    private RemoteRetrieveService<LawDoc> remoteRetrieveService;
+    private RemoteLawDocRetrieveService remoteLawDocRetrieveService;
     private int successNum = 0;
     private int failureNum = 0;
 
@@ -59,13 +60,13 @@ public class LawRegulationImportListener extends AnalysisEventListener<LawRegula
                 ValidatorUtils.validate(lawRegulation);
                 lawRegulation.setCreateBy(operName);
                 boolean sqlFlag = lawRegulationService.save(lawRegulation);
-                boolean esFlag = remoteRetrieveService.exist(lawRegulation.getName());
+                boolean esFlag = remoteLawDocRetrieveService.exist(lawRegulation.getName());
                 boolean flag = sqlFlag && esFlag;
                 if (flag) {
 //                查询刚刚新建的法条
                     LawRegulation newLaw = lawRegulationService.selectLawRegulationByName(lawRegulation.getName());
 //                添加es索引
-                    remoteRetrieveService.insert(BeanCopyUtils.copy(newLaw, LawDoc.class));
+                    remoteLawDocRetrieveService.insert(BeanCopyUtils.copy(newLaw, LawDoc.class));
                     successNum++;
                     successMsg.append("<br/>").append(successNum).append("、法条 ").append(lawRegulation.getName()).append(" 导入成功");
                 }
@@ -77,11 +78,11 @@ public class LawRegulationImportListener extends AnalysisEventListener<LawRegula
                 ValidatorUtils.validate(lawRegulation);
                 lawRegulation.setUpdateBy(operName);
                 boolean sqlFlag = lawRegulationService.updateById(lawRegulation);
-                boolean esFlag = remoteRetrieveService.exist(lawRegulation.getName());
+                boolean esFlag = remoteLawDocRetrieveService.exist(lawRegulation.getName());
                 boolean flag = sqlFlag && esFlag;
                 if (flag) {
 //                更新es索引
-                    remoteRetrieveService.update(BeanCopyUtils.copy(lawRegulation, LawDoc.class));
+                    remoteLawDocRetrieveService.update(BeanCopyUtils.copy(lawRegulation, LawDoc.class));
                     successNum++;
                     successMsg.append("<br/>").append(successNum).append("、法条 ").append(lawRegulation.getName()).append(" 更新成功");
                 }

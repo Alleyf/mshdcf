@@ -8,7 +8,6 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-//import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.util.AntPathMatcher;
 
 import java.io.ByteArrayInputStream;
@@ -40,12 +39,12 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     }
 
     /**
-     * 去除异常unicode
+     * 去除司法案例异常unicode
      *
      * @param data 原始文本
      * @return String
      */
-    public static String stripUnicode(String data) {
+    public static String stripCaseUnicode(String data) {
         data = data.replace("?", "");
         StringBuilder cleanStringBuilder = new StringBuilder();
         for (char ch : data.toCharArray()) {
@@ -60,9 +59,38 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
             }
         }
         String cleanString = cleanStringBuilder.toString();
+//        此处通过最后一句认定为文书记录不合理，尤其是法律法规没有记录信息无需切分获取
         String[] temp = cleanString.split("。");
         temp[temp.length - 1] = "\n" + temp[temp.length - 1];
         cleanString = StringUtils.join(temp, "");
+        return cleanString;
+    }
+
+    /**
+     * 去除法律法规异常unicode
+     *
+     * @param data 原始文本
+     * @return String
+     */
+    public static String stripLawUnicode(String data) {
+        data = data.replace("?", "");
+        StringBuilder cleanStringBuilder = new StringBuilder();
+        for (char ch : data.toCharArray()) {
+            if (Character.isUnicodeIdentifierPart(ch)) {
+                cleanStringBuilder.append(ch);
+            } else {
+                if (!isPunctuation(ch) && !Character.isWhitespace(ch)) {
+                    cleanStringBuilder.append('\n');
+                } else {
+                    cleanStringBuilder.append(ch);
+                }
+            }
+        }
+        String cleanString = cleanStringBuilder.toString();
+//        todo 此处通过最后一句认定为文书记录不合理，尤其是法律法规没有记录信息无需切分获取
+//        String[] temp = cleanString.split("。");
+//        temp[temp.length - 1] = "\n" + temp[temp.length - 1];
+//        cleanString = StringUtils.join(temp, "");
         return cleanString;
     }
 
@@ -87,6 +115,10 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      */
     public static String buildJsonArray(String text) {
         String[] paragraphs = text.split("\n");
+        // 过滤掉空字符串
+        paragraphs = Arrays.stream(paragraphs)
+            .filter(s -> !s.isEmpty())
+            .toArray(String[]::new);
         JSONArray array = new JSONArray();
         array.addAll(Arrays.asList(paragraphs));
         return array.toJSONString();
@@ -100,16 +132,37 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
      */
     public static String buildJsonObj(String text) {
         String[] paragraphs = text.split("\n");
+        // 过滤掉空字符串
+        paragraphs = Arrays.stream(paragraphs)
+            .filter(s -> !s.isEmpty())
+            .toArray(String[]::new);
         JSONObject json = new JSONObject();
         // 根据文本的段落内容，填充JSON对象的字段
-        json.put("plea", paragraphs[0]); // 诉讼要求
-//        json.put("type", "行政非诉"); // 案件类型
-        json.put("plai", paragraphs[2]); // 原告诉述
-        json.put("defe", paragraphs[3]); // 被告辩称
-//        json.put("cause", "行政非诉案件"); // 案由
-//        json.put("article", "《中华人民共和国民事诉讼法》第二百六十四条第（六）项"); // 法律依据
-//        json.put("party", "牟定县卫生和计划生育局、李某某1"); // 当事人
-        json.put("fact", paragraphs[4]); // 法院意见
+        for (String paragraph : paragraphs) {
+            if (paragraph.contains("诉讼要求")) {
+                json.put("plea", paragraph);
+            } else if (paragraph.contains("某某")) {
+                json.put("party", paragraph);
+            } else if (paragraph.contains("原告诉述")) {
+                json.put("plai", paragraph);
+            } else if (paragraph.contains("被告辩称")) {
+                json.put("defe", paragraph);
+            } else if (paragraph.contains("依法")) {
+                json.put("fact", paragraph);
+            } else if (paragraph.contains("依照") || paragraph.contains("中华人民")) {
+                json.put("article", paragraph);
+            } else if (paragraph.contains("审判") || paragraph.contains("书记员")) {
+                json.put("note", paragraph);
+            }
+        }
+//        json.put("plea", paragraphs[0]); // 诉讼要求
+////        json.put("type", "行政非诉"); // 案件类型
+//        json.put("plai", paragraphs[1]); // 原告诉述
+//        json.put("defe", paragraphs[2]); // 被告辩称
+////        json.put("cause", "行政非诉案件"); // 案由
+////        json.put("article", "《中华人民共和国民事诉讼法》第二百六十四条第（六）项"); // 法律依据
+////        json.put("party", "牟定县卫生和计划生育局、李某某1"); // 当事人
+//        json.put("fact", paragraphs[3]); // 法院意见
 //        json.put("note", "审判员张**，二〇二三年三月二十二日，书记员窦靓"); // 审判员和日期
         return json.toJSONString();
     }

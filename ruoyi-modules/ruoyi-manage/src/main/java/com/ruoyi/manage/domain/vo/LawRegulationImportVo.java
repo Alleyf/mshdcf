@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author fcs
@@ -82,6 +83,12 @@ public class LawRegulationImportVo implements Serializable {
      */
     @ExcelProperty(value = "法规正文")
     private String content;
+
+    /**
+     * 附加语义信息（json格式）
+     */
+    @ExcelProperty(value = "语义信息")
+    private String extra;
 
     /**
      * 法规来源（关联source表主键）

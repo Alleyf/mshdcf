@@ -56,8 +56,8 @@ public class LawDocServiceImpl implements ILawDocService {
     @Override
     public Integer insert(LawDoc lawDoc) {
         //        设置词云
-        String wordCloud = getWordCloud(lawDoc.getName(), lawDoc.getContent());
-        lawDoc.setWordCloud(wordCloud);
+//        String wordCloud = getWordCloud(lawDoc.getName(), lawDoc.getContent());
+//        lawDoc.setWordCloud(wordCloud);
         return lawDocMapper.insert(lawDoc);
     }
 
@@ -70,8 +70,8 @@ public class LawDocServiceImpl implements ILawDocService {
     @Override
     public Integer update(LawDoc lawDoc) {
         //        设置词云
-        String wordCloud = getWordCloud(lawDoc.getName(), lawDoc.getContent());
-        lawDoc.setWordCloud(wordCloud);
+//        String wordCloud = getWordCloud(lawDoc.getName(), lawDoc.getContent());
+//        lawDoc.setWordCloud(wordCloud);
         return lawDocMapper.updateById(lawDoc);
     }
 

@@ -14,6 +14,7 @@ import com.ruoyi.common.satoken.utils.LoginHelper;
 import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.vo.DocCaseImportVo;
 import com.ruoyi.manage.service.IDocCaseService;
+import com.ruoyi.retrieve.api.RemoteCaseDocRetrieveService;
 import com.ruoyi.retrieve.api.RemoteRetrieveService;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class DocCaseImportListener extends AnalysisEventListener<DocCaseImportVo
     private final StringBuilder successMsg = new StringBuilder();
     private final StringBuilder failureMsg = new StringBuilder();
     @DubboReference(version = "1.0", group = "case")
-    private RemoteRetrieveService<CaseDoc> remoteRetrieveService;
+    private RemoteCaseDocRetrieveService remoteCaseDocRetrieveService;
     private int successNum = 0;
     private int failureNum = 0;
 
@@ -59,13 +60,13 @@ public class DocCaseImportListener extends AnalysisEventListener<DocCaseImportVo
                 ValidatorUtils.validate(docCase);
                 docCase.setCreateBy(operName);
                 boolean sqlFlag = docCaseService.save(docCase);
-                boolean esFlag = remoteRetrieveService.exist(docCase.getName());
+                boolean esFlag = remoteCaseDocRetrieveService.exist(docCase.getName());
                 boolean flag = sqlFlag && esFlag;
                 if (flag) {
 //                查询刚刚新建的案例
                     DocCase newCase = docCaseService.selectDocCaseByName(docCase.getName());
 //                添加es索引
-                    remoteRetrieveService.insert(BeanCopyUtils.copy(newCase, CaseDoc.class));
+                    remoteCaseDocRetrieveService.insert(BeanCopyUtils.copy(newCase, CaseDoc.class));
                     successNum++;
                     successMsg.append("<br/>").append(successNum).append("、案例 ").append(docCase.getName()).append(" 导入成功");
                 }
@@ -77,11 +78,11 @@ public class DocCaseImportListener extends AnalysisEventListener<DocCaseImportVo
                 ValidatorUtils.validate(docCase);
                 docCase.setUpdateBy(operName);
                 boolean sqlFlag = docCaseService.updateById(docCase);
-                boolean esFlag = remoteRetrieveService.exist(docCase.getName());
+                boolean esFlag = remoteCaseDocRetrieveService.exist(docCase.getName());
                 boolean flag = sqlFlag && esFlag;
                 if (flag) {
 //                更新es索引
-                    remoteRetrieveService.update(BeanCopyUtils.copy(docCase, CaseDoc.class));
+                    remoteCaseDocRetrieveService.update(BeanCopyUtils.copy(docCase, CaseDoc.class));
                     successNum++;
                     successMsg.append("<br/>").append(successNum).append("、案例 ").append(docCase.getName()).append(" 更新成功");
                 }

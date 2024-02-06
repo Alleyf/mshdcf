@@ -4,6 +4,7 @@ import cn.easyes.annotation.*;
 import cn.easyes.annotation.rely.Analyzer;
 import cn.easyes.annotation.rely.FieldType;
 import cn.easyes.annotation.rely.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -80,9 +81,16 @@ public class CaseDoc implements Serializable {
     @HighLight(mappingField = "highlightContent", preTag = "<text style='color:red'>", postTag = "</text>")
     @IndexField(fieldType = FieldType.TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
     private String content;
+
+    /**
+     * 附加语义信息（json格式）
+     */
+    @IndexField(fieldType = FieldType.TEXT)
+    private String extra;
     /**
      * 判决日期
      */
+    // TODO: 2024/2/7 日期无法从mysql同步到es 
     @IndexField(fieldType = FieldType.DATE, dateFormat = "yyyy-MM-dd")
     private String judgeDate;
     /**
@@ -128,5 +136,5 @@ public class CaseDoc implements Serializable {
     /**
      * 词云图
      */
-    private String wordCloud;
+//    private String wordCloud;
 }

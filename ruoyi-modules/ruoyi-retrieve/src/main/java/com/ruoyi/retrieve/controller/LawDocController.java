@@ -80,9 +80,9 @@ public class LawDocController extends BaseController {
     @GetMapping("/{id}")
     public R<Object> get(@PathVariable("id") Long id) {
         LawDoc lawDoc = lawDocService.selectById(id);
-        if (StringUtils.isNotEmpty(lawDoc.getWordCloud())) {
-            return R.ok(lawDoc.getWordCloud(), lawDoc);
-        }
+//        if (StringUtils.isNotEmpty(lawDoc.getWordCloud())) {
+//            return R.ok(lawDoc.getWordCloud(), lawDoc);
+//        }
         String worldCloud = WorldCloudUtils.genWorldCloud(lawDoc.getName(), lawDoc.getContent());
         Map<String, Object> map = BeanCopyUtils.copyToMap(lawDoc);
         if (map == null) {

@@ -68,6 +68,11 @@ public class LawDoc implements Serializable {
     @IndexField(fieldType = FieldType.TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
     private String content;
     /**
+     * 附加语义信息（json格式）
+     */
+    @IndexField(fieldType = FieldType.TEXT)
+    private String extra;
+    /**
      * 判决日期
      */
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -95,6 +100,11 @@ public class LawDoc implements Serializable {
     private String reviseNum;
 
     /**
+     * 来源id
+     */
+    private Long sourceId;
+
+    /**
      * 是否有效
      */
     private Long isValidity;
@@ -120,6 +130,6 @@ public class LawDoc implements Serializable {
     /**
      * 词云图
      */
-    private String wordCloud;
+//    private String wordCloud;
 
 }

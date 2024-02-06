@@ -2,6 +2,8 @@ package com.ruoyi.manage.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.excel.annotation.ExcelDictFormat;
 import com.ruoyi.common.excel.convert.ExcelDictConvert;
@@ -9,6 +11,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 
 /**
@@ -117,6 +120,12 @@ public class DocCaseImportVo implements Serializable {
      */
     @ExcelProperty(value = "正文")
     private String content;
+
+    /**
+     * 附加语义信息（json格式）
+     */
+    @ExcelProperty(value = "语义信息")
+    private String extra;
 
     /**
      * 状态（0：停用；1：正常）

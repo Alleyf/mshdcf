@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 法律法规
+ * 法律法规管理
  *
  * @author alleyf
  * @description 前端访问路由地址为:/manage/regulation

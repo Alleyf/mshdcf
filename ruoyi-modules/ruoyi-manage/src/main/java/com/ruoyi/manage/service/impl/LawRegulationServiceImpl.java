@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.mapper.DocCaseMapper;
+import com.ruoyi.retrieve.api.RemoteLawDocRetrieveService;
 import com.ruoyi.retrieve.api.RemoteRetrieveService;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
 import com.ruoyi.retrieve.api.domain.LawDoc;
@@ -42,7 +43,7 @@ import java.util.stream.Collectors;
 public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, LawRegulation> implements ILawRegulationService {
 
     @DubboReference(version = "1.0", group = "law", timeout = 200000)
-    public RemoteRetrieveService<LawDoc> remoteRetrieveService;
+    public RemoteLawDocRetrieveService remoteLawRetrieveService;
     @Resource
     private LawRegulationMapper baseMapper;
 
@@ -97,7 +98,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
             bo.setId(add.getId());
             //            添加es索引
             LawRegulation newLaw = selectLawRegulationByName(add.getName());
-            flag = remoteRetrieveService.insert(BeanCopyUtils.copy(newLaw, LawDoc.class)) > 0;
+            flag = remoteLawRetrieveService.insert(BeanCopyUtils.copy(newLaw, LawDoc.class)) > 0;
         }
         return flag;
     }
@@ -114,7 +115,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         all = all.stream().peek(lawDoc -> lawDoc.setMysqlId(lawDoc.getId())).collect(Collectors.toList());
         int successNum = 0, insertNum = 300;
         if (all.size() <= insertNum) {
-            successNum = remoteRetrieveService.insertBatch(all);
+            successNum = remoteLawRetrieveService.insertBatch(all);
         } else {
 //            判断是否为300的整数倍
             boolean remain = all.size() % 300 != 0;
@@ -127,7 +128,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
                 } else {
                     subList = all.subList(i * 300, (i + 1) * 300);
                 }
-                successNum += remoteRetrieveService.insertBatch(subList);
+                successNum += remoteLawRetrieveService.insertBatch(subList);
             }
         }
         return successNum > 0;
@@ -143,7 +144,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         boolean flag = baseMapper.updateById(update) > 0;
         if (flag) {
 //            更新es索引
-            flag = remoteRetrieveService.update(BeanCopyUtils.copy(update, LawDoc.class)) > 0;
+            flag = remoteLawRetrieveService.update(BeanCopyUtils.copy(update, LawDoc.class)) > 0;
         }
         return flag;
     }
@@ -167,7 +168,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         boolean flag = baseMapper.deleteBatchIds(ids) > 0;
         if (flag) {
 //            删除es索引
-            remoteRetrieveService.deleteBatch(ids.toArray(new Long[0]));
+            remoteLawRetrieveService.deleteBatch(ids.toArray(new Long[0]));
         }
         return flag;
     }

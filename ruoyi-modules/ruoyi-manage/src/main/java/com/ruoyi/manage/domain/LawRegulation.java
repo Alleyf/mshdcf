@@ -1,10 +1,12 @@
 package com.ruoyi.manage.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.Date;
+import java.util.Map;
 
 import com.ruoyi.common.core.web.domain.BaseEntity;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -65,6 +67,11 @@ public class LawRegulation extends BaseEntity {
      * 法规正文
      */
     private String content;
+
+    /**
+     * 语义信息
+     */
+    private String extra;
     /**
      * 法规来源（关联source表主键）
      */

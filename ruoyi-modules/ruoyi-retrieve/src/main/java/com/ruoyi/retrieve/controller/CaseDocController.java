@@ -80,9 +80,9 @@ public class CaseDocController extends BaseController {
     @GetMapping("/{id}")
     public R<Object> get(@PathVariable("id") Long id) {
         CaseDoc caseDoc = caseDocService.selectById(id);
-        if (StringUtils.isNotEmpty(caseDoc.getWordCloud())) {
-            return R.ok(caseDoc.getWordCloud(), caseDoc);
-        }
+//        if (StringUtils.isNotEmpty(caseDoc.getWordCloud())) {
+//            return R.ok(caseDoc.getWordCloud(), caseDoc);
+//        }
         String worldCloud = WorldCloudUtils.genWorldCloud(caseDoc.getName(), caseDoc.getContent());
         Map<String, Object> map = BeanCopyUtils.copyToMap(caseDoc);
         if (map == null) {

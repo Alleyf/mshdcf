@@ -26,7 +26,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <dependencies>
 
         <!-- Spring Context Support -->
@@ -73,7 +73,7 @@
             <artifactId>jaxb-api</artifactId>
         </dependency>
 
-        <!-- Apache Lang3 -->
+        <!-- Apache Lang3 todo 和其他commons-lang包有冲突，但是commons-lang是词云生成必要依赖-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -132,14 +132,14 @@
             <groupId>com.kennycason</groupId>
             <artifactId>kumo-tokenizers</artifactId>
             <version>1.28</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-lang</artifactId>
-                    <groupId>commons-lang</groupId>
-                </exclusion>
-            </exclusions>
+            <!--            <exclusions>-->
+            <!--                <exclusion>-->
+            <!--                    <artifactId>commons-lang</artifactId>-->
+            <!--                    <groupId>commons-lang</groupId>-->
+            <!--                </exclusion>-->
+            <!--            </exclusions>-->
         </dependency>
-        <!--        fastjson2-->
+        <!--        fastjson2和其他模块重复，可能存在依赖冲突导致应用程序无法启动-->
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
             <artifactId>fastjson2</artifactId>
@@ -150,6 +150,12 @@
             <groupId>com.unfbx</groupId>
             <artifactId>chatgpt-java</artifactId>
             <version>1.0.14-beta1</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>annotations</artifactId>
+                    <groupId>org.jetbrains</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--        单元测试-->
         <dependency>
@@ -159,10 +165,10 @@
         <!--        Gemini Pro-->
 
 
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-vertexai</artifactId>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.google.cloud</groupId>-->
+        <!--            <artifactId>google-cloud-vertexai</artifactId>-->
+        <!--        </dependency>-->
 
     </dependencies>
 

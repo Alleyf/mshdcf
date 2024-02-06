@@ -55,7 +55,7 @@ public class ChatGPTUtils {
         //！！！生产或者测试环境建议设置为这三种级别：NONE,BASIC,HEADERS,！！！
         httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-//            .proxy(proxy)
+            .proxy(proxy)
             .addInterceptor(httpLoggingInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)

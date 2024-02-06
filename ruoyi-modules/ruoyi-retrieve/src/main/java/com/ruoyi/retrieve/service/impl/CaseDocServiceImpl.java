@@ -54,8 +54,8 @@ public class CaseDocServiceImpl implements ICaseDocService {
     @Override
     public Integer insert(CaseDoc caseDoc) {
 //        设置词云
-        String wordCloud = getWordCloud(caseDoc.getName(), caseDoc.getContent());
-        caseDoc.setWordCloud(wordCloud);
+//        String wordCloud = getWordCloud(caseDoc.getName(), caseDoc.getContent());
+//        caseDoc.setWordCloud(wordCloud);
         return caseDocMapper.insert(caseDoc);
     }
 
@@ -69,8 +69,8 @@ public class CaseDocServiceImpl implements ICaseDocService {
     public Integer update(CaseDoc caseDoc) {
         // TODO: 2024/2/2 更新和新建司法案例和法律法规均报错？
         //        设置词云
-        String wordCloud = getWordCloud(caseDoc.getName(), caseDoc.getContent());
-        caseDoc.setWordCloud(wordCloud);
+//        String wordCloud = getWordCloud(caseDoc.getName(), caseDoc.getContent());
+//        caseDoc.setWordCloud(wordCloud);
         return caseDocMapper.updateById(caseDoc);
     }
 

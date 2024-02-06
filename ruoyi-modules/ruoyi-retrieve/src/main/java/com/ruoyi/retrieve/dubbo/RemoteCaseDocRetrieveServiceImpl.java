@@ -1,6 +1,6 @@
 package com.ruoyi.retrieve.dubbo;
 
-import com.ruoyi.retrieve.api.RemoteRetrieveService;
+import com.ruoyi.retrieve.api.RemoteCaseDocRetrieveService;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
 import com.ruoyi.retrieve.service.ICaseDocService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import java.util.List;
 @Service
 @DubboService(version = "1.0", group = "case")
 @RequiredArgsConstructor
-public class RemoteCaseDocServiceImpl implements RemoteRetrieveService<CaseDoc> {
+public class RemoteCaseDocRetrieveServiceImpl implements RemoteCaseDocRetrieveService {
 
     private final ICaseDocService caseDocService;
 

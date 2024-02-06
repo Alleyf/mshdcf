@@ -15,10 +15,10 @@ import javax.annotation.Resource;
  * @site <a href="https://alleyf.github.io">getHelp</a>
  * @description
  */
-@SpringBootTest
+//@SpringBootTest
 public class EsTests {
 
-    @Resource
+    //    @Resource
     private CaseDocMapper mapper;
 
     @Test

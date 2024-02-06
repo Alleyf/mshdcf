@@ -30,7 +30,7 @@ import javax.validation.constraints.NotNull;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * 司法案例
+ * 司法案例管理
  *
  * @author alleyf
  * @description 司法案例控制器前端访问路由地址为:/manage/case

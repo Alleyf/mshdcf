@@ -16,7 +16,7 @@ public class RuoYiGatewayApplication {
         // 标记 sentinel 类型为 网关
         System.setProperty("csp.sentinel.app.type", "1");
         SpringApplication application = new SpringApplication(RuoYiGatewayApplication.class);
-        application.setApplicationStartup(new BufferingApplicationStartup(2048));
+//        application.setApplicationStartup(new BufferingApplicationStartup(2048));
         application.run(args);
         System.out.println("(♥◠‿◠)ﾉﾞ  网关启动成功   ლ(´ڡ`ლ)ﾞ  ");
     }

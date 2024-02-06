@@ -66,6 +66,12 @@ public class DocCase extends BaseEntity {
      * 案件正文
      */
     private String content;
+
+    /**
+     * 语义信息
+     */
+    private String extra;
+
     /**
      * 案件来源（关联source表主键）
      */
