@@ -18,13 +18,10 @@ import javax.annotation.Resource;
  * @author fcs
  * @date 2024/2/4 23:44
  * @site <a href="https://alleyf.github.io">getHelp</a>
- * @description 对司法数据进行统计分析，数据处理等<br/>
- * todo <p>1. 司法案例和法律法规数据总量</p>
- *  <p>2. 司法案例和法律法规数据量增量（模糊查询新建日期大于等于前一天的所有数据量）</p>
- *  <p>3. 全国各省案件数量，各文书类型数量，各根案由数量，各审判程序数量，各个数据来源数量</p>
- *  <p>4. 生成或抽取正文摘要，法条分类，正文数据清洗、补全、分段（案例：背景，事实，陈述，依据，判决结果；法条：章->节）</p>
+ * @description 对司法数据智能处理等<br />
+ * <p>生成或抽取正文摘要，法条分类，正文数据清洗、补全、分段（案例：背景，事实，陈述，依据，判决结果；法条：章->节）</p>
  */
-@RequestMapping("/process")
+//@RequestMapping("/process")
 @RestController
 @Validated
 @Slf4j
@@ -41,8 +38,9 @@ public class DataProcessController extends BaseController {
      */
     @GetMapping("/case/stripAll")
     public R<Void> stripCaseAll() {
-        int success = dataProcessService.stripCaseContent(null);
-        return R.ok("司法案例数据成功清洗：" + success + "条数据。");
+        int stripNum = dataProcessService.stripCaseContent(null);
+        int reviseNum = dataProcessService.reviseCaseContent(null);
+        return R.ok("司法案例数据成功清洗：" + stripNum + "条数据；" + "成功清洗：" + reviseNum + "条。");
     }
 
     /**
@@ -53,7 +51,9 @@ public class DataProcessController extends BaseController {
      */
     @GetMapping("/case/strip/{id}")
     public R<Void> stripCaseOne(@PathVariable("id") Long id) {
-        return toAjax(dataProcessService.stripCaseContent(id));
+        boolean stripFlag = dataProcessService.stripCaseContent(id) > 0;
+        boolean reviseFlag = dataProcessService.reviseCaseContent(id) > 0;
+        return toAjax(stripFlag && reviseFlag);
     }
 
     /**
@@ -63,8 +63,9 @@ public class DataProcessController extends BaseController {
      */
     @GetMapping("/law/stripAll")
     public R<Void> stripLawAll() {
-        int success = dataProcessService.stripRegulationContent(null);
-        return R.ok("法律法规数据成功清洗：" + success + "条数据。");
+        int stripNum = dataProcessService.stripRegulationContent(null);
+        int reviseNum = dataProcessService.reviseLawContent(null);
+        return R.ok("法律法规数据成功格式化：" + stripNum + "条;" + "成功清洗：" + reviseNum + "条。");
     }
 
     /**
@@ -75,7 +76,9 @@ public class DataProcessController extends BaseController {
      */
     @GetMapping("/law/strip/{id}")
     public R<Void> stripLawOne(@PathVariable("id") Long id) {
-        return toAjax(dataProcessService.stripRegulationContent(id));
+        boolean stripFlag = dataProcessService.stripRegulationContent(id) > 0;
+        boolean reviseFlag = dataProcessService.reviseLawContent(id) > 0;
+        return toAjax(stripFlag && reviseFlag);
     }
 
     /**
@@ -90,7 +93,7 @@ public class DataProcessController extends BaseController {
     }
 
     /**
-     * 案例数据挖掘
+     * 全部案例数据挖掘
      *
      * @return R<Void>
      */
@@ -111,7 +114,7 @@ public class DataProcessController extends BaseController {
     }
 
     /**
-     * 法条数据挖掘
+     * 全部法条数据挖掘
      *
      * @return R<Void>
      */

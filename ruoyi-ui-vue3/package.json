@@ -1,8 +1,8 @@
 {
   "name": "ruoyi-cloud-plus",
-  "version": "1.8.1",
+  "version": "1.0",
   "description": "多源异构司法数据汇聚融合平台",
-  "author": "Lion Li",
+  "author": "csFan",
   "license": "MIT",
   "scripts": {
     "dev": "vite",
@@ -19,7 +19,7 @@
     "@vueuse/core": "9.5.0",
     "@wangeditor/editor-for-vue": "^5.1.12",
     "axios": "0.27.2",
-    "echarts": "5.4.0",
+    "echarts": "^5.4.3",
     "element-plus": "2.2.27",
     "file-saver": "2.0.5",
     "fuse.js": "6.6.2",
@@ -29,12 +29,16 @@
     "pinia": "2.0.22",
     "vue": "3.2.45",
     "vue-cropper": "1.0.3",
+    "vue-echarts": "^6.6.8",
     "vue-router": "4.1.4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "3.1.0",
     "@vue/compiler-sfc": "3.2.45",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.34",
     "sass": "1.56.1",
+    "tailwindcss": "^3.4.1",
     "unplugin-auto-import": "0.11.4",
     "unplugin-vue-setup-extend-plus": "0.4.9",
     "vite": "3.2.3",

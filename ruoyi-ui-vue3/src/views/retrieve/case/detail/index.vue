@@ -184,7 +184,7 @@ onMounted(() => {
                   </el-row>
                 </el-card>
               </el-tab-pane>
-
+              <!--              todo 摘要用打字机效果，正文直接显示-->
               <el-tab-pane v-if="caseItem.extra.summary" label="摘要总结" style="font-weight: bold;font-size: medium"
                            type="warning">
                 <el-card :shadow="'always'">
