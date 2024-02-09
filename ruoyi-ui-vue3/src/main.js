@@ -13,6 +13,7 @@ import App from './App'
 import store from './store'
 import router from './router'
 import directive from './directive' // directive
+import VueCharts from 'vue-echarts'
 
 // 注册指令
 import plugins from './plugins' // plugins
@@ -51,6 +52,7 @@ import DictTag from '@/components/DictTag'
 // iframe组件
 import IFrame from "@/components/IFrame";
 
+
 const app = createApp(App)
 
 // 全局方法挂载
@@ -76,6 +78,8 @@ app.component('RightToolbar', RightToolbar)
 app.component('WEditor', WEditor)
 app.component('QEditor', QEditor)
 app.component('IFrame', IFrame)
+app.component('v-chart', VueCharts)
+
 
 app.use(router)
 app.use(store)
@@ -87,9 +91,9 @@ directive(app)
 
 // 使用element-plus 并且设置全局的大小
 app.use(ElementPlus, {
-  locale: locale,
-  // 支持 large、default、small
-  size: Cookies.get('size') || 'default'
+    locale: locale,
+    // 支持 large、default、small
+    size: Cookies.get('size') || 'default'
 })
 
 // 修改 el-dialog 默认点击遮照为不关闭

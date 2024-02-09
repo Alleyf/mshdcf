@@ -122,6 +122,13 @@ public class StatisticAnalyseService {
         }
     }
 
+    private Map<String, Object> initProvinceMap(String province) {
+        HashMap<String, Object> provinceMap = new HashMap<>(1);
+        provinceMap.put("name", province);
+        provinceMap.put("value", 0);
+        return provinceMap;
+    }
+
     /**
      * 统计全国各省案件数量
      *
@@ -130,7 +137,7 @@ public class StatisticAnalyseService {
     public Map<String, Integer> countCasesByProvince() {
         List<DocCase> docCases = docCaseMapper.selectList();
         String[] caseNumbers = docCases.stream().map(DocCase::getNumber).toArray(String[]::new);
-        Map<String, Integer> provinceCases = new HashMap<>();
+        Map<String, Integer> provinceCases = new HashMap<>(34);
         for (String caseNumber : caseNumbers) {
             String province = extractProvinceFromCaseNumber(caseNumber);
             if (province != null) {

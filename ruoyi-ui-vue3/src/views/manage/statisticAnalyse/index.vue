@@ -8,7 +8,7 @@ import {
   LegendComponent,
   ToolboxComponent
 } from "echarts/components";
-import VChart, {THEME_KEY} from "vue-echarts";
+import {THEME_KEY} from "vue-echarts";
 import {ref, provide, onMounted, watch} from "vue";
 import {countCauseCase, countProcessCase, countTypeCase, countTypeLaw} from "@/api/manage/statisticAnalyse";
 import * as echarts from 'echarts';
