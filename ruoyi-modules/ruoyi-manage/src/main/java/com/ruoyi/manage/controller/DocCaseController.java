@@ -128,7 +128,7 @@ public class DocCaseController extends BaseController {
 //    @Log(title = "司法案例", businessType = BusinessType.INSERT)
     @GetMapping("/syncAll")
     public R<Void> syncAll() {
-        return toAjax(docCaseService.insertBatch());
+        return R.ok("成功同步司法案例数据：" + docCaseService.insertBatch() + "条");
     }
 
     /**
@@ -149,7 +149,7 @@ public class DocCaseController extends BaseController {
     @SaCheckPermission("manage:case:remove")
     @Log(title = "司法案例", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
-    public R<Void> remove(@NotEmpty(message = "主键不能为空") @PathVariable Long[] ids) {
+    public R<Void> remove(@Validated @NotEmpty(message = "主键不能为空") @PathVariable Long[] ids) {
         return toAjax(docCaseService.deleteWithValidByIds(Arrays.asList(ids), true));
     }
 }

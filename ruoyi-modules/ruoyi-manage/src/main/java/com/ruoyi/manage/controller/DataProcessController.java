@@ -5,12 +5,10 @@ import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.manage.service.impl.DataProcessService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 
 /**
  * 智能处理
@@ -21,7 +19,7 @@ import javax.annotation.Resource;
  * @description 对司法数据智能处理等<br />
  * <p>生成或抽取正文摘要，法条分类，正文数据清洗、补全、分段（案例：背景，事实，陈述，依据，判决结果；法条：章->节）</p>
  */
-//@RequestMapping("/process")
+//配置gateway网关路由地址前缀为process/**
 @RestController
 @Validated
 @Slf4j
@@ -40,19 +38,21 @@ public class DataProcessController extends BaseController {
     public R<Void> stripCaseAll() {
         int stripNum = dataProcessService.stripCaseContent(null);
         int reviseNum = dataProcessService.reviseCaseContent(null);
-        return R.ok("司法案例数据成功清洗：" + stripNum + "条数据；" + "成功清洗：" + reviseNum + "条。");
+        return R.ok("司法案例数据成功清洗格式化：" + stripNum + "条数据；" + "成功清洗修正：" + reviseNum + "条。");
     }
 
     /**
-     * 清洗指定案例数据
+     * 清洗批量案例数据
      *
-     * @param id 案例id
+     * @param ids 案例id
      * @return R<Void>
      */
-    @GetMapping("/case/strip/{id}")
-    public R<Void> stripCaseOne(@PathVariable("id") Long id) {
-        boolean stripFlag = dataProcessService.stripCaseContent(id) > 0;
-        boolean reviseFlag = dataProcessService.reviseCaseContent(id) > 0;
+    @PutMapping("/case/strip/{ids}")
+    public R<Void> stripCaseBatch(@PathVariable("ids") Long[] ids) {
+        log.info(String.format("stripCaseBatch ids:{}", ids));
+        System.out.println(Arrays.toString(Arrays.stream(ids).toArray()));
+        boolean stripFlag = dataProcessService.stripCaseContent(Arrays.asList(ids)) > 0;
+        boolean reviseFlag = dataProcessService.reviseCaseContent(Arrays.asList(ids)) > 0;
         return toAjax(stripFlag && reviseFlag);
     }
 
@@ -65,35 +65,35 @@ public class DataProcessController extends BaseController {
     public R<Void> stripLawAll() {
         int stripNum = dataProcessService.stripRegulationContent(null);
         int reviseNum = dataProcessService.reviseLawContent(null);
-        return R.ok("法律法规数据成功格式化：" + stripNum + "条;" + "成功清洗：" + reviseNum + "条。");
+        return R.ok("法律法规数据成功清洗格式化：" + stripNum + "条;" + "成功清洗修正：" + reviseNum + "条。");
     }
 
     /**
-     * 清洗指定法条数据
+     * 清洗批量法条数据
      *
-     * @param id 法条id
+     * @param ids 法条id
      * @return R<Void>
      */
-    @GetMapping("/law/strip/{id}")
-    public R<Void> stripLawOne(@PathVariable("id") Long id) {
-        boolean stripFlag = dataProcessService.stripRegulationContent(id) > 0;
-        boolean reviseFlag = dataProcessService.reviseLawContent(id) > 0;
+    @PutMapping("/law/strip/{ids}")
+    public R<Void> stripLawBatch(@PathVariable("ids") Long[] ids) {
+        boolean stripFlag = dataProcessService.stripRegulationContent(Arrays.asList(ids)) > 0;
+        boolean reviseFlag = dataProcessService.reviseLawContent(Arrays.asList(ids)) > 0;
         return toAjax(stripFlag && reviseFlag);
     }
 
     /**
-     * 案例数据挖掘
+     * 挖掘批量案例数据
      *
-     * @param id 案例id
+     * @param ids 案例id
      * @return R<Void>
      */
-    @GetMapping("/case/extract/{id}")
-    public R<Void> caseExtract(@PathVariable("id") Long id) {
-        return toAjax(dataProcessService.caseInfoMining(id));
+    @PutMapping("/case/extract/{ids}")
+    public R<Void> caseExtract(@PathVariable("ids") Long[] ids) {
+        return toAjax(dataProcessService.caseInfoMining(Arrays.asList(ids)));
     }
 
     /**
-     * 全部案例数据挖掘
+     * 挖掘全部案例数据
      *
      * @return R<Void>
      */
@@ -103,18 +103,18 @@ public class DataProcessController extends BaseController {
     }
 
     /**
-     * 法条数据挖掘
+     * 挖掘批量法条数据
      *
-     * @param id 法条id
+     * @param ids 法条id
      * @return R<Void>
      */
-    @GetMapping("/law/extract/{id}")
-    public R<Void> lawExtract(@PathVariable("id") Long id) {
-        return toAjax(dataProcessService.lawInfoMining(id));
+    @PutMapping("/law/extract/{ids}")
+    public R<Void> lawExtract(@PathVariable("ids") Long[] ids) {
+        return toAjax(dataProcessService.lawInfoMining(Arrays.asList(ids)));
     }
 
     /**
-     * 全部法条数据挖掘
+     * 挖掘全部法条数据
      *
      * @return R<Void>
      */

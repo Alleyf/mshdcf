@@ -6,6 +6,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.ruoyi.common.excel.annotation.ExcelDictFormat;
 import com.ruoyi.common.excel.convert.ExcelDictConvert;
+import com.ruoyi.manage.enums.MiningStatus;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -67,13 +68,13 @@ public class LawRegulationVo implements Serializable {
      * 发布日期
      */
     @ExcelProperty(value = "发布日期")
-    private Date releaseDate;
+    private String releaseDate;
 
     /**
      * 实施日期
      */
     @ExcelProperty(value = "实施日期")
-    private Date executeDate;
+    private String executeDate;
 
     /**
      * 发布机关
@@ -84,8 +85,13 @@ public class LawRegulationVo implements Serializable {
     /**
      * 法规正文
      */
-    @ExcelProperty(value = "法规正文")
+    @ExcelProperty(value = "正文")
     private String content;
+    /**
+     * 修正后的法条正文
+     */
+    @ExcelProperty(value = "修正正文")
+    private String stripContent;
 
     /**
      * 附加语义信息（json格式）
@@ -131,5 +137,9 @@ public class LawRegulationVo implements Serializable {
     @ExcelProperty(value = "更新时间")
     private Date updateTime;
 
-
+    /**
+     * 挖掘状态
+     */
+    @ExcelProperty(value = "挖掘状态")
+    private MiningStatus isMining;
 }

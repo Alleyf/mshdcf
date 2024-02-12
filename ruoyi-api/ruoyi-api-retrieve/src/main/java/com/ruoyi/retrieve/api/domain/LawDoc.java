@@ -28,7 +28,6 @@ public class LawDoc implements Serializable {
      * es中的唯一id
      */
     @IndexId(type = IdType.CUSTOMIZE)
-    @NotNull(message = "id不能为空")
     private Long id;
 
     /**
@@ -42,7 +41,7 @@ public class LawDoc implements Serializable {
      */
     @HighLight(mappingField = "highlightName", preTag = "<text style='color:red'>", postTag = "</text>")
     @IndexField(fieldType = FieldType.KEYWORD_TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
-    @NotBlank(message = "标题不能为空")
+//    @NotBlank(message = "标题不能为空")
     private String name;
     /**
      * 所属领域
@@ -63,10 +62,15 @@ public class LawDoc implements Serializable {
     /**
      * 案件内容
      */
-//    @NotBlank(message = "内容不能为空")
     @HighLight(mappingField = "highlightContent", preTag = "<text style='color:red'>", postTag = "</text>")
     @IndexField(fieldType = FieldType.TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
     private String content;
+    /**
+     * 修正法条内容
+     */
+    @HighLight(mappingField = "highlightContent", preTag = "<text style='color:red'>", postTag = "</text>")
+    @IndexField(fieldType = FieldType.TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
+    private String stripContent;
     /**
      * 附加语义信息（json格式）
      */
@@ -75,7 +79,6 @@ public class LawDoc implements Serializable {
     /**
      * 判决日期
      */
-    @JsonFormat(pattern = "yyyy-MM-dd")
     @IndexField(fieldType = FieldType.DATE, dateFormat = "yyyy-MM-dd")
     private String releaseDate;
     /**
@@ -127,9 +130,5 @@ public class LawDoc implements Serializable {
     @IndexField(exist = false)
     private String highlightContent;
 
-    /**
-     * 词云图
-     */
-//    private String wordCloud;
 
 }

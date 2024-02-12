@@ -115,7 +115,8 @@ public class LawRegulationController extends BaseController {
 //    @Log(title = "法律法规", businessType = BusinessType.INSERT)
     @GetMapping("/syncAll")
     public R<Void> syncAll() {
-        return toAjax(LawRegulationService.insertBatch());
+        return R.ok("成功同步法条数据：" + LawRegulationService.insertBatch() + "条");
+
     }
 
     /**

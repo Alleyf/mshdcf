@@ -117,12 +117,15 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     }
 
     @Override
-    public Boolean insertBatch() {
+    public Integer insertBatch() {
         List<DocCase> allCase = baseMapper.selectList();
+//        log.info("批量新增案例：{}", allCase);
         List<CaseDoc> all = BeanCopyUtils.copyList(allCase, CaseDoc.class);
+//        log.info("批量新增索引案例：{}", all);
 //        设置mysqlId
         Assert.notNull(all, "数据库暂无案例数据，请先新增数据");
         all = all.stream().peek(caseDoc -> caseDoc.setMysqlId(caseDoc.getId())).collect(Collectors.toList());
+//        log.info("批量新增过滤后的索引案例：{}", all);
         int successNum = 0, insertNum = 300;
         if (all.size() <= insertNum) {
             successNum = remoteCaseRetrieveService.insertBatch(all);
@@ -141,7 +144,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
                 successNum += remoteCaseRetrieveService.insertBatch(subList);
             }
         }
-        return successNum > 0;
+        return successNum;
     }
 
     /**

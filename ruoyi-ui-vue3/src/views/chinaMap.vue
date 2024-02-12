@@ -40,15 +40,16 @@ const option = ref({
     formatter: "{a} <br/>{b} : {c} "
   },
   toolbox: {
+    showTitle: true,
     show: true,
-    //orient: 'vertical',
     left: 'left',
     top: 'top',
     feature: {
-      dataView: {readOnly: false},
+      dataView: {readOnly: true},
       restore: {},
       saveAsImage: {}
-    }
+
+    },
   },
   backgroundColor: '#ffffff',
   visualMap: {

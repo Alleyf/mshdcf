@@ -2,6 +2,7 @@ package com.ruoyi.manage.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import com.ruoyi.manage.enums.MiningStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -53,20 +54,24 @@ public class LawRegulation extends BaseEntity {
      * 发布日期
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date releaseDate;
+    private String releaseDate;
     /**
      * 实施日期
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date executeDate;
+    private String executeDate;
     /**
      * 发布机关
      */
     private String releaseOrganization;
     /**
-     * 法规正文
+     * 法条正文
      */
     private String content;
+    /**
+     * 修正后的法条正文
+     */
+    private String stripContent;
 
     /**
      * 语义信息
@@ -88,5 +93,8 @@ public class LawRegulation extends BaseEntity {
      * 状态（0：停用；1：正常）
      */
     private Integer status;
-
+    /**
+     * 挖掘状态
+     */
+    private MiningStatus isMining;
 }

@@ -211,8 +211,8 @@ const handleDelete = row => {
 const handleExport = () => {
   console.log({...queryParams.value})
   proxy.download('manage/regulation/export',
-    {...queryParams.value}
-    , `regulation_${new Date().getTime()}.xlsx`)
+      {...queryParams.value}
+      , `regulation_${new Date().getTime()}.xlsx`)
 }
 
 onMounted(() => {
@@ -286,19 +286,30 @@ onMounted(() => {
                      @click="handleExport">导出
           </el-button>
         </el-col>
+        <el-col :span="1.5">
+          <el-button
+              v-hasPermi="['manage:case:process']"
+              :disabled="multiple"
+              icon="Edit"
+              size="default"
+              type="primary"
+              @click="handleProcess"
+          >清洗挖掘
+          </el-button>
+        </el-col>
         <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
       </el-row>
 
       <el-table
-        v-loading="loading"
-        :data="regulationList"
-        :default-sort="{ prop: 'releaseDate', order: 'descending' }"
-        border
-        height="500"
-        stripe
-        style="width: 100%;text-align: center"
-        table-layout="auto"
-        @selection-change="handleSelectionChange"
+          v-loading="loading"
+          :data="regulationList"
+          :default-sort="{ prop: 'releaseDate', order: 'descending' }"
+          border
+          height="500"
+          stripe
+          style="width: 100%;text-align: center"
+          table-layout="auto"
+          @selection-change="handleSelectionChange"
       >
         <el-table-column align="center" type="selection" width="55"/>
         <!--      <el-table-column v-if="true" align="center" label="法律法规主键id" prop="id"/>-->
@@ -460,11 +471,11 @@ onMounted(() => {
       </el-dialog>
     </el-card>
     <pagination
-      v-show="total>0"
-      v-model:limit="queryParams.pageSize"
-      v-model:page="queryParams.pageNum"
-      :total="total"
-      @pagination="getList"
+        v-show="total>0"
+        v-model:limit="queryParams.pageSize"
+        v-model:page="queryParams.pageNum"
+        :total="total"
+        @pagination="getList"
     />
   </div>
 </template>

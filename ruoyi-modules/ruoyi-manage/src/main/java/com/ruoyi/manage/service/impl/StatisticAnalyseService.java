@@ -3,6 +3,8 @@ package com.ruoyi.manage.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.LawRegulation;
+import com.ruoyi.manage.domain.vo.DocCaseVo;
+import com.ruoyi.manage.domain.vo.LawRegulationVo;
 import com.ruoyi.manage.mapper.DocCaseMapper;
 import com.ruoyi.manage.mapper.LawRegulationMapper;
 import lombok.RequiredArgsConstructor;
@@ -250,6 +252,7 @@ public class StatisticAnalyseService {
         String formattedDate = yesterday.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         LambdaQueryWrapper<DocCase> lqw = new LambdaQueryWrapper<>();
         lqw.ge(DocCase::getCreateTime, formattedDate);
+        lqw.or().ge(DocCase::getUpdateTime, formattedDate);
         return docCaseMapper.selectCount(lqw);
     }
 
@@ -265,7 +268,23 @@ public class StatisticAnalyseService {
         String formattedDate = yesterday.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         LambdaQueryWrapper<LawRegulation> lqw = new LambdaQueryWrapper<>();
         lqw.ge(LawRegulation::getCreateTime, formattedDate);
+        lqw.or().ge(LawRegulation::getUpdateTime, formattedDate);
         return lawRegulationMapper.selectCount(lqw);
     }
 
+    public List<DocCaseVo> selectNewTenCases() {
+        LambdaQueryWrapper<DocCase> lqw = new LambdaQueryWrapper<>();
+        lqw.orderByDesc(DocCase::getCreateTime);
+//        获取前10条数据
+        lqw.last("limit 10");
+        return docCaseMapper.selectVoList(lqw);
+    }
+
+    public List<LawRegulationVo> selectNewTenLaws() {
+        LambdaQueryWrapper<LawRegulation> lqw = new LambdaQueryWrapper<>();
+        lqw.orderByDesc(LawRegulation::getCreateTime);
+//        获取前10条数据
+        lqw.last("limit 10");
+        return lawRegulationMapper.selectVoList(lqw);
+    }
 }

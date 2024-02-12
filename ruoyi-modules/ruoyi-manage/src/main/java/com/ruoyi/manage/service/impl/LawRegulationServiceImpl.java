@@ -107,7 +107,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
      * 批量新增
      */
     @Override
-    public Boolean insertBatch() {
+    public Integer insertBatch() {
         List<LawRegulation> allLaw = baseMapper.selectList();
         List<LawDoc> all = BeanCopyUtils.copyList(allLaw, LawDoc.class);
         //        设置mysqlId
@@ -131,7 +131,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
                 successNum += remoteLawRetrieveService.insertBatch(subList);
             }
         }
-        return successNum > 0;
+        return successNum;
     }
 
     /**

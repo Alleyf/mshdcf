@@ -11,6 +11,7 @@ import {getCurrentInstance, onMounted, reactive, ref, toRefs} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {getToken} from "@/utils/auth";
 import QEditor from "@/components/Editor/index.vue";
+import {Edit, Picture, UploadFilled} from "@element-plus/icons-vue";
 
 const {proxy} = getCurrentInstance();
 const {
@@ -116,11 +117,20 @@ const {queryParams, form, rules} = toRefs(data);
 
 const title = ref('')
 const open = ref(false)
+const processDialog = ref(false)
+const processDialogTitle = ref("数据清洗")
+const processStep = ref(0)
 const openContent = ref(false)
 
 
 const queryForm = ref(null)
 const dialogForm = ref(null)
+
+//案例数据清洗挖掘
+const handleProcess = () => {
+  processDialog.value = true
+  // if (active.value++ > 2) active.value = 0
+}
 
 const handleOpenContent = () => {
   openContent.value = true
@@ -308,8 +318,8 @@ const handleExport = () => {
     ...queryParams.value
   })
   proxy.download('manage/case/export',
-    {...queryParams.value}
-    , `case_${new Date().getTime()}.xlsx`)
+      {...queryParams.value}
+      , `case_${new Date().getTime()}.xlsx`)
 }
 
 const handleExportSelected = () => {
@@ -323,8 +333,8 @@ const handleExportSelected = () => {
   // }
   // console.log(idLs, typeof idLs)
   download('manage/case/exportSelected',
-    ids.value
-    , `case_${new Date().getTime()}.xlsx`)
+      ids.value
+      , `case_${new Date().getTime()}.xlsx`)
 }
 
 onMounted(() => {
@@ -337,14 +347,15 @@ onMounted(() => {
 <template>
   <div class="app-container">
     <el-card class="box-card" shadow="hover">
+      <!--      条件查询表单-->
       <el-row :gutter="10" align="middle" class="header" justify="space-between">
         <el-form
-          v-show="showSearch"
-          ref="queryForm"
-          :inline="true"
-          :model="queryParams"
-          label-position="left"
-          label-width="80px"
+            v-show="showSearch"
+            ref="queryForm"
+            :inline="true"
+            :model="queryParams"
+            label-position="left"
+            label-width="80px"
         >
           <el-form-item label="案件名称" label-width="80" prop="name">
             <el-input v-model="queryParams.name"></el-input>
@@ -358,20 +369,20 @@ onMounted(() => {
           <el-form-item label="案由" label-width="80" prop="cause">
             <el-select v-model="queryParams.cause">
               <el-option
-                v-for="item in doc_case_cause"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                  v-for="item in doc_case_cause"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
               />
             </el-select>
           </el-form-item>
           <el-form-item label="文书类型" label-width="80" prop="type">
             <el-select v-model="queryParams.type">
               <el-option
-                v-for="item in doc_case_type"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                  v-for="item in doc_case_type"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
               />
             </el-select>
           </el-form-item>
@@ -384,27 +395,27 @@ onMounted(() => {
           <el-form-item label="案件来源" label-width="80" prop="sourceId">
             <el-select v-model="queryParams.sourceId">
               <el-option
-                v-for="item in crawler_source"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                  v-for="item in crawler_source"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
               />
             </el-select>
           </el-form-item>
           <el-form-item label="判决日期" prop="judgeDate">
             <el-date-picker
-              v-model="queryParams.judgeDate"
-              placeholder="选择日期"
-              type="date"
-              value-format="YYYY-MM-DD"
+                v-model="queryParams.judgeDate"
+                placeholder="选择日期"
+                type="date"
+                value-format="YYYY-MM-DD"
             />
           </el-form-item>
           <el-form-item label="公开日期" prop="pubDate">
             <el-date-picker
-              v-model="queryParams.pubDate"
-              placeholder="选择日期"
-              type="date"
-              value-format="YYYY-MM-DD"
+                v-model="queryParams.pubDate"
+                placeholder="选择日期"
+                type="date"
+                value-format="YYYY-MM-DD"
             />
           </el-form-item>
           <!--        <el-form-item label="法律依据">-->
@@ -419,10 +430,10 @@ onMounted(() => {
           <el-form-item label="状态" prop="status">
             <el-select v-model="queryParams.status">
               <el-option
-                v-for="item in crawl_common_status"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                  v-for="item in crawl_common_status"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
               />
             </el-select>
           </el-form-item>
@@ -433,75 +444,88 @@ onMounted(() => {
         </el-form>
       </el-row>
       <el-divider/>
+      <!--      操作按钮导航-->
       <el-row slot="header" :gutter="10" class="mb8" clearfix>
         <el-col :span="1.5">
           <el-button
-            v-hasPermi="['manage:case:add']"
-            icon="Plus"
-            plain
-            size="default"
-            type="primary"
-            @click="handleAdd"
+              v-hasPermi="['manage:case:add']"
+              icon="Plus"
+              plain
+              size="default"
+              type="primary"
+              @click="handleAdd"
           >新增
           </el-button>
         </el-col>
         <el-col :span="1.5">
           <el-button
-            v-hasPermi="['manage:case:edit']"
-            :disabled="single"
-            icon="Edit"
-            plain
-            size="default"
-            type="success"
-            @click="handleUpdate"
+              v-hasPermi="['manage:case:edit']"
+              :disabled="single"
+              icon="Edit"
+              plain
+              size="default"
+              type="success"
+              @click="handleUpdate"
           >修改
           </el-button>
         </el-col>
         <el-col :span="1.5">
           <el-button
-            v-hasPermi="['manage:case:remove']"
-            :disabled="multiple"
-            icon="Delete"
-            plain
-            size="default"
-            type="danger"
-            @click="handleDelete"
+              v-hasPermi="['manage:case:remove']"
+              :disabled="multiple"
+              icon="Delete"
+              plain
+              size="default"
+              type="danger"
+              @click="handleDelete"
           >删除
           </el-button>
         </el-col>
         <el-col :span="1.5">
           <el-button
-            v-hasPermi="['manage:case:import']"
-            icon="Upload"
-            plain
-            type="info"
-            @click="handleImport"
+              v-hasPermi="['manage:case:import']"
+              icon="Upload"
+              plain
+              type="info"
+              @click="handleImport"
           >导入
           </el-button>
         </el-col>
         <el-col :span="1.5">
           <el-button
-            v-hasPermi="['manage:case:export']"
-            icon="Download"
-            plain
-            size="default"
-            type="warning"
-            @click="handleExport"
+              v-hasPermi="['manage:case:export']"
+              icon="Download"
+              plain
+              size="default"
+              type="warning"
+              @click="handleExport"
           >导出
+          </el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
+              v-hasPermi="['manage:case:process']"
+              :disabled="multiple"
+              icon="Edit"
+              size="default"
+              type="primary"
+              @click="handleProcess"
+          >清洗挖掘
           </el-button>
         </el-col>
         <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
       </el-row>
+      <!--      数据列表-->
       <el-table
-        v-loading="loading"
-        :data="caseList"
-        :default-sort="{ prop: 'judgeDate', order: 'descending' }"
-        border
-        height="500"
-        stripe
-        style="width: 100%;text-align: center"
-        table-layout="auto"
-        @selection-change="handleSelectionChange"
+          v-loading="loading"
+          :data="caseList"
+          :default-sort="{ prop: 'judgeDate', order: 'descending' }"
+          border
+          height="500"
+          stripe
+          style="width: 100%;text-align: center"
+          table-layout="auto"
+          @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55"></el-table-column>
         <!--        <el-table-column label="案件主键id" prop="id" width="150"></el-table-column>-->
@@ -565,27 +589,27 @@ onMounted(() => {
           </template>
         </el-table-column>
         <el-table-column
-          align="center"
-          fixed="right"
-          label="操作"
-          width="180"
+            align="center"
+            fixed="right"
+            label="操作"
+            width="180"
         >
           <template #default="scope">
             <el-button
-              v-hasPermi="['manage:case:edit']"
-              icon="Edit"
-              size="small"
-              type="primary"
-              @click="handleUpdate(scope.row)"
+                v-hasPermi="['manage:case:edit']"
+                icon="Edit"
+                size="small"
+                type="primary"
+                @click="handleUpdate(scope.row)"
             >
               修改
             </el-button>
             <el-button
-              v-hasPermi="['manage:case:remove']"
-              icon="Delete"
-              size="small"
-              type="danger"
-              @click="handleDelete(scope.row)"
+                v-hasPermi="['manage:case:remove']"
+                icon="Delete"
+                size="small"
+                type="danger"
+                @click="handleDelete(scope.row)"
             >
               删除
             </el-button>
@@ -614,20 +638,20 @@ onMounted(() => {
           <el-form-item label="案由" prop="cause">
             <el-select v-model="form.cause" placeholder="请选择案由">
               <el-option
-                v-for="dict in doc_case_cause"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
+                  v-for="dict in doc_case_cause"
+                  :key="dict.value"
+                  :label="dict.label"
+                  :value="dict.value"
               ></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="文书类型" prop="type">
             <el-select v-model="form.type" placeholder="请选择文书类型">
               <el-option
-                v-for="dict in doc_case_type"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
+                  v-for="dict in doc_case_type"
+                  :key="dict.value"
+                  :label="dict.label"
+                  :value="dict.value"
               ></el-option>
             </el-select>
           </el-form-item>
@@ -646,10 +670,10 @@ onMounted(() => {
           <el-form-item label="案件来源" prop="sourceId">
             <el-select v-model="form.sourceId" placeholder="请选择案件来源">
               <el-option
-                v-for="dict in crawler_source"
-                :key="dict.value"
-                :label="dict.label"
-                :value="parseInt(dict.value)"
+                  v-for="dict in crawler_source"
+                  :key="dict.value"
+                  :label="dict.label"
+                  :value="parseInt(dict.value)"
               ></el-option>
             </el-select>
           </el-form-item>
@@ -683,10 +707,10 @@ onMounted(() => {
           <el-form-item label="状态" prop="status">
             <el-select v-model="form.status" placeholder="请选择状态">
               <el-option
-                v-for="dict in crawl_common_status"
-                :key="dict.value"
-                :label="dict.label"
-                :value="parseInt(dict.value)"
+                  v-for="dict in crawl_common_status"
+                  :key="dict.value"
+                  :label="dict.label"
+                  :value="parseInt(dict.value)"
               ></el-option>
             </el-select>
           </el-form-item>
@@ -702,16 +726,16 @@ onMounted(() => {
       <!-- 案例导入对话框 -->
       <el-dialog v-model="upload.open" :title="upload.title" append-to-body width="400px">
         <el-upload
-          ref="uploadRef"
-          :action="upload.url + '?updateSupport=' + upload.updateSupport"
-          :auto-upload="false"
-          :disabled="upload.isUploading"
-          :headers="upload.headers"
-          :limit="1"
-          :on-progress="handleFileUploadProgress"
-          :on-success="handleFileSuccess"
-          accept=".xlsx, .xls"
-          drag
+            ref="uploadRef"
+            :action="upload.url + '?updateSupport=' + upload.updateSupport"
+            :auto-upload="false"
+            :disabled="upload.isUploading"
+            :headers="upload.headers"
+            :limit="1"
+            :on-progress="handleFileUploadProgress"
+            :on-success="handleFileSuccess"
+            accept=".xlsx, .xls"
+            drag
         >
           <el-icon class="el-icon--upload">
             <upload-filled/>
@@ -737,13 +761,28 @@ onMounted(() => {
           </div>
         </template>
       </el-dialog>
+
+      <!-- 清洗挖掘对话框 -->
+      <el-dialog v-model="processDialog" align-center title="司法案例数据清洗挖掘">
+        <el-steps :active="processStep" :space="200" finish-status="success" simple>
+          <el-step :icon="Edit" class="w-max" status="process" title="Step 1：数据清洗"/>
+          <el-step :icon="UploadFilled" class="w-max" status="finish" title="Step 2：数据挖掘"/>
+          <el-step :icon="Picture" class="w-max" status="finish" title="Step 3：同步更新"/>
+        </el-steps>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button :loading="buttonLoading" type="primary" @click="">确 定</el-button>
+            <el-button @click="cancelDialog">取 消</el-button>
+          </span>
+        </template>
+      </el-dialog>
     </el-card>
     <pagination
-      v-show="total>0"
-      v-model:limit="queryParams.pageSize"
-      v-model:page="queryParams.pageNum"
-      :total="total"
-      @pagination="getList"
+        v-show="total>0"
+        v-model:limit="queryParams.pageSize"
+        v-model:page="queryParams.pageNum"
+        :total="total"
+        @pagination="getList"
     />
   </div>
 </template>

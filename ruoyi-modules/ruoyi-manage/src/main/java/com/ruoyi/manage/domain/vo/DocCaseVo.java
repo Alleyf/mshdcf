@@ -7,6 +7,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.excel.annotation.ExcelDictFormat;
 import com.ruoyi.common.excel.convert.ExcelDictConvert;
+import com.ruoyi.manage.enums.MiningStatus;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -94,14 +95,14 @@ public class DocCaseVo implements Serializable {
      */
     @ExcelProperty(value = "判决日期")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date judgeDate;
+    private String judgeDate;
 
     /**
      * 公开日期
      */
     @ExcelProperty(value = "公开日期")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date pubDate;
+    private String pubDate;
 
     /**
      * 法律依据
@@ -120,6 +121,11 @@ public class DocCaseVo implements Serializable {
      */
     @ExcelProperty(value = "正文")
     private String content;
+    /**
+     * 修正后的案件正文
+     */
+    @ExcelProperty(value = "修正正文")
+    private String stripContent;
 
     /**
      * 附加语义信息（json格式）
@@ -163,5 +169,9 @@ public class DocCaseVo implements Serializable {
     @ExcelProperty(value = "更新人")
     private String updateBy;
 
-
+    /**
+     * 挖掘状态
+     */
+    @ExcelProperty(value = "挖掘状态")
+    private MiningStatus isMining;
 }

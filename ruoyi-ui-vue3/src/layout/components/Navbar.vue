@@ -7,7 +7,7 @@
 
     <div class="right-menu">
       <template v-if="appStore.device !== 'mobile'">
-        <header-search id="header-search" class="right-menu-item"/>
+        <header-search id="header-search" class="right-menu-item "/>
         <!--  联系我-->
         <!--        <Contact/>-->
         <el-tooltip content="源码地址" effect="dark" placement="bottom">
@@ -27,7 +27,7 @@
       <div class="avatar-container">
         <el-dropdown class="right-menu-item hover-effect" trigger="click" @command="handleCommand">
           <div class="avatar-wrapper">
-            <img :src="userStore.avatar" class="user-avatar"/>
+            <el-image :src="userStore.avatar" class="user-avatar"/>
             <el-icon>
               <caret-bottom/>
             </el-icon>
@@ -143,10 +143,9 @@ function setLayout() {
   }
 
   .right-menu {
-    float: right;
-    height: 100%;
-    line-height: 50px;
     display: flex;
+    margin-left: 78%;
+    margin-top: auto;
 
     &:focus {
       outline: none;
@@ -174,7 +173,6 @@ function setLayout() {
       margin-right: 40px;
 
       .avatar-wrapper {
-        margin-top: 5px;
         position: relative;
 
         .user-avatar {

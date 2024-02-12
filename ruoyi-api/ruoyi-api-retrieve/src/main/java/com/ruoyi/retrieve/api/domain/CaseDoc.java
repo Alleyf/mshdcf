@@ -81,6 +81,12 @@ public class CaseDoc implements Serializable {
     @HighLight(mappingField = "highlightContent", preTag = "<text style='color:red'>", postTag = "</text>")
     @IndexField(fieldType = FieldType.TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
     private String content;
+    /**
+     * 修正案件内容
+     */
+    @HighLight(mappingField = "highlightContent", preTag = "<text style='color:red'>", postTag = "</text>")
+    @IndexField(fieldType = FieldType.TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
+    private String stripContent;
 
     /**
      * 附加语义信息（json格式）
@@ -90,13 +96,15 @@ public class CaseDoc implements Serializable {
     /**
      * 判决日期
      */
-    // TODO: 2024/2/7 日期无法从mysql同步到es 
+    // TODO: 2024/2/7 日期无法从mysql同步到es
     @IndexField(fieldType = FieldType.DATE, dateFormat = "yyyy-MM-dd")
+//    @IndexField(fieldType = FieldType.KEYWORD)
     private String judgeDate;
     /**
      * 公开日期
      */
     @IndexField(fieldType = FieldType.DATE, dateFormat = "yyyy-MM-dd")
+//    @IndexField(fieldType = FieldType.KEYWORD)
     private String pubDate;
     /**
      * 法律依据

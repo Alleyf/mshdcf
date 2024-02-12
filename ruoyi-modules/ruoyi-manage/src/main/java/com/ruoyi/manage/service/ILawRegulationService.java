@@ -43,7 +43,7 @@ public interface ILawRegulationService extends IService<LawRegulation> {
     /**
      * 批量插入
      */
-    Boolean insertBatch();
+    Integer insertBatch();
 
     /**
      * 修改法律法规

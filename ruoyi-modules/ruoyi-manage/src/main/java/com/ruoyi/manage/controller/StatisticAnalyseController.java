@@ -2,6 +2,8 @@ package com.ruoyi.manage.controller;
 
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.web.controller.BaseController;
+import com.ruoyi.manage.domain.vo.DocCaseVo;
+import com.ruoyi.manage.domain.vo.LawRegulationVo;
 import com.ruoyi.manage.service.impl.DataProcessService;
 import com.ruoyi.manage.service.impl.StatisticAnalyseService;
 import lombok.Getter;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -120,5 +123,26 @@ public class StatisticAnalyseController extends BaseController {
     @GetMapping("/law/count/type")
     public R<Map<String, Long>> countLawsByType() {
         return R.ok(statisticAnalyseService.countLawsByType());
+    }
+
+
+    /**
+     * 获取最新十条案件
+     *
+     * @return R<List < DocCaseVo>> 最新十条案件
+     */
+    @GetMapping("/case/rankTen")
+    public R<List<DocCaseVo>> selectNewTenCases() {
+        return R.ok(statisticAnalyseService.selectNewTenCases());
+    }
+
+    /**
+     * 获取最新十条法律法规
+     *
+     * @return R<List < LawRegulationVo>> 最新十条法律法规
+     */
+    @GetMapping("/law/rankTen")
+    public R<List<LawRegulationVo>> selectNewTenLaws() {
+        return R.ok(statisticAnalyseService.selectNewTenLaws());
     }
 }

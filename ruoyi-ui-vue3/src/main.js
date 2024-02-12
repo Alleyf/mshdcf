@@ -23,6 +23,8 @@ import {download} from '@/utils/request'
 import 'virtual:svg-icons-register'
 import SvgIcon from '@/components/SvgIcon'
 import elementIcons from '@/components/SvgIcon/svgicon'
+import {Icon} from '@iconify/vue';
+
 
 import './permission' // permission control
 
