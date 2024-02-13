@@ -2,6 +2,7 @@ package com.ruoyi.manage.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.manage.domain.DocCase;
+import com.ruoyi.manage.domain.bo.DocCaseProcessBo;
 import com.ruoyi.manage.domain.vo.DocCaseVo;
 import com.ruoyi.manage.domain.bo.DocCaseBo;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
@@ -63,4 +64,6 @@ public interface IDocCaseService extends IService<DocCase> {
      * 根据案例名称查询
      */
     DocCase selectDocCaseByName(String name);
+
+    int process(List<DocCaseProcessBo> processList);
 }

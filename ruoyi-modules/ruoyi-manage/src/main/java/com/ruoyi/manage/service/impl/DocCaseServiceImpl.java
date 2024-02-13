@@ -10,6 +10,7 @@ import com.ruoyi.common.mybatis.core.page.TableDataInfo;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.ruoyi.manage.domain.bo.DocCaseProcessBo;
 import com.ruoyi.retrieve.api.RemoteCaseDocRetrieveService;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import com.ruoyi.manage.service.IDocCaseService;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -190,6 +192,32 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
             remoteCaseRetrieveService.deleteBatch(ids.toArray(new Long[0]));
         }
         return flag;
+    }
+
+    /**
+     * 批量智能处理司法案例
+     *
+     * @param processList 待处理列表
+     * @return int 成功个数
+     */
+    @Override
+    public int process(List<DocCaseProcessBo> processList) {
+        AtomicInteger success = new AtomicInteger(0);
+        List<DocCase> docCases = BeanCopyUtils.copyList(processList, DocCase.class);
+        if (docCases != null) {
+            docCases.forEach(docCase -> {
+                validEntityBeforeSave(docCase);
+                boolean sqlFlag = baseMapper.updateById(docCase) > 0;
+                if (sqlFlag) {
+                    //            更新es索引
+                    boolean esFlag = remoteCaseRetrieveService.update(BeanCopyUtils.copy(docCase, CaseDoc.class)) > 0;
+                    if (esFlag) {
+                        success.addAndGet(1);
+                    }
+                }
+            });
+        }
+        return success.get();
     }
 
     /**

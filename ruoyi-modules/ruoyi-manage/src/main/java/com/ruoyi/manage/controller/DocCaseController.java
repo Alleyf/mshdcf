@@ -10,6 +10,7 @@ import com.ruoyi.common.excel.utils.ExcelUtil;
 import com.ruoyi.common.log.annotation.Log;
 import com.ruoyi.common.log.enums.BusinessType;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
+import com.ruoyi.manage.domain.bo.DocCaseProcessBo;
 import com.ruoyi.manage.domain.vo.DocCaseImportVo;
 import com.ruoyi.manage.listener.DocCaseImportListener;
 import lombok.RequiredArgsConstructor;
@@ -136,9 +137,21 @@ public class DocCaseController extends BaseController {
      */
     @SaCheckPermission("manage:case:edit")
     @Log(title = "司法案例", businessType = BusinessType.UPDATE)
-    @PutMapping()
+    @PutMapping
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody DocCaseBo bo) {
         return toAjax(docCaseService.updateByBo(bo));
+    }
+
+    /**
+     * 批量智能处理司法案例
+     *
+     * @param processList 待处理案例列表
+     */
+    @SaCheckPermission("manage:case:edit")
+    @Log(title = "司法案例", businessType = BusinessType.UPDATE)
+    @PutMapping("/process")
+    public R<Void> process(@Validated(EditGroup.class) @RequestBody List<DocCaseProcessBo> processList) {
+        return R.ok("成功处理：" + docCaseService.process(processList) + "条");
     }
 
     /**

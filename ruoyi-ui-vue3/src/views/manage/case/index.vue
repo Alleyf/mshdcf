@@ -4,14 +4,15 @@ import {
   getCase,
   delCase,
   addCase,
-  updateCase,
+  updateCase, processCase,
 } from '@/api/manage/case'
 import {download} from '@/utils/request'
 import {getCurrentInstance, onMounted, reactive, ref, toRefs} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {getToken} from "@/utils/auth";
 import QEditor from "@/components/Editor/index.vue";
-import {Edit, Picture, UploadFilled} from "@element-plus/icons-vue";
+import {Edit, Picture, Switch, UploadFilled, UserFilled} from "@element-plus/icons-vue";
+import {Icon} from '@iconify/vue';
 
 const {proxy} = getCurrentInstance();
 const {
@@ -109,16 +110,24 @@ const data = reactive({
     status: [
       {required: true, message: '状态不能为空', trigger: 'change'},
     ],
-  }
+  },
+  processData: [],
+  processDataForm: {
+    id: null,
+    content: '',
+    stripContent: '',
+    extra: '',
+  },
+  processDataStage: []
 })
 
-const {queryParams, form, rules} = toRefs(data);
+const {queryParams, form, rules, processData, processDataForm, processDataStage} = toRefs(data);
 
 
 const title = ref('')
 const open = ref(false)
 const processDialog = ref(false)
-const processDialogTitle = ref("数据清洗")
+const defaultTab = ref(0)
 const processStep = ref(0)
 const openContent = ref(false)
 
@@ -128,18 +137,115 @@ const dialogForm = ref(null)
 
 //案例数据清洗挖掘
 const handleProcess = () => {
+  // 浅拷贝
+  processData.value = []
+  console.log(processData.value)
+  const toAdd = []
+  caseList.value.forEach(item => {
+    const exist = processData.value.findIndex(data => item.id === data.id) !== -1
+    if (ids.value.includes(item.id) && !exist) {
+      // 判断extra是否是非空字符串，是则需要解析，否则无需解析
+      if ((item.extra !== "" || item.extra !== null) && typeof item.extra === 'string') {
+        // 解析json字符串
+        item.extra = JSON.parse(item.extra);
+      }
+      toAdd.push(item); // 将元素添加到新数组中
+      // 将解析后的json对象还原为json字符串
+      // item.extra = JSON.stringify(item.extra);
+    }
+  })
+  processData.value = processData.value.concat(toAdd);
   processDialog.value = true
-  // if (active.value++ > 2) active.value = 0
+  // processData.value = caseListCopy
+  // console.log(ids.value, processData.value)
 }
 
+const handleProcessStage = (data) => {
+  // 检查数组中是否存在具有相同 id 的元素
+  const existingIndex = processDataStage.value.findIndex(item => item.id === data.id);
+  if (existingIndex !== -1) {
+    // 如果找到，更新数组中的元素
+    processDataStage.value[existingIndex] = {
+      id: data.id,
+      content: data.content,
+      stripContent: data.stripContent,
+      extra: JSON.stringify(data.extra),
+    };
+  } else {
+    // 如果没有找到，将新元素添加到数组中
+    processDataStage.value.push({
+      id: data.id,
+      content: data.content,
+      stripContent: data.stripContent,
+      extra: JSON.stringify(data.extra),
+    });
+  }
+  console.log(processDataStage.value)
+  ElMessage.success(`数据<${data.name}>暂存成功`)
+}
+const handleProcessSubmit = () => {
+  if (processDataStage.value.length === 0) {
+    ElMessage.error("请先暂存已修改的数据")
+    return
+  }
+  console.log(processDataStage.value)
+  processCase(processDataStage.value).then(res => {
+    if (res.code === 200) {
+      // 数据更新重新获取
+      getList()
+      ElMessage.success(res.msg)
+    } else {
+      ElMessage.error(res.msg)
+    }
+  })
+}
+
+const handleProcessNext = () => {
+  // todo 数据清洗挖掘下一步按钮回调函数
+  if (processStep.value++ > 0) processStep.value = 1
+  console.log(processStep.value)
+
+}
+
+const handleProcessPrev = () => {
+  // todo 数据清洗挖掘上一步按钮回调函数
+  if (processStep.value-- < 1) processStep.value = 0
+  console.log(processStep.value)
+}
+
+const handleRemoveTab = (targetName) => {
+  // todo 数据清洗挖掘tab页删除回调函数
+  // 找到要删除的标签页的索引
+  const index = targetName;
+  if (index !== 0) {
+    // 从数组中移除标签页
+    processData.value.splice(index, 1);
+  }
+  // 如果删除的是当前选中的标签页，需要更新 defaultTab
+  if (defaultTab.value === targetName) {
+    // 设置新的 defaultTab，例如选中第一个标签页
+    defaultTab.value = 0;
+  }
+}
+
+const handleProcessStrip = (data) => {
+  // todo 调用数据清洗接口，并将结果更新到processData中
+}
+
+const handleProcessMining = (data) => {
+  // todo 调用数据挖掘接口，并将结果更新到processData中
+}
+
+
+//--------------------分割线--------------------
 const handleOpenContent = () => {
   openContent.value = true
-  console.log(form.value)
+  // console.log(form.value)
 }
 
 const getList = () => {
   loading.value = true
-  console.log(queryParams.value)
+  // console.log(queryParams.value)
   listCase(queryParams.value).then(res => {
     caseList.value = res.rows
     total.value = res.total
@@ -222,6 +328,7 @@ const resetForm = () => {
 
 const cancelDialog = () => {
   open.value = false
+  processDialog.value = false
   resetForm()
 }
 
@@ -588,6 +695,26 @@ onMounted(() => {
             <dict-tag :options="crawl_common_status" :value="scope.row.status"/>
           </template>
         </el-table-column>
+        <el-table-column label="新建日期" prop="createTime" sortable width="180">
+          <template #default="scope">
+            <div style="display: flex; align-items: center">
+              <el-icon>
+                <timer/>
+              </el-icon>
+              <span style="margin-left: 10px">{{ scope.row.createTime }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="更新日期" prop="updateTime" sortable width="180">
+          <template #default="scope">
+            <div style="display: flex; align-items: center">
+              <el-icon>
+                <timer/>
+              </el-icon>
+              <span style="margin-left: 10px">{{ scope.row.updateTime }}</span>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column
             align="center"
             fixed="right"
@@ -763,18 +890,130 @@ onMounted(() => {
       </el-dialog>
 
       <!-- 清洗挖掘对话框 -->
-      <el-dialog v-model="processDialog" align-center title="司法案例数据清洗挖掘">
-        <el-steps :active="processStep" :space="200" finish-status="success" simple>
-          <el-step :icon="Edit" class="w-max" status="process" title="Step 1：数据清洗"/>
-          <el-step :icon="UploadFilled" class="w-max" status="finish" title="Step 2：数据挖掘"/>
-          <el-step :icon="Picture" class="w-max" status="finish" title="Step 3：同步更新"/>
+      <el-dialog v-model="processDialog" :fullscreen="true" title="司法案例数据清洗挖掘" width="100%">
+        <el-steps :active="processStep" align-center class="mb-10" finish-status="success">
+          <el-step :icon="Edit" description="对数据格式进行格式化并去除异常字符" title="Step 1：数据清洗"/>
+          <el-step :icon="UploadFilled" :status="'finish'" description="对数据进行挖掘分析提取潜在信息"
+                   title="Step 2：数据挖掘"/>
         </el-steps>
-        <template #footer>
-          <span class="dialog-footer">
-            <el-button :loading="buttonLoading" type="primary" @click="">确 定</el-button>
-            <el-button @click="cancelDialog">取 消</el-button>
-          </span>
-        </template>
+        <el-tabs v-model="defaultTab" :closable="true" :tab-position="'left'" @tab-remove="handleRemoveTab">
+          <el-card :shadow="'hover'" class="mt-3 shadow-sm w-100%">
+            <el-tab-pane v-for="(data,index) in processData" :key="data.id" :label="data.name" :name="index">
+              <template #label>
+                <el-tooltip :content="data.name" class="item" effect="dark" placement="top">
+                  <span class="text-overflow overflow-hidden whitespace-nowrap text-sm">{{
+                      data.name.substring(0, 15) + '...'
+                    }}</span>
+                </el-tooltip>
+              </template>
+              <el-form :label-position="'left'" :model="data" :size="'default'" class="flex">
+                <el-col :span="12" class="mr-2">
+                  <div v-if="processStep===0">
+                    <el-header>
+                      原始正文
+                    </el-header>
+                    <el-form-item>
+                      <el-input v-model="data.content" :autosize="true" resize="vertical" type="textarea"/>
+                    </el-form-item>
+                  </div>
+                  <div v-else-if="processStep===1">
+                    <el-header>
+                      修正正文
+                    </el-header>
+                    <el-input v-model="data.stripContent" :autosize="true" resize="vertical" type="textarea"/>
+                  </div>
+                </el-col>
+                <el-col :span="12">
+                  <div v-if="processStep===0">
+                    <el-header>
+                      修正正文
+                    </el-header>
+                    <el-input v-model="data.stripContent" :autosize="{ minRows: 10, maxRows: 200 }" type="textarea"/>
+                  </div>
+                  <div v-else-if="processStep===1">
+                    <el-header>
+                      语义信息
+                    </el-header>
+                    <el-card :shadow="'never'">
+                      <div v-if="data.extra.party"
+                           class="text-center whitespace-pre-wrap flex justify-around">
+                        <el-form-item label="">
+                          <el-input v-model="data.extra.party.plaintiff" :prefix-icon="UserFilled" clearable/>
+                        </el-form-item>
+                        <el-form-item class="text-red-500 font-bold">
+                          原告⚖️被告
+                        </el-form-item>
+                        <el-form-item label="">
+                          <el-input v-model="data.extra.party.defendant" :prefix-icon="UserFilled" clearable/>
+                        </el-form-item>
+                      </div>
+                      <el-form-item label="关键词语">
+                        <el-input v-model="data.extra.keyword" type="textarea"/>
+                      </el-form-item>
+                      <el-form-item label="诉讼要求">
+                        <el-input v-model="data.extra.plea" type="textarea"/>
+                      </el-form-item>
+                      <el-form-item label="案件类型">
+                        <el-input v-model="data.extra.label" :prefix-icon="Switch"/>
+                      </el-form-item>
+                      <el-form-item label="原告诉述">
+                        <el-input v-model="data.extra.plai" type="textarea"/>
+                      </el-form-item>
+                      <el-form-item label="被告辩称">
+                        <el-input v-model="data.extra.defe" type="textarea"/>
+                      </el-form-item>
+                      <el-form-item label="案件事实">
+                        <el-input v-model="data.extra.fact" type="textarea"/>
+                      </el-form-item>
+                      <el-form-item label="判决记录">
+                        <el-input v-model="data.extra.note" type="textarea"/>
+                      </el-form-item>
+                      <el-form-item label="案件摘要">
+                        <el-input v-model="data.extra.summary" type="textarea"/>
+                      </el-form-item>
+                      <el-form-item label="法律依据">
+                        <el-input v-model="data.extra.legalBasis" type="textarea"/>
+                      </el-form-item>
+                    </el-card>
+                  </div>
+                </el-col>
+              </el-form>
+              <div class="flex justify-end items-end mt-3"> <!-- 添加 justify-end 和 items-end 类 -->
+                <el-button @click="cancelDialog">取 消</el-button>
+                <el-button :disabled="processStep <= 0" :loading="buttonLoading" type="primary"
+                           @click="handleProcessPrev">
+                  上一步
+                </el-button>
+                <el-button :disabled="processStep >= 1" :loading="buttonLoading" type="primary"
+                           @click="handleProcessNext">
+                  下一步
+                </el-button>
+                <el-button :disabled="processStep !== 0" :loading="buttonLoading" type="warning"
+                           @click="handleProcessStrip(data)">
+                  开始清洗
+                </el-button>
+                <el-button :disabled="processStep !== 1" :loading="buttonLoading" type="warning"
+                           @click="handleProcessMining(data)">
+                  开始挖掘
+                </el-button>
+                <el-button :disabled="processStep !== 1" :loading="buttonLoading" type="success"
+                           @click="handleProcessStage(data)">
+                  暂 存
+                </el-button>
+                <el-button :disabled="processDataStage.length===0" :loading="buttonLoading" type="warning"
+                           @click="handleProcessSubmit">
+                  提 交
+                </el-button>
+
+              </div>
+            </el-tab-pane>
+
+
+          </el-card>
+
+        </el-tabs>
+
+
       </el-dialog>
     </el-card>
     <pagination
@@ -810,5 +1049,10 @@ onMounted(() => {
   white-space: normal; /* 这是默认值，保持常规空白处理和换行行为 */
 }
 
+.el-header {
+  text-align: center;
+  font-size: large;
+  font-weight: bold;
+}
 
 </style>

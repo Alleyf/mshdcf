@@ -85,6 +85,15 @@ public class DocCaseBo extends BaseEntity {
      */
     @NotBlank(message = "案件正文不能为空", groups = {AddGroup.class, EditGroup.class})
     private String content;
+    /**
+     * 修正后的案件正文
+     */
+    private String stripContent;
+
+    /**
+     * 语义信息
+     */
+    private String extra;
 
     /**
      * 案件来源（关联source表主键）

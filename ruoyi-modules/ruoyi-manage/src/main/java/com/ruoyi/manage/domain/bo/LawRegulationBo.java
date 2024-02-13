@@ -88,6 +88,15 @@ public class LawRegulationBo extends BaseEntity {
      */
     @NotBlank(message = "法规正文不能为空", groups = {AddGroup.class, EditGroup.class})
     private String content;
+    /**
+     * 修正后的法条正文
+     */
+    private String stripContent;
+
+    /**
+     * 语义信息
+     */
+    private String extra;
 
     /**
      * 法规来源（关联source表主键）
