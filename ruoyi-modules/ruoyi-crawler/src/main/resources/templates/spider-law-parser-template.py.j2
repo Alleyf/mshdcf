@@ -1,0 +1,139 @@
+class {{ alias }}RegulationParser(BaseParser):
+    """{{ source_name }}法律法规爬虫解析器"""
+
+    db = MysqlDB()
+    current_page = 1
+    total_page = 10
+    current_item = 1
+    start_urls = {{ start_urls }}
+    test_url = "{{ source_url }}"
+    # 自定义配置
+    __custom_setting__ = dict(
+        # 请求超时随请求数变化（一个请求默认20s，一页的请求个数为20个请求，乘以总页数得到总请求超时时间）
+        REQUEST_TIMEOUT = 20*20*total_page,
+    )
+    def __init__(self):
+        """初始化（获取并携带cookie或登录设置cookie，以下为demo）"""
+        openlaw = OpenLaw() #实例化openlaw类
+        self.cookies_dict = openlaw.cookie_login() #获取cookie
+        # print(type(self.cookies_dict),self.cookies_dict)
+
+
+    def download_midware(self, request):
+        """设置cookie将cookie添加到请求中"""
+        request.cookies = self.cookies_dict
+        # log.info("对所有请求添加cookie")
+        return request
+
+    def start_requests(self):
+          """发起初始请求"""
+          index = 0
+          for url in self.start_urls:
+              yield Request(url=url, callback=self.parseLs, errback=self.errback)
+              index += 1
+          # yield Request(url=self.start_urls[0], render=True, callback=self.parseLs)
+          # yield Request(url=self.test_url, render=True, callback=self.parseLs)
+
+    def validate(self, request, response):
+        """校验请求是否正常"""
+        if response.status_code != 200 or response.url != request.url or "login" in response.url:
+            log.info(f"返回内容为：{response.text}")
+            log.error(f"{request.url}->请求失败,抛弃该请求;实际请求为：{response.url}")
+            # raise Exception("response code not 200") # 抛出异常则重试
+            return False
+
+    def parseLs(self, request, response):
+        """列表页解析获取法规名称和详细页地址（根据网页结构特征自行修改逻辑）"""
+        print("--------------------------------开始请求<列表页>--------------------------------")
+        # log.info(response.text)
+        law_ls = response.css("div#ht-kb div.ht-kb-category ul.ht-kb-article-list > li")
+        # log.info(law_ls)
+        for law in law_ls:
+            title = law.css("a::attr(title)").extract_first()
+            law_id = law.css("a::attr(href)").extract_first().split("/")[-1]
+            detail_url = self.start_urls[0] + law_id
+            yield Request(url=detail_url, cookies=self.cookies_dict, callback=self.parse_detail, title = title, errback=self.errback)
+        # 请求下一页
+        # next_rel_urlLs = response.css("div#ht-kb > nav.ht-pagination > ul.page-numbers > a.next.page-numbers::attr(href)").extract_first().split('&')
+        next_url = request.url.split("?")[0] + '?page=%d'%self.current_page #获取下一页的url
+        if next_url!= None and self.current_page < self.total_page:
+            self.current_page += 1 #当前页码自增
+            yield Request(url=next_url, cookies=self.cookies_dict, callback=self.parseLs, errback=self.errback)
+
+
+    def parse_detail(self, request ,response):
+        """详细页解析获取法规基本信息（根据网页结构特征自行修改逻辑）"""
+        print("--------------------------------开始请求<详细页>--------------------------------")
+        item = LawRegulationItem()
+        try:
+          item["id"] = MySnowFlake.create_id()
+          item["url"] = request.url
+          item["name"] = request.title
+          # 确保 response 已经被正确解码为 Unicode 字符串
+          # response_text = response.body.decode('utf-8')
+          # 去除正文为空的响应
+          if isinstance(response.text,bytes):
+            log.debug(f"译码前的 {item['name']} 为{response.text}")
+            response.text = response.text.decode('utf-8')
+            log.debug(f"译码后的 {item['name']} 为{response.text}")
+          if len(response.text.strip())==0:
+              log.debug(f"{response.url} 被抛弃")
+              return False
+          # 然后使用解码后的文本执行 CSS 选择器操作
+          # article_selector = Selector(text=response_text).css("div#ht-kb article")
+          article_selector = response.css("div#ht-kb article")
+          # if article_selector
+          item['release_date'] = article_selector.css("header ul li:nth-child(1) time::attr(datetime)").extract_first()
+          item['execute_date'] = article_selector.css("header ul li:nth-child(2) time::attr(datetime)").extract_first()
+
+          contents_selector = article_selector.css("div#entry-cont") #一直为空？？？
+          # log.info(contents_selector)
+          contentLs = contents_selector.css("*::text").extract()
+          # log.info(contentLs)
+          contents = []
+          for content in contentLs:
+              content = content.strip()
+              content = content.replace("","")
+              if content !="" and content != None:
+                  contents.append(content)
+          item['content'] = "\n".join(contents) #该处格式可能有错误
+          other_selector = response.css("div.ht-container aside#sidebar section:nth-child(1) ul")
+          # 使用正则表达式提取，避免顺序错误
+          item['type'] = other_selector.re_first(regex="类型：(.*?)<",replace_entities=False)
+          if item['type']:
+              item['type'] = item['type'].strip()
+          item['structure'] = other_selector.re_first(regex="法规结构：(.*?)<",replace_entities=False)
+          if item['structure']:
+              item['structure'] = item['structure'].strip()
+          item['revise_num'] = other_selector.re_first(regex="修改次数：(.*?)<",replace_entities=False)
+          if item['revise_num']:
+              item['revise_num'] = item['revise_num'].strip()
+          item['release_organization'] = other_selector.re_first(regex="发文机关：(.*?)<",replace_entities=False)
+          if item['release_organization']:
+              item['release_organization'] = item['release_organization'].strip()
+          item['source_id'] = 1 #来源于openlaw
+
+          yield item
+
+        except Exception as e:
+          log.error(traceback.print_exc())
+          log.error(f"详细页面 {response.url} 解析失败：{e}")
+          raise Exception(f"详细页面 {response.url} 解析失败：{e}") # 抛出异常则重试
+          # return None
+
+
+    def errback(self, failure):
+      """请求异常回调函数"""
+      log.error(repr(failure))
+
+      if failure.check(HttpError):
+            response = failure.value.response
+            log.error("HttpError on %s", response.url)
+
+      elif failure.check(DNSLookupError):
+            request = failure.request
+            log.error("DNSLookupError on %s", request.url)
+
+      elif failure.check(TimeoutError, TCPTimedOutError):
+            request = failure.request
+            log.error("TimeoutError on %s", request.url)
