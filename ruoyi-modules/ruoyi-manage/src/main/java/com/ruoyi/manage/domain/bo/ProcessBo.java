@@ -19,20 +19,20 @@ import javax.validation.constraints.NotNull;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class DocCaseProcessBo extends BaseEntity {
+public class ProcessBo extends BaseEntity {
     private static final long serialVersionUID = 1L;
     /**
-     * 案件主键id（雪花id）
+     * 主键id（雪花id）
      */
-    @NotNull(message = "案件主键id（雪花id）不能为空", groups = {EditGroup.class})
+    @NotNull(message = "主键id（雪花id）不能为空", groups = {EditGroup.class})
     private Long id;
     /**
-     * 案件正文
+     * 正文
      */
-    @NotBlank(message = "案件正文不能为空", groups = {AddGroup.class, EditGroup.class})
+    @NotBlank(message = "正文不能为空", groups = {AddGroup.class, EditGroup.class})
     private String content;
     /**
-     * 修正后的案件正文
+     * 修正后的正文
      */
     private String stripContent;
 

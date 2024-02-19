@@ -12,6 +12,7 @@ import com.ruoyi.common.log.enums.BusinessType;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
 import com.ruoyi.manage.domain.bo.LawRegulationBo;
+import com.ruoyi.manage.domain.bo.ProcessBo;
 import com.ruoyi.manage.domain.vo.LawRegulationImportVo;
 import com.ruoyi.manage.domain.vo.LawRegulationVo;
 import com.ruoyi.manage.listener.LawRegulationImportListener;
@@ -42,7 +43,7 @@ import java.util.List;
 @RequestMapping("/regulation")
 public class LawRegulationController extends BaseController {
 
-    private final ILawRegulationService LawRegulationService;
+    private final ILawRegulationService lawRegulationService;
 
     /**
      * 查询法律法规列表
@@ -50,7 +51,7 @@ public class LawRegulationController extends BaseController {
     @SaCheckPermission("manage:regulation:list")
     @GetMapping("/list")
     public TableDataInfo<LawRegulationVo> list(LawRegulationBo bo, PageQuery pageQuery) {
-        return LawRegulationService.queryPageList(bo, pageQuery);
+        return lawRegulationService.queryPageList(bo, pageQuery);
     }
 
     /**
@@ -83,7 +84,7 @@ public class LawRegulationController extends BaseController {
     @Log(title = "法律法规", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(LawRegulationBo bo, HttpServletResponse response) {
-        List<LawRegulationVo> list = LawRegulationService.queryList(bo);
+        List<LawRegulationVo> list = lawRegulationService.queryList(bo);
         ExcelUtil.exportExcel(list, "法律法规", LawRegulationVo.class, response);
     }
 
@@ -95,7 +96,7 @@ public class LawRegulationController extends BaseController {
     @SaCheckPermission("manage:regulation:query")
     @GetMapping("/{id}")
     public R<LawRegulationVo> getInfo(@NotNull(message = "主键不能为空") @PathVariable Long id) {
-        return R.ok(LawRegulationService.queryById(id));
+        return R.ok(lawRegulationService.queryById(id));
     }
 
     /**
@@ -105,7 +106,7 @@ public class LawRegulationController extends BaseController {
     @Log(title = "法律法规", businessType = BusinessType.INSERT)
     @PostMapping()
     public R<Void> add(@Validated(AddGroup.class) @RequestBody LawRegulationBo bo) {
-        return toAjax(LawRegulationService.insertByBo(bo));
+        return toAjax(lawRegulationService.insertByBo(bo));
     }
 
     /**
@@ -115,7 +116,7 @@ public class LawRegulationController extends BaseController {
 //    @Log(title = "法律法规", businessType = BusinessType.INSERT)
     @GetMapping("/syncAll")
     public R<Void> syncAll() {
-        return R.ok("成功同步法条数据：" + LawRegulationService.insertBatch() + "条");
+        return R.ok("成功同步法条数据：" + lawRegulationService.insertBatch() + "条");
 
     }
 
@@ -126,7 +127,43 @@ public class LawRegulationController extends BaseController {
     @Log(title = "法律法规", businessType = BusinessType.UPDATE)
     @PutMapping()
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody LawRegulationBo bo) {
-        return toAjax(LawRegulationService.updateByBo(bo));
+        return toAjax(lawRegulationService.updateByBo(bo));
+    }
+
+    /**
+     * 批量智能处理法律法规
+     *
+     * @param processList 待处理法条列表
+     */
+    @SaCheckPermission("manage:case:edit")
+    @Log(title = "法律法规", businessType = BusinessType.UPDATE)
+    @PutMapping("/process")
+    public R<Void> process(@Validated(EditGroup.class) @RequestBody List<ProcessBo> processList) {
+        return R.ok("成功处理：" + lawRegulationService.process(processList) + "条");
+    }
+
+    /**
+     * 批量清洗法律法规
+     *
+     * @param processList 待处理法条列表
+     */
+    @SaCheckPermission("manage:case:edit")
+    @Log(title = "法律法规", businessType = BusinessType.UPDATE)
+    @PutMapping("/revise")
+    public R<Void> saveContent(@Validated(EditGroup.class) @RequestBody List<ProcessBo> processList) {
+        return R.ok("成功处理：" + lawRegulationService.processContent(processList) + "条");
+    }
+
+    /**
+     * 批量挖掘法律法规
+     *
+     * @param processList 待处理法条列表
+     */
+    @SaCheckPermission("manage:case:edit")
+    @Log(title = "法律法规", businessType = BusinessType.UPDATE)
+    @PutMapping("/mining")
+    public R<Void> saveExtra(@Validated(EditGroup.class) @RequestBody List<ProcessBo> processList) {
+        return R.ok("成功处理：" + lawRegulationService.processExtra(processList) + "条");
     }
 
     /**
@@ -138,6 +175,6 @@ public class LawRegulationController extends BaseController {
     @Log(title = "法律法规", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空") @PathVariable Long[] ids) {
-        return toAjax(LawRegulationService.deleteWithValidByIds(Arrays.asList(ids), true));
+        return toAjax(lawRegulationService.deleteWithValidByIds(Arrays.asList(ids), true));
     }
 }

@@ -10,7 +10,8 @@ import com.ruoyi.common.mybatis.core.page.TableDataInfo;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.ruoyi.manage.domain.bo.DocCaseProcessBo;
+import com.ruoyi.manage.domain.bo.ProcessBo;
+import com.ruoyi.manage.enums.MiningStatus;
 import com.ruoyi.retrieve.api.RemoteCaseDocRetrieveService;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
 import lombok.extern.slf4j.Slf4j;
@@ -201,12 +202,72 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
      * @return int 成功个数
      */
     @Override
-    public int process(List<DocCaseProcessBo> processList) {
+    public int process(List<ProcessBo> processList) {
         AtomicInteger success = new AtomicInteger(0);
         List<DocCase> docCases = BeanCopyUtils.copyList(processList, DocCase.class);
         if (docCases != null) {
             docCases.forEach(docCase -> {
                 validEntityBeforeSave(docCase);
+                if (checkRevised(docCase)) {
+                    docCase.setIsMining(MiningStatus.STRIPED);
+                }
+                if (checkMininged(docCase)) {
+                    docCase.setIsMining(MiningStatus.MININGED);
+                }
+                boolean sqlFlag = baseMapper.updateById(docCase) > 0;
+                if (sqlFlag) {
+                    //            更新es索引
+                    boolean esFlag = remoteCaseRetrieveService.update(BeanCopyUtils.copy(docCase, CaseDoc.class)) > 0;
+                    if (esFlag) {
+                        success.addAndGet(1);
+                    }
+                }
+            });
+        }
+        return success.get();
+    }
+
+    /**
+     * 批量处理司法案例内容
+     *
+     * @param processList 待处理列表
+     * @return int 成功个数
+     */
+    @Override
+    public int processContent(List<ProcessBo> processList) {
+        AtomicInteger success = new AtomicInteger(0);
+        List<DocCase> docCases = BeanCopyUtils.copyList(processList, DocCase.class);
+        if (docCases != null) {
+            docCases.forEach(docCase -> {
+                validEntityBeforeSave(docCase);
+                docCase.setIsMining(MiningStatus.STRIPED);
+                boolean sqlFlag = baseMapper.updateById(docCase) > 0;
+                if (sqlFlag) {
+                    //            更新es索引
+                    boolean esFlag = remoteCaseRetrieveService.update(BeanCopyUtils.copy(docCase, CaseDoc.class)) > 0;
+                    if (esFlag) {
+                        success.addAndGet(1);
+                    }
+                }
+            });
+        }
+        return success.get();
+    }
+
+    /**
+     * 批量处理司法案例额外信息
+     *
+     * @param processList 待处理列表
+     * @return int 成功个数
+     */
+    @Override
+    public int processExtra(List<ProcessBo> processList) {
+        AtomicInteger success = new AtomicInteger(0);
+        List<DocCase> docCases = BeanCopyUtils.copyList(processList, DocCase.class);
+        if (docCases != null) {
+            docCases.forEach(docCase -> {
+                validEntityBeforeSave(docCase);
+                docCase.setIsMining(MiningStatus.MININGED);
                 boolean sqlFlag = baseMapper.updateById(docCase) > 0;
                 if (sqlFlag) {
                     //            更新es索引
@@ -228,5 +289,25 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         LambdaQueryWrapper<DocCase> lqw = Wrappers.lambdaQuery();
         lqw.eq(DocCase::getName, name);
         return baseMapper.selectOne(lqw);
+    }
+
+    /**
+     * 判断是否已经清洗
+     *
+     * @param docCase 案例
+     * @return boolean
+     */
+    boolean checkRevised(DocCase docCase) {
+        return !StringUtils.isBlank(docCase.getStripContent()) && !docCase.getStripContent().equals(docCase.getContent());
+    }
+
+    /**
+     * 判断是否已经挖掘
+     *
+     * @param docCase 案例
+     * @return boolean
+     */
+    boolean checkMininged(DocCase docCase) {
+        return !StringUtils.isBlank(docCase.getExtra());
     }
 }

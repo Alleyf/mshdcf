@@ -4,12 +4,15 @@ import {
   getRegulation,
   delRegulation,
   addRegulation,
-  updateRegulation,
+  updateRegulation, saveProcessRegulation,
 } from '@/api/manage/regulation'
 import {download} from '@/utils/request'
 import {getCurrentInstance, onMounted, reactive, ref, toRefs} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {parseTime} from "@/utils/ruoyi";
+import {saveProcessCase} from "@/api/manage/case";
+import {miningCase, miningLaw, reviseCase, reviseLaw} from "@/api/manage/process";
+import {Edit, Switch, UploadFilled, UserFilled} from "@element-plus/icons-vue";
 
 const {proxy} = getCurrentInstance();
 
@@ -27,7 +30,6 @@ const ids = ref([])
 const single = ref(true)
 const multiple = ref(true)
 const showSearch = ref(true)
-const openContent = ref(false)
 
 const data = reactive({
   form: {},
@@ -70,17 +72,172 @@ const data = reactive({
     status: [
       {required: true, message: '状态不能为空', trigger: 'change'},
     ],
+  },
+  processData: [],
+  processDataForm: {
+    id: null,
+    content: '',
+    stripContent: '',
+    extra: '',
+  },
+  processDataStage: [],
+  extra: {
+    keyword: '',
+    field: '',
+    type: '',
+    organization: '',
+    release: '',
+    execute: '',
+    basis: [],
+    scope: '',
+    main: [],
+    abstract: ''
   }
 })
 
-const {queryParams, form, rules} = toRefs(data);
+const {queryParams, form, rules, processData, processDataForm, processDataStage, extra} = toRefs(data);
+
 
 const title = ref('')
 const open = ref(false)
+const processDialog = ref(false)
+const defaultTab = ref(0)
+const processStep = ref(0)
+const openContent = ref(false)
 
 const queryForm = ref(null)
 const dialogForm = ref(null)
 
+//法条数据清洗挖掘
+const handleProcess = () => {
+  // 浅拷贝
+  processData.value = []
+  console.log(processData.value)
+  const toAdd = []
+  regulationList.value.forEach(item => {
+    const exist = processData.value.findIndex(data => item.id === data.id) !== -1
+    if (ids.value.includes(item.id) && !exist) {
+      // 判断extra是否是非空字符串，是则需要解析，否则无需解析
+      if ((item.extra !== "" || item.extra !== null) && typeof item.extra === 'string') {
+        // 解析json字符串
+        item.extra = JSON.parse(item.extra);
+      } else {
+        item.extra = extra.value
+      }
+      toAdd.push(item); // 将元素添加到新数组中
+      // 将解析后的json对象还原为json字符串
+      // item.extra = JSON.stringify(item.extra);
+    }
+  })
+  processData.value = processData.value.concat(toAdd);
+  processDialog.value = true
+  // processData.value = regulationListCopy
+  // console.log(ids.value, processData.value)
+}
+
+const handleProcessStage = (data) => {
+  // 检查数组中是否存在具有相同 id 的元素
+  const existingIndex = processDataStage.value.findIndex(item => item.id === data.id);
+  if (existingIndex !== -1) {
+    // 如果找到，更新数组中的元素
+    processDataStage.value[existingIndex] = {
+      id: data.id,
+      content: data.content,
+      stripContent: data.stripContent,
+      extra: JSON.stringify(data.extra),
+    };
+  } else {
+    // 如果没有找到，将新元素添加到数组中
+    processDataStage.value.push({
+      id: data.id,
+      content: data.content,
+      stripContent: data.stripContent,
+      extra: JSON.stringify(data.extra),
+    });
+  }
+  console.log(processDataStage.value)
+  ElMessage.success(`数据<${data.name}>暂存成功`)
+}
+const handleProcessSubmit = () => {
+  if (processDataStage.value.length === 0) {
+    ElMessage.error("请先暂存已修改的数据")
+    return
+  }
+  console.log(processDataStage.value)
+  saveProcessRegulation(processDataStage.value).then(res => {
+    if (res.code === 200) {
+      // 数据更新重新获取
+      getList()
+      ElMessage.success(res.msg)
+    } else {
+      ElMessage.error(res.msg)
+    }
+  })
+}
+
+const handleProcessNext = () => {
+  // todo 数据清洗挖掘下一步按钮回调函数
+  if (processStep.value++ > 0) processStep.value = 1
+  console.log(processStep.value)
+
+}
+
+const handleProcessPrev = () => {
+  // todo 数据清洗挖掘上一步按钮回调函数
+  if (processStep.value-- < 1) processStep.value = 0
+  console.log(processStep.value)
+}
+
+const handleRemoveTab = (targetName) => {
+  // todo 数据清洗挖掘tab页删除回调函数
+  // 找到要删除的标签页的索引
+  const index = targetName;
+  if (index !== 0) {
+    // 从数组中移除标签页
+    processData.value.splice(index, 1);
+  }
+  // 如果删除的是当前选中的标签页，需要更新 defaultTab
+  if (defaultTab.value === targetName) {
+    // 设置新的 defaultTab，例如选中第一个标签页
+    defaultTab.value = 0;
+  }
+}
+
+const handleProcessStrip = (data) => {
+  // todo 调用数据清洗接口，并将结果更新到processData中
+  console.log(data)
+  reviseLaw(data.id).then(res => {
+    if (res.code === 200) {
+      // 数据更新重新获取
+      data.stripContent = res.data.stripContent
+      ElMessage.success(res.msg)
+    } else {
+      ElMessage.error(res.msg)
+    }
+  })
+}
+
+const handleProcessMining = (data) => {
+  // todo 调用数据挖掘接口，并将结果更新到processData中
+  console.log(data)
+  miningLaw(data.id).then(res => {
+    if (res.code === 200) {
+      // 数据更新重新获取
+      data.extra = JSON.parse(res.data.extra)
+      console.log(data.extra, res.data.extra)
+      ElMessage.success(res.msg)
+    } else {
+      ElMessage.error(res.msg)
+    }
+  })
+}
+
+const resetProcess = (data) => {
+  data.stripContent = data.content
+}
+
+
+// ---------------分割线---------------
 const getList = () => {
   loading.value = true
   listRegulation(queryParams.value).then((res) => {
@@ -148,6 +305,7 @@ const resetForm = () => {
 
 const cancelDialog = () => {
   open.value = false
+  processDialog.value = false
   resetForm()
 }
 
@@ -211,8 +369,8 @@ const handleDelete = row => {
 const handleExport = () => {
   console.log({...queryParams.value})
   proxy.download('manage/regulation/export',
-      {...queryParams.value}
-      , `regulation_${new Date().getTime()}.xlsx`)
+    {...queryParams.value}
+    , `regulation_${new Date().getTime()}.xlsx`)
 }
 
 onMounted(() => {
@@ -288,12 +446,12 @@ onMounted(() => {
         </el-col>
         <el-col :span="1.5">
           <el-button
-              v-hasPermi="['manage:case:process']"
-              :disabled="multiple"
-              icon="Edit"
-              size="default"
-              type="primary"
-              @click="handleProcess"
+            v-hasPermi="['manage:case:process']"
+            :disabled="multiple"
+            icon="Edit"
+            size="default"
+            type="primary"
+            @click="handleProcess"
           >清洗挖掘
           </el-button>
         </el-col>
@@ -301,15 +459,15 @@ onMounted(() => {
       </el-row>
 
       <el-table
-          v-loading="loading"
-          :data="regulationList"
-          :default-sort="{ prop: 'releaseDate', order: 'descending' }"
-          border
-          height="500"
-          stripe
-          style="width: 100%;text-align: center"
-          table-layout="auto"
-          @selection-change="handleSelectionChange"
+        v-loading="loading"
+        :data="regulationList"
+        :default-sort="{ prop: 'releaseDate', order: 'descending' }"
+        border
+        height="500"
+        stripe
+        style="width: 100%;text-align: center"
+        table-layout="auto"
+        @selection-change="handleSelectionChange"
       >
         <el-table-column align="center" type="selection" width="55"/>
         <!--      <el-table-column v-if="true" align="center" label="法律法规主键id" prop="id"/>-->
@@ -441,7 +599,7 @@ onMounted(() => {
           <el-form-item label="法规正文" prop="content">
             <el-link href="javascript:void(0);" type="primary" @click="openContent=true">进入法条正文</el-link>
             <el-dialog v-model="openContent" title="输入法条正文">
-              <editor v-model="form.content" :min-height="300"/>
+              <q-editor v-model="form.content" :min-height="300"/>
             </el-dialog>
           </el-form-item>
           <el-form-item label="法规来源" prop="sourceId">
@@ -469,13 +627,136 @@ onMounted(() => {
           <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
         </template>
       </el-dialog>
+
+      <!-- 清洗挖掘对话框 -->
+      <el-dialog v-model="processDialog" :fullscreen="true" title="法律法规数据清洗挖掘" width="100%">
+        <el-steps :active="processStep" align-center class="mb-10" finish-status="success">
+          <el-step :icon="Edit" description="对数据格式进行格式化并去除异常字符" title="Step 1：数据清洗"/>
+          <el-step :icon="UploadFilled" :status="'finish'" description="对数据进行挖掘分析提取潜在信息"
+                   title="Step 2：数据挖掘"/>
+        </el-steps>
+        <el-tabs v-model="defaultTab" :closable="true" :tab-position="'left'" @tab-remove="handleRemoveTab">
+          <el-card :shadow="'hover'" class="mt-3 shadow-sm w-100%">
+            <el-tab-pane v-for="(data,index) in processData" :key="data.id" :label="data.name" :name="index">
+              <template #label>
+                <el-tooltip :content="data.name" class="item" effect="dark" placement="top">
+                  <span class="text-overflow overflow-hidden whitespace-nowrap text-sm">{{
+                      data.name.substring(0, 15) + '...'
+                    }}</span>
+                </el-tooltip>
+              </template>
+              <el-form :label-position="'left'" :model="data" :size="'default'" class="flex">
+                <el-col :span="12" class="mr-2">
+                  <div v-if="processStep===0">
+                    <el-header>
+                      原始正文
+                      <el-button :plain="true" type="primary" @click="resetProcess(data)">还原</el-button>
+                    </el-header>
+                    <el-form-item>
+                      <el-input v-model="data.content" :autosize="true" resize="vertical" type="textarea"/>
+                    </el-form-item>
+
+                  </div>
+                  <div v-else-if="processStep===1">
+                    <el-header>
+                      修正正文
+                    </el-header>
+                    <el-input v-model="data.stripContent" :autosize="true" resize="vertical" type="textarea"/>
+                  </div>
+                </el-col>
+                <el-col :span="12">
+                  <div v-if="processStep===0">
+                    <el-header>
+                      修正正文
+                    </el-header>
+                    <el-input v-model="data.stripContent" :autosize="{ minRows: 10, maxRows: 200 }" type="textarea"/>
+                  </div>
+                  <div v-else-if="processStep===1">
+                    <el-header>
+                      语义信息
+                    </el-header>
+                    <el-card :shadow="'never'">
+                      <!--                      <div v-if="data.extra.party"-->
+                      <!--                           class="text-center whitespace-pre-wrap flex justify-around">-->
+                      <!--                        <el-form-item label="">-->
+                      <!--                          <el-input v-model="data.extra.party.plaintiff" :prefix-icon="UserFilled" clearable/>-->
+                      <!--                        </el-form-item>-->
+                      <!--                        <el-form-item class="text-red-500 font-bold">-->
+                      <!--                          原告⚖️被告-->
+                      <!--                        </el-form-item>-->
+                      <!--                        <el-form-item label="">-->
+                      <!--                          <el-input v-model="data.extra.party.defendant" :prefix-icon="UserFilled" clearable/>-->
+                      <!--                        </el-form-item>-->
+                      <!--                      </div>-->
+                      <el-form-item label="关键词语">
+                        <el-input v-model="data.extra.keyword" type="textarea"/>
+                      </el-form-item>
+                      <el-form-item label="所属领域">
+                        <el-input v-model="data.extra.field"/>
+                      </el-form-item>
+                      <el-form-item label="颁布组织">
+                        <el-input v-model="data.extra.organization" :prefix-icon="Switch"/>
+                      </el-form-item>
+                      <el-form-item label="适用范围">
+                        <el-input v-model="data.extra.scope" type="textarea"/>
+                      </el-form-item>
+                      <el-form-item label="法条依据">
+                        <el-input v-model="data.extra.basis" type="textarea"/>
+                      </el-form-item>
+                      <el-form-item label="主要内容">
+                        <el-input v-model="data.extra.main" type="textarea"/>
+                      </el-form-item>
+                      <el-form-item label="法条摘要">
+                        <el-input v-model="data.extra.summary" type="textarea"/>
+                      </el-form-item>
+                    </el-card>
+                  </div>
+                </el-col>
+              </el-form>
+              <div class="flex justify-end items-end mt-3"> <!-- 添加 justify-end 和 items-end 类 -->
+                <el-button @click="cancelDialog">取 消</el-button>
+                <el-button :disabled="processStep <= 0" :loading="buttonLoading" type="primary"
+                           @click="handleProcessPrev">
+                  上一步
+                </el-button>
+                <el-button :disabled="processStep >= 1" :loading="buttonLoading" type="primary"
+                           @click="handleProcessNext">
+                  下一步
+                </el-button>
+                <el-button :disabled="processStep !== 0" :loading="buttonLoading" type="warning"
+                           @click="handleProcessStrip(data)">
+                  开始清洗
+                </el-button>
+                <el-button :disabled="processStep !== 1" :loading="buttonLoading" type="warning"
+                           @click="handleProcessMining(data)">
+                  开始挖掘
+                </el-button>
+                <el-button :disabled="processStep !== 1" :loading="buttonLoading" type="success"
+                           @click="handleProcessStage(data)">
+                  暂 存
+                </el-button>
+                <el-button :disabled="processDataStage.length===0" :loading="buttonLoading" type="warning"
+                           @click="handleProcessSubmit">
+                  提 交
+                </el-button>
+
+              </div>
+            </el-tab-pane>
+
+
+          </el-card>
+
+        </el-tabs>
+
+
+      </el-dialog>
     </el-card>
     <pagination
-        v-show="total>0"
-        v-model:limit="queryParams.pageSize"
-        v-model:page="queryParams.pageNum"
-        :total="total"
-        @pagination="getList"
+      v-show="total>0"
+      v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNum"
+      :total="total"
+      @pagination="getList"
     />
   </div>
 </template>
@@ -493,5 +774,11 @@ onMounted(() => {
   overflow-wrap: break-word; /* 当内容溢出容器边界时允许单词内部断行 */
   word-break: break-word; /* 对于不区分单词的脚本（如中文、日文等），也可以使用此属性 */
   white-space: normal; /* 这是默认值，保持常规空白处理和换行行为 */
+}
+
+.el-header {
+  text-align: center;
+  font-size: large;
+  font-weight: bold;
 }
 </style>

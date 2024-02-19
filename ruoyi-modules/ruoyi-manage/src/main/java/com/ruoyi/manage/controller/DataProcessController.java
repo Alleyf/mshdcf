@@ -2,6 +2,8 @@ package com.ruoyi.manage.controller;
 
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.web.controller.BaseController;
+import com.ruoyi.manage.domain.DocCase;
+import com.ruoyi.manage.domain.LawRegulation;
 import com.ruoyi.manage.service.impl.DataProcessService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -37,7 +39,7 @@ public class DataProcessController extends BaseController {
     @GetMapping("/case/stripAll")
     public R<Void> stripCaseAll() {
         int stripNum = dataProcessService.stripCaseContent(null);
-        int reviseNum = dataProcessService.reviseCaseContent(null);
+        int reviseNum = dataProcessService.reviseCaseContentSave(null);
         return R.ok("司法案例数据成功清洗格式化：" + stripNum + "条数据；" + "成功清洗修正：" + reviseNum + "条。");
     }
 
@@ -52,8 +54,20 @@ public class DataProcessController extends BaseController {
         log.info(String.format("stripCaseBatch ids:{}", ids));
         System.out.println(Arrays.toString(Arrays.stream(ids).toArray()));
         boolean stripFlag = dataProcessService.stripCaseContent(Arrays.asList(ids)) > 0;
-        boolean reviseFlag = dataProcessService.reviseCaseContent(Arrays.asList(ids)) > 0;
+        boolean reviseFlag = dataProcessService.reviseCaseContentSave(Arrays.asList(ids)) > 0;
         return toAjax(stripFlag && reviseFlag);
+    }
+
+    /**
+     * 清洗单个案例数据
+     *
+     * @param id 案例id
+     * @return R<DocCase>
+     */
+    @GetMapping("/case/revise/{id}")
+    public R<DocCase> reviseCase(@PathVariable("id") Long id) {
+        DocCase docCase = dataProcessService.reviseCaseContent(id);
+        return R.ok(docCase);
     }
 
     /**
@@ -64,7 +78,7 @@ public class DataProcessController extends BaseController {
     @GetMapping("/law/stripAll")
     public R<Void> stripLawAll() {
         int stripNum = dataProcessService.stripRegulationContent(null);
-        int reviseNum = dataProcessService.reviseLawContent(null);
+        int reviseNum = dataProcessService.reviseLawContentSave(null);
         return R.ok("法律法规数据成功清洗格式化：" + stripNum + "条;" + "成功清洗修正：" + reviseNum + "条。");
     }
 
@@ -77,8 +91,20 @@ public class DataProcessController extends BaseController {
     @PutMapping("/law/strip/{ids}")
     public R<Void> stripLawBatch(@PathVariable("ids") Long[] ids) {
         boolean stripFlag = dataProcessService.stripRegulationContent(Arrays.asList(ids)) > 0;
-        boolean reviseFlag = dataProcessService.reviseLawContent(Arrays.asList(ids)) > 0;
+        boolean reviseFlag = dataProcessService.reviseLawContentSave(Arrays.asList(ids)) > 0;
         return toAjax(stripFlag && reviseFlag);
+    }
+
+    /**
+     * 清洗单个法条数据
+     *
+     * @param id 法条id
+     * @return R<LawRegulation>
+     */
+    @GetMapping("/law/revise/{id}")
+    public R<LawRegulation> reviseLaw(@PathVariable("id") Long id) {
+        LawRegulation lawRegulation = dataProcessService.reviseLawContent(id);
+        return R.ok(lawRegulation);
     }
 
     /**
@@ -89,7 +115,19 @@ public class DataProcessController extends BaseController {
      */
     @PutMapping("/case/extract/{ids}")
     public R<Void> caseExtract(@PathVariable("ids") Long[] ids) {
-        return toAjax(dataProcessService.caseInfoMining(Arrays.asList(ids)));
+        return toAjax(dataProcessService.caseInfoMiningSave(Arrays.asList(ids)));
+    }
+
+    /**
+     * 挖掘单个案例数据
+     *
+     * @param id 案例id
+     * @return R<DocCase>
+     */
+    @GetMapping("/case/extractOne/{id}")
+    public R<DocCase> caseExtract(@PathVariable("id") Long id) {
+        DocCase docCase = dataProcessService.caseInfoMining(id);
+        return R.ok(docCase);
     }
 
     /**
@@ -99,7 +137,7 @@ public class DataProcessController extends BaseController {
      */
     @GetMapping("/case/extractAll")
     public R<Void> caseExtractAll() {
-        return toAjax(dataProcessService.caseInfoMining(null));
+        return toAjax(dataProcessService.caseInfoMiningSave(null));
     }
 
     /**
@@ -110,7 +148,19 @@ public class DataProcessController extends BaseController {
      */
     @PutMapping("/law/extract/{ids}")
     public R<Void> lawExtract(@PathVariable("ids") Long[] ids) {
-        return toAjax(dataProcessService.lawInfoMining(Arrays.asList(ids)));
+        return toAjax(dataProcessService.lawInfoMiningSave(Arrays.asList(ids)));
+    }
+
+    /**
+     * 挖掘单个法条数据
+     *
+     * @param id 法条id
+     * @return R<LawRegulation>
+     */
+    @GetMapping("/law/extractOne/{id}")
+    public R<LawRegulation> lawExtract(@PathVariable("id") Long id) {
+        LawRegulation lawRegulation = dataProcessService.lawInfoMining(id);
+        return R.ok(lawRegulation);
     }
 
     /**
@@ -120,7 +170,7 @@ public class DataProcessController extends BaseController {
      */
     @GetMapping("/law/extractAll")
     public R<Void> lawExtractAll() {
-        return toAjax(dataProcessService.lawInfoMining(null));
+        return toAjax(dataProcessService.lawInfoMiningSave(null));
     }
 
 }

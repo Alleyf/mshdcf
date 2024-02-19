@@ -2,12 +2,11 @@ package com.ruoyi.manage.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.manage.domain.DocCase;
-import com.ruoyi.manage.domain.bo.DocCaseProcessBo;
+import com.ruoyi.manage.domain.bo.ProcessBo;
 import com.ruoyi.manage.domain.vo.DocCaseVo;
 import com.ruoyi.manage.domain.bo.DocCaseBo;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 
 import java.util.Collection;
 import java.util.List;
@@ -65,5 +64,9 @@ public interface IDocCaseService extends IService<DocCase> {
      */
     DocCase selectDocCaseByName(String name);
 
-    int process(List<DocCaseProcessBo> processList);
+    int process(List<ProcessBo> processList);
+
+    int processContent(List<ProcessBo> processList);
+
+    int processExtra(List<ProcessBo> processList);
 }

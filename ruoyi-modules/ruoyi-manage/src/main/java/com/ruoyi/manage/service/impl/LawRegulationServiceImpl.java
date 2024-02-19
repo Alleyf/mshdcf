@@ -11,10 +11,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.manage.domain.DocCase;
-import com.ruoyi.manage.mapper.DocCaseMapper;
+import com.ruoyi.manage.domain.LawRegulation;
+import com.ruoyi.manage.domain.bo.ProcessBo;
+import com.ruoyi.manage.enums.MiningStatus;
+import com.ruoyi.manage.mapper.LawRegulationMapper;
 import com.ruoyi.retrieve.api.RemoteLawDocRetrieveService;
 import com.ruoyi.retrieve.api.RemoteRetrieveService;
-import com.ruoyi.retrieve.api.domain.CaseDoc;
+import com.ruoyi.retrieve.api.domain.LawDoc;
 import com.ruoyi.retrieve.api.domain.LawDoc;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +33,7 @@ import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -174,6 +178,93 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
     }
 
     /**
+     * 批量智能处理法律法规
+     *
+     * @param processList 待处理列表
+     * @return int 成功个数
+     */
+    @Override
+    public int process(List<ProcessBo> processList) {
+        AtomicInteger success = new AtomicInteger(0);
+        List<LawRegulation> laws = BeanCopyUtils.copyList(processList, LawRegulation.class);
+        if (laws != null) {
+            laws.forEach(law -> {
+                validEntityBeforeSave(law);
+                if (checkRevised(law)) {
+                    law.setIsMining(MiningStatus.STRIPED);
+                }
+                if (checkMininged(law)) {
+                    law.setIsMining(MiningStatus.MININGED);
+                }
+
+                boolean sqlFlag = baseMapper.updateById(law) > 0;
+                if (sqlFlag) {
+                    //            更新es索引
+                    boolean esFlag = remoteLawRetrieveService.update(BeanCopyUtils.copy(law, LawDoc.class)) > 0;
+                    if (esFlag) {
+                        success.addAndGet(1);
+                    }
+                }
+            });
+        }
+        return success.get();
+    }
+
+    /**
+     * 批量处理法律法规内容
+     *
+     * @param processList 待处理列表
+     * @return int 成功个数
+     */
+    @Override
+    public int processContent(List<ProcessBo> processList) {
+        AtomicInteger success = new AtomicInteger(0);
+        List<LawRegulation> laws = BeanCopyUtils.copyList(processList, LawRegulation.class);
+        if (laws != null) {
+            laws.forEach(law -> {
+                validEntityBeforeSave(law);
+                law.setIsMining(MiningStatus.STRIPED);
+                boolean sqlFlag = baseMapper.updateById(law) > 0;
+                if (sqlFlag) {
+                    //            更新es索引
+                    boolean esFlag = remoteLawRetrieveService.update(BeanCopyUtils.copy(law, LawDoc.class)) > 0;
+                    if (esFlag) {
+                        success.addAndGet(1);
+                    }
+                }
+            });
+        }
+        return success.get();
+    }
+
+    /**
+     * 批量处理法律法规额外信息
+     *
+     * @param processList 待处理列表
+     * @return int 成功个数
+     */
+    @Override
+    public int processExtra(List<ProcessBo> processList) {
+        AtomicInteger success = new AtomicInteger(0);
+        List<LawRegulation> laws = BeanCopyUtils.copyList(processList, LawRegulation.class);
+        if (laws != null) {
+            laws.forEach(law -> {
+                validEntityBeforeSave(law);
+                law.setIsMining(MiningStatus.MININGED);
+                boolean sqlFlag = baseMapper.updateById(law) > 0;
+                if (sqlFlag) {
+                    //            更新es索引
+                    boolean esFlag = remoteLawRetrieveService.update(BeanCopyUtils.copy(law, LawDoc.class)) > 0;
+                    if (esFlag) {
+                        success.addAndGet(1);
+                    }
+                }
+            });
+        }
+        return success.get();
+    }
+
+    /**
      * 根据案例名字查询
      */
     @Override
@@ -181,5 +272,25 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         LambdaQueryWrapper<LawRegulation> lqw = Wrappers.lambdaQuery();
         lqw.eq(LawRegulation::getName, name);
         return baseMapper.selectOne(lqw);
+    }
+
+    /**
+     * 判断是否已经清洗
+     *
+     * @param law 法条
+     * @return boolean
+     */
+    boolean checkRevised(LawRegulation law) {
+        return !StringUtils.isBlank(law.getStripContent()) && !law.getStripContent().equals(law.getContent());
+    }
+
+    /**
+     * 判断是否已经挖掘
+     *
+     * @param law 法条
+     * @return boolean
+     */
+    boolean checkMininged(LawRegulation law) {
+        return !StringUtils.isBlank(law.getExtra());
     }
 }

@@ -20,6 +20,7 @@ import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -54,6 +55,12 @@ public class DataProcessService {
         return remoteLawDocRetrieveService.update(lawDoc);
     }
 
+    /**
+     * 检查索引是否存在
+     *
+     * @param id id
+     * @return boolean
+     */
     private boolean existDataCaseIndex(Long id) {
         return remoteCaseDocRetrieveService.exist(id);
     }
@@ -68,7 +75,7 @@ public class DataProcessService {
      * @param ids 案例id
      * @return int 成功数
      */
-    public int caseInfoMining(List<Long> ids) {
+    public int caseInfoMiningSave(List<Long> ids) {
 //        首先使用Gemini提示模板进行挖掘，失败则通过设计的规则进行挖掘
         AtomicInteger success = new AtomicInteger(0);
         List<DocCase> docCases;
@@ -110,12 +117,32 @@ public class DataProcessService {
     }
 
     /**
+     * 案例信息挖掘
+     *
+     * @param id 案例id
+     * @return int 挖掘后的案例
+     */
+    public DocCase caseInfoMining(Long id) {
+//        首先使用Gemini提示模板进行挖掘，失败则通过设计的规则进行挖掘
+        DocCase docCase = docCaseMapper.selectById(id);
+        Assert.notNull(docCase, "id为：" + id + "的数据不存在");
+//            清洗过的数据才能进行挖掘
+        String extra = GeminiUtils.caseParse(docCase.getStripContent());
+        if (extra == null) {
+//                从原文or修正文？中提取信息
+            extra = ProcessUtils.buildCaseExtra(docCase.getStripContent());
+        }
+        docCase.setExtra(extra);
+        return docCase;
+    }
+
+    /**
      * 法规信息挖掘
      *
      * @param ids 法规id
      * @return int 成功数
      */
-    public int lawInfoMining(List<Long> ids) {
+    public int lawInfoMiningSave(List<Long> ids) {
         AtomicInteger success = new AtomicInteger(0);
         List<LawRegulation> lawRegulations;
         if (ids != null) {
@@ -143,6 +170,22 @@ public class DataProcessService {
             }
         });
         return success.get();
+    }
+
+    /**
+     * 法规信息挖掘
+     *
+     * @param id 法规id
+     * @return int 挖掘后的法规
+     */
+    public LawRegulation lawInfoMining(Long id) {
+//        首先使用Gemini提示模板进行挖掘，失败则通过设计的规则进行挖掘
+        LawRegulation lawRegulation = lawRegulationMapper.selectById(id);
+        Assert.notNull(lawRegulation, "id为：" + id + "的数据不存在");
+//            清洗过的数据才能进行挖掘
+        String extra = GeminiUtils.lawParse(lawRegulation.getStripContent());
+        lawRegulation.setExtra(extra);
+        return lawRegulation;
     }
 
     /**
@@ -184,7 +227,7 @@ public class DataProcessService {
      * @param ids 案例id
      * @return int 成功数
      */
-    public int reviseCaseContent(List<Long> ids) {
+    public int reviseCaseContentSave(List<Long> ids) {
         AtomicInteger success = new AtomicInteger(0);
         List<DocCase> docCases;
         if (ids != null) {
@@ -212,6 +255,23 @@ public class DataProcessService {
             }
         });
         return success.get();
+    }
+
+
+    /**
+     * 指定id的案例正文修正不保存
+     *
+     * @param id 案例id
+     * @return 修正后的案例
+     */
+    public DocCase reviseCaseContent(Long id) {
+        DocCase docCase = docCaseMapper.selectById(id);
+        Assert.notNull(docCase, "id为：" + id + "的数据不存在");
+        //            原始数据才需要清洗
+        String content = ProcessUtils.stripCaseUnicode(docCase.getContent());
+        content = GeminiUtils.caseRevise(content);
+        docCase.setStripContent(content);
+        return docCase;
     }
 
     /**
@@ -253,7 +313,7 @@ public class DataProcessService {
      * @param ids 法条id
      * @return int 成功数
      */
-    public int reviseLawContent(List<Long> ids) {
+    public int reviseLawContentSave(List<Long> ids) {
         AtomicInteger success = new AtomicInteger(0);
         List<LawRegulation> lawRegulations;
         if (ids != null) {
@@ -283,4 +343,19 @@ public class DataProcessService {
         return success.get();
     }
 
+    /**
+     * 指定id的法条正文修正不保存
+     *
+     * @param id 法条id
+     * @return 修正后的法条
+     */
+    public LawRegulation reviseLawContent(Long id) {
+        LawRegulation lawRegulation = lawRegulationMapper.selectById(id);
+        Assert.notNull(lawRegulation, "id为：" + id + "的数据不存在");
+        //            原始数据才需要清洗
+        String content = ProcessUtils.stripCaseUnicode(lawRegulation.getContent());
+        content = GeminiUtils.lawRevise(content);
+        lawRegulation.setStripContent(content);
+        return lawRegulation;
+    }
 }

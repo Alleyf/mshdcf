@@ -10,7 +10,7 @@ import com.ruoyi.common.excel.utils.ExcelUtil;
 import com.ruoyi.common.log.annotation.Log;
 import com.ruoyi.common.log.enums.BusinessType;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
-import com.ruoyi.manage.domain.bo.DocCaseProcessBo;
+import com.ruoyi.manage.domain.bo.ProcessBo;
 import com.ruoyi.manage.domain.vo.DocCaseImportVo;
 import com.ruoyi.manage.listener.DocCaseImportListener;
 import lombok.RequiredArgsConstructor;
@@ -150,8 +150,32 @@ public class DocCaseController extends BaseController {
     @SaCheckPermission("manage:case:edit")
     @Log(title = "司法案例", businessType = BusinessType.UPDATE)
     @PutMapping("/process")
-    public R<Void> process(@Validated(EditGroup.class) @RequestBody List<DocCaseProcessBo> processList) {
+    public R<Void> process(@Validated(EditGroup.class) @RequestBody List<ProcessBo> processList) {
         return R.ok("成功处理：" + docCaseService.process(processList) + "条");
+    }
+
+    /**
+     * 批量清洗司法案例
+     *
+     * @param processList 待处理案例列表
+     */
+    @SaCheckPermission("manage:case:edit")
+    @Log(title = "司法案例", businessType = BusinessType.UPDATE)
+    @PutMapping("/revise")
+    public R<Void> saveContent(@Validated(EditGroup.class) @RequestBody List<ProcessBo> processList) {
+        return R.ok("成功处理：" + docCaseService.processContent(processList) + "条");
+    }
+
+    /**
+     * 批量挖掘司法案例
+     *
+     * @param processList 待处理案例列表
+     */
+    @SaCheckPermission("manage:case:edit")
+    @Log(title = "司法案例", businessType = BusinessType.UPDATE)
+    @PutMapping("/mining")
+    public R<Void> saveExtra(@Validated(EditGroup.class) @RequestBody List<ProcessBo> processList) {
+        return R.ok("成功处理：" + docCaseService.processExtra(processList) + "条");
     }
 
     /**
