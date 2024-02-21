@@ -5,6 +5,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.ruoyi.common.excel.annotation.ExcelDictFormat;
 import com.ruoyi.common.excel.convert.ExcelDictConvert;
 import lombok.Data;
+
 import java.util.Date;
 import java.io.Serializable;
 
@@ -33,6 +34,14 @@ public class SourceVo implements Serializable {
     @ExcelProperty(value = "数据源名称")
     private String sourceName;
 
+    /**
+     * 数据源别名
+     */
+    private String alias;
+    /**
+     * 数据源授权（0：不需要授权；1：需要授权）
+     */
+    private Integer authorize;
     /**
      * 数据源url地址
      */

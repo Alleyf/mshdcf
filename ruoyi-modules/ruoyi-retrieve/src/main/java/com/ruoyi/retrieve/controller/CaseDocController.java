@@ -83,6 +83,7 @@ public class CaseDocController extends BaseController {
 //        if (StringUtils.isNotEmpty(caseDoc.getWordCloud())) {
 //            return R.ok(caseDoc.getWordCloud(), caseDoc);
 //        }
+//        设置为异步生成词云，通过消息队列实现
         String worldCloud = WorldCloudUtils.genWorldCloud(caseDoc.getName(), caseDoc.getContent());
         Map<String, Object> map = BeanCopyUtils.copyToMap(caseDoc);
         if (map == null) {

@@ -1,5 +1,5 @@
 <script setup>
-import {listSource, getSource, delSource, addSource, updateSource} from "@/api/crawler/source";
+import {listSource, getSource, delSource, addSource, updateSource, downloadTemplate} from "@/api/crawler/source";
 import {getCurrentInstance, onMounted, reactive, ref} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 
@@ -24,6 +24,7 @@ let queryParams = reactive({
 let form = reactive({
   id: null,
   sourceName: null,
+  alias: null,
   sourceUrl: null,
   sourceTypeId: null,
   remark: null,
@@ -36,6 +37,9 @@ const rules = reactive({
   ],
   sourceName: [
     {required: true, message: "数据源名称不能为空", trigger: "blur"}
+  ],
+  alias: [
+    {required: true, message: "数据源别名不能为空", trigger: "blur"}
   ],
   sourceUrl: [
     {required: true, message: "数据源url地址不能为空", trigger: "blur"}
@@ -71,6 +75,17 @@ const getList = () => {
 const handleQuery = () => {
   queryParams.pageNum = 1;
   getList();
+};
+
+const handleDownload = (row) => {
+  const id = row.id || ids.value
+  proxy.download(`/crawler/source/spiderTemplate`, {id}, `SpiderTemplate_${new Date().getTime()}.zip`)
+  // downloadTemplate(id).then(res => {
+  //   ElMessage.success("下载成功");
+  // }).catch(err => {
+  //   ElMessage.error(err.message)
+  // })
+
 };
 
 
@@ -161,7 +176,7 @@ const handleDelete = (row) => {
 };
 
 const handleExport = () => {
-  download('crawlerdata/source/export', {
+  proxy.download('crawlerdata/source/export', {
     ...queryParams
   }, `source_${new Date().getTime()}.xlsx`)
 };
@@ -269,30 +284,37 @@ onMounted(() => {
 
     <el-table v-loading="loading" :data="sourceList" @selection-change="handleSelectionChange">
       <el-table-column align="center" type="selection" width="55"/>
-      <el-table-column v-if="true" align="center" label="数据源id" prop="id"/>
-      <el-table-column align="center" label="数据源名称" prop="sourceName"/>
-      <el-table-column align="center" label="数据源url地址" prop="sourceUrl">
+      <!--      <el-table-column v-if="true" align="center" label="数据源id" prop="id"/>-->
+      <el-table-column align="center" fixed label="名称" prop="sourceName"/>
+      <el-table-column align="center" label="别名" prop="alias"/>
+      <el-table-column align="center" label="url地址" prop="sourceUrl">
         <template #default="scope">
           <el-link :href="scope.row.sourceUrl" target="_blank" type="primary">{{ scope.row.sourceUrl }}</el-link>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="数据源类型" prop="sourceTypeId">
+      <el-table-column align="center" label="类型" prop="sourceTypeId">
         <template #default="scope">
           <dict-tag :options="crawler_source_type" :value="scope.row.sourceTypeId"/>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="数据源备注说明" prop="remark"/>
+      <el-table-column align="center" label="备注说明" prop="remark"/>
       <el-table-column align="center" label="状态" prop="status">
         <template #default="scope">
           <dict-tag :options="crawl_common_status" :value="scope.row.status"/>
         </template>
       </el-table-column>
-      <el-table-column align="center" class-name="small-padding fixed-width" label="操作">
+      <el-table-column align="center" class-name="small-padding fixed-width" fixed="right" label="操作" width="240">
         <template #default="scope">
+          <el-button
+            v-hasPermi="['crawlerdata:source:query']"
+            icon="Download"
+            type="text"
+            @click="handleDownload(scope.row)"
+          >模板
+          </el-button>
           <el-button
             v-hasPermi="['crawlerdata:source:edit']"
             icon="Edit"
-            size="mini"
             type="text"
             @click="handleUpdate(scope.row)"
           >修改
@@ -300,7 +322,6 @@ onMounted(() => {
           <el-button
             v-hasPermi="['crawlerdata:source:remove']"
             icon="Delete"
-            size="mini"
             type="text"
             @click="handleDelete(scope.row)"
           >删除
@@ -321,10 +342,13 @@ onMounted(() => {
     />
 
     <!-- 添加或修改爬虫数据源对话框 -->
-    <el-dialog v-model="open" :title="title" align-center append-to-body width="40%">
+    <el-dialog v-model="open" :title="title" align-center center width="40%">
       <el-form ref="dialogForm" :model="form" :rules="rules" label-width="120px">
         <el-form-item label="数据源名称" prop="sourceName">
           <el-input v-model="form.sourceName" placeholder="请输入数据源名称"/>
+        </el-form-item>
+        <el-form-item label="数据源别名" prop="alias">
+          <el-input v-model="form.alias" placeholder="请输入数据源别名"/>
         </el-form-item>
         <el-form-item label="数据源url地址" prop="sourceUrl">
           <el-input v-model="form.sourceUrl" placeholder="请输入数据源url地址"/>
@@ -356,7 +380,7 @@ onMounted(() => {
       <template #footer>
       <span class="dialog-footer">
         <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancelDialog(dialogForm)">取 消</el-button>
+        <el-button @click="cancelDialog">取 消</el-button>
       </span>
       </template>
     </el-dialog>

@@ -17,6 +17,14 @@ export function getSource(id) {
   })
 }
 
+// 下载爬虫解析模板
+export function downloadTemplate(id) {
+  return request({
+    url: '/crawler/source/spiderTemplate/' + id,
+    method: 'get'
+  })
+}
+
 // 新增爬虫数据源
 export function addSource(data) {
   return request({

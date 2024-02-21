@@ -26,11 +26,11 @@ public class GeneratorCode {
     /**
      * 法律模板路径
      */
-    private static final String LAW_TEMPLATE_PATH = "templates/spider-law-parser-template.py.j2";
+    public static final String LAW_TEMPLATE_PATH = "templates/spider-law-parser-template.py.j2";
     /**
      * 案件模板路径
      */
-    private static final String CASE_TEMPLATE_PATH = "templates/spider-case-parser-template.py.j2";
+    public static final String CASE_TEMPLATE_PATH = "templates/spider-case-parser-template.py.j2";
     /**
      * jinjava模板引擎
      */

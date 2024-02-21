@@ -14,6 +14,7 @@ import QEditor from "@/components/Editor/index.vue";
 import {Edit, Picture, Switch, UploadFilled, UserFilled} from "@element-plus/icons-vue";
 import {Icon} from '@iconify/vue';
 import {miningCase, reviseCase} from "@/api/manage/process";
+import {getRegulation} from "@/api/manage/regulation";
 
 const {proxy} = getCurrentInstance();
 const {
@@ -25,6 +26,9 @@ const {
 
 
 const caseList = ref([]);
+const caseListStriped = ref([]);
+const caseListOrigin = ref([]);
+
 const total = ref(0);
 const loading = ref(true);
 const buttonLoading = ref(false);
@@ -143,6 +147,7 @@ const {queryParams, form, rules, processData, processDataForm, processDataStage,
 const title = ref('')
 const open = ref(false)
 const processDialog = ref(false)
+const defaultListTab = ref(1)
 const defaultTab = ref(0)
 const processStep = ref(0)
 const openContent = ref(false)
@@ -156,7 +161,15 @@ const handleProcess = () => {
   processData.value = []
   console.log(processData.value)
   const toAdd = []
-  caseList.value.forEach(item => {
+  const tempList = caseListOrigin.value
+  if (defaultListTab.value === 1) {
+    tempList.value = caseListOrigin.value
+  } else if (defaultListTab.value === 2) {
+    tempList.value = caseListStriped.value
+  } else {
+    tempList.value = caseList.value
+  }
+  tempList.value.forEach(item => {
     const exist = processData.value.findIndex(data => item.id === data.id) !== -1
     if (ids.value.includes(item.id) && !exist) {
       // 判断extra是否是非空字符串，是则需要解析，否则无需解析
@@ -273,6 +286,17 @@ const handleProcessMining = (data) => {
   })
 }
 
+const resetProcess = (data) => {
+  getCase(data.id).then(res => {
+    if (processStep.value === 0) {
+      data.stripContent = res.data.stripContent
+    } else {
+      data.extra = JSON.parse(res.data.extra)
+    }
+  })
+
+}
+
 
 //--------------------分割线--------------------
 const handleOpenContent = () => {
@@ -284,9 +308,19 @@ const getList = () => {
   loading.value = true
   // console.log(queryParams.value)
   listCase(queryParams.value).then(res => {
-    caseList.value = res.rows
-    total.value = res.total
+    // caseList.value = res.rows
+    caseList.value = res.rows.filter(item => {
+      return item.isMining === "MININGED"
+    })
+    caseListStriped.value = res.rows.filter(item => {
+      return item.isMining === "STRIPED"
+    })
+    caseListOrigin.value = res.rows.filter(item => {
+      return item.isMining === "ORIGIN"
+    })
     loading.value = false
+    total.value = res.total
+
   })
 
 }
@@ -660,130 +694,384 @@ onMounted(() => {
         <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
       </el-row>
       <!--      数据列表-->
-      <el-table
-        v-loading="loading"
-        :data="caseList"
-        :default-sort="{ prop: 'judgeDate', order: 'descending' }"
-        border
-        height="500"
-        stripe
-        style="width: 100%;text-align: center"
-        table-layout="auto"
-        @selection-change="handleSelectionChange"
-      >
-        <el-table-column type="selection" width="55"></el-table-column>
-        <!--        <el-table-column label="案件主键id" prop="id" width="150"></el-table-column>-->
-        <el-table-column fixed label="案件名称" prop="name" width="200">
-          <template #default="{ row }">
-            <el-tooltip effect="dark" placement="top">
-              <template #content class="newLine">{{ row.name }}</template>
-              <span class="hidden">{{ row.name }}</span>
-            </el-tooltip>
-          </template>
-        </el-table-column>
-        <el-table-column label="审判法院" prop="court" width="180">
-          <template #default="{ row }">
-            <el-tooltip effect="dark" placement="top">
-              <template #content class="newLine">{{ row.court }}</template>
-              <span class="hidden">{{ row.court }}</span>
-            </el-tooltip>
-          </template>
-        </el-table-column>
-        <el-table-column label="案号" prop="number" width="210"></el-table-column>
-        <el-table-column label="案由" prop="cause" width="150"></el-table-column>
-        <el-table-column label="原始链接" prop="url" width="150">
-          <template #default="scope">
-            <el-link :href="scope.row.url" target="_blank" type="primary">
-              <span class="hidden"> {{ scope.row.url }}</span>
-            </el-link>
-          </template>
-        </el-table-column>
-        <el-table-column label="文书类型" prop="type" width="150"></el-table-column>
-        <el-table-column label="审理程序" prop="process" width="150"></el-table-column>
-        <el-table-column label="详细案由" prop="label" width="180"></el-table-column>
-        <el-table-column label="案件来源" prop="sourceId" width="150">
-          <template #default="scope">
-            <dict-tag :options="crawler_source" :value="scope.row.sourceId"/>
-          </template>
-        </el-table-column>
-        <el-table-column label="判决日期" prop="judgeDate" sortable width="150">
-          <template #default="scope">
-            <div style="display: flex; align-items: center">
-              <el-icon>
-                <timer/>
-              </el-icon>
-              <span style="margin-left: 10px">{{ scope.row.judgeDate }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <!--        <el-table-column label="公开日期" prop="pubDate" width="150"></el-table-column>-->
-        <el-table-column label="法律依据" prop="legalBasis" style="overflow: hidden" width="150">
-          <template #default="{ row }">
-            <el-tooltip effect="dark" placement="top">
-              <template #content class="newLine">{{ row.legalBasis }}</template>
-              <span class="hidden">{{ row.legalBasis }}</span>
-            </el-tooltip>
-          </template>
-        </el-table-column>
-        <!--        <el-table-column label="当事人" prop="party" width="150"></el-table-column>-->
-        <!--        <el-table-column label="相关案件" prop="relatedCases" width="180"></el-table-column>-->
-        <el-table-column label="状态" prop="status" width="150">
-          <template #default="scope">
-            <dict-tag :options="crawl_common_status" :value="scope.row.status"/>
-          </template>
-        </el-table-column>
-        <el-table-column label="新建日期" prop="createTime" sortable width="180">
-          <template #default="scope">
-            <div style="display: flex; align-items: center">
-              <el-icon>
-                <timer/>
-              </el-icon>
-              <span style="margin-left: 10px">{{ scope.row.createTime }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="更新日期" prop="updateTime" sortable width="180">
-          <template #default="scope">
-            <div style="display: flex; align-items: center">
-              <el-icon>
-                <timer/>
-              </el-icon>
-              <span style="margin-left: 10px">{{ scope.row.updateTime }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column
-          align="center"
-          fixed="right"
-          label="操作"
-          width="180"
-        >
-          <template #default="scope">
-            <el-button
-              v-hasPermi="['manage:case:edit']"
-              icon="Edit"
-              size="small"
-              type="primary"
-              @click="handleUpdate(scope.row)"
+      <el-tabs v-model="defaultListTab" :tab-position="'right'" class="el-tabs" style="height: 500px">
+        <el-tab-pane :name="1" label="未清洗挖掘">
+          <el-table
+            v-loading="loading"
+            :data="caseListOrigin"
+            :default-sort="{ prop: 'judgeDate', order: 'descending' }"
+            border
+            height="500"
+            stripe
+            style="width: 100%;text-align: center"
+            table-layout="auto"
+            @selection-change="handleSelectionChange"
+          >
+            <el-table-column type="selection" width="55"></el-table-column>
+            <!--        <el-table-column label="案件主键id" prop="id" width="150"></el-table-column>-->
+            <el-table-column fixed label="案件名称" prop="name" width="200">
+              <template #default="{ row }">
+                <el-tooltip effect="dark" placement="top">
+                  <template #content class="newLine">{{ row.name }}</template>
+                  <span class="hidden">{{ row.name }}</span>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <el-table-column label="审判法院" prop="court" width="180">
+              <template #default="{ row }">
+                <el-tooltip effect="dark" placement="top">
+                  <template #content class="newLine">{{ row.court }}</template>
+                  <span class="hidden">{{ row.court }}</span>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <el-table-column label="案号" prop="number" width="210"></el-table-column>
+            <el-table-column label="案由" prop="cause" width="150"></el-table-column>
+            <el-table-column label="原始链接" prop="url" width="150">
+              <template #default="scope">
+                <el-link :href="scope.row.url" target="_blank" type="primary">
+                  <span class="hidden"> {{ scope.row.url }}</span>
+                </el-link>
+              </template>
+            </el-table-column>
+            <el-table-column label="文书类型" prop="type" width="150"></el-table-column>
+            <el-table-column label="审理程序" prop="process" width="150"></el-table-column>
+            <el-table-column label="详细案由" prop="label" width="180"></el-table-column>
+            <el-table-column label="案件来源" prop="sourceId" width="150">
+              <template #default="scope">
+                <dict-tag :options="crawler_source" :value="scope.row.sourceId"/>
+              </template>
+            </el-table-column>
+            <el-table-column label="判决日期" prop="judgeDate" sortable width="150">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px">{{ scope.row.judgeDate }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <!--        <el-table-column label="公开日期" prop="pubDate" width="150"></el-table-column>-->
+            <el-table-column label="法律依据" prop="legalBasis" style="overflow: hidden" width="150">
+              <template #default="{ row }">
+                <el-tooltip effect="dark" placement="top">
+                  <template #content class="newLine">{{ row.legalBasis }}</template>
+                  <span class="hidden">{{ row.legalBasis }}</span>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <!--        <el-table-column label="当事人" prop="party" width="150"></el-table-column>-->
+            <!--        <el-table-column label="相关案件" prop="relatedCases" width="180"></el-table-column>-->
+            <el-table-column label="状态" prop="status" width="150">
+              <template #default="scope">
+                <dict-tag :options="crawl_common_status" :value="scope.row.status"/>
+              </template>
+            </el-table-column>
+            <el-table-column label="新建日期" prop="createTime" sortable width="180">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px">{{ scope.row.createTime }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="更新日期" prop="updateTime" sortable width="180">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px">{{ scope.row.updateTime }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column
+              align="center"
+              fixed="right"
+              label="操作"
+              width="180"
             >
-              修改
-            </el-button>
-            <el-button
-              v-hasPermi="['manage:case:remove']"
-              icon="Delete"
-              size="small"
-              type="danger"
-              @click="handleDelete(scope.row)"
+              <template #default="scope">
+                <el-button
+                  v-hasPermi="['manage:case:edit']"
+                  icon="Edit"
+                  size="small"
+                  type="primary"
+                  @click="handleUpdate(scope.row)"
+                >
+                  修改
+                </el-button>
+                <el-button
+                  v-hasPermi="['manage:case:remove']"
+                  icon="Delete"
+                  size="small"
+                  type="danger"
+                  @click="handleDelete(scope.row)"
+                >
+                  删除
+                </el-button>
+              </template>
+            </el-table-column>
+            <template #empty>
+              <el-empty></el-empty>
+            </template>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane :name="2" label="已清洗">
+          <el-table
+            v-loading="loading"
+            :data="caseListStriped"
+            :default-sort="{ prop: 'judgeDate', order: 'descending' }"
+            border
+            height="500"
+            stripe
+            style="width: 100%;text-align: center"
+            table-layout="auto"
+            @selection-change="handleSelectionChange"
+          >
+            <el-table-column type="selection" width="55"></el-table-column>
+            <!--        <el-table-column label="案件主键id" prop="id" width="150"></el-table-column>-->
+            <el-table-column fixed label="案件名称" prop="name" width="200">
+              <template #default="{ row }">
+                <el-tooltip effect="dark" placement="top">
+                  <template #content class="newLine">{{ row.name }}</template>
+                  <span class="hidden">{{ row.name }}</span>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <el-table-column label="审判法院" prop="court" width="180">
+              <template #default="{ row }">
+                <el-tooltip effect="dark" placement="top">
+                  <template #content class="newLine">{{ row.court }}</template>
+                  <span class="hidden">{{ row.court }}</span>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <el-table-column label="案号" prop="number" width="210"></el-table-column>
+            <el-table-column label="案由" prop="cause" width="150"></el-table-column>
+            <el-table-column label="原始链接" prop="url" width="150">
+              <template #default="scope">
+                <el-link :href="scope.row.url" target="_blank" type="primary">
+                  <span class="hidden"> {{ scope.row.url }}</span>
+                </el-link>
+              </template>
+            </el-table-column>
+            <el-table-column label="文书类型" prop="type" width="150"></el-table-column>
+            <el-table-column label="审理程序" prop="process" width="150"></el-table-column>
+            <el-table-column label="详细案由" prop="label" width="180"></el-table-column>
+            <el-table-column label="案件来源" prop="sourceId" width="150">
+              <template #default="scope">
+                <dict-tag :options="crawler_source" :value="scope.row.sourceId"/>
+              </template>
+            </el-table-column>
+            <el-table-column label="判决日期" prop="judgeDate" sortable width="150">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px">{{ scope.row.judgeDate }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <!--        <el-table-column label="公开日期" prop="pubDate" width="150"></el-table-column>-->
+            <el-table-column label="法律依据" prop="legalBasis" style="overflow: hidden" width="150">
+              <template #default="{ row }">
+                <el-tooltip effect="dark" placement="top">
+                  <template #content class="newLine">{{ row.legalBasis }}</template>
+                  <span class="hidden">{{ row.legalBasis }}</span>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <!--        <el-table-column label="当事人" prop="party" width="150"></el-table-column>-->
+            <!--        <el-table-column label="相关案件" prop="relatedCases" width="180"></el-table-column>-->
+            <el-table-column label="状态" prop="status" width="150">
+              <template #default="scope">
+                <dict-tag :options="crawl_common_status" :value="scope.row.status"/>
+              </template>
+            </el-table-column>
+            <el-table-column label="新建日期" prop="createTime" sortable width="180">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px">{{ scope.row.createTime }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="更新日期" prop="updateTime" sortable width="180">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px">{{ scope.row.updateTime }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column
+              align="center"
+              fixed="right"
+              label="操作"
+              width="180"
             >
-              删除
-            </el-button>
-          </template>
-        </el-table-column>
-        <template #empty>
-          <el-empty></el-empty>
-        </template>
-      </el-table>
+              <template #default="scope">
+                <el-button
+                  v-hasPermi="['manage:case:edit']"
+                  icon="Edit"
+                  size="small"
+                  type="primary"
+                  @click="handleUpdate(scope.row)"
+                >
+                  修改
+                </el-button>
+                <el-button
+                  v-hasPermi="['manage:case:remove']"
+                  icon="Delete"
+                  size="small"
+                  type="danger"
+                  @click="handleDelete(scope.row)"
+                >
+                  删除
+                </el-button>
+              </template>
+            </el-table-column>
+            <template #empty>
+              <el-empty></el-empty>
+            </template>
+          </el-table>
 
+        </el-tab-pane>
+        <el-tab-pane :name="3" label="已挖掘">
+          <el-table
+            v-loading="loading"
+            :data="caseList"
+            :default-sort="{ prop: 'judgeDate', order: 'descending' }"
+            border
+            height="500"
+            stripe
+            style="width: 100%;text-align: center"
+            table-layout="auto"
+            @selection-change="handleSelectionChange"
+          >
+            <el-table-column type="selection" width="55"></el-table-column>
+            <!--        <el-table-column label="案件主键id" prop="id" width="150"></el-table-column>-->
+            <el-table-column fixed label="案件名称" prop="name" width="200">
+              <template #default="{ row }">
+                <el-tooltip effect="dark" placement="top">
+                  <template #content class="newLine">{{ row.name }}</template>
+                  <span class="hidden">{{ row.name }}</span>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <el-table-column label="审判法院" prop="court" width="180">
+              <template #default="{ row }">
+                <el-tooltip effect="dark" placement="top">
+                  <template #content class="newLine">{{ row.court }}</template>
+                  <span class="hidden">{{ row.court }}</span>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <el-table-column label="案号" prop="number" width="210"></el-table-column>
+            <el-table-column label="案由" prop="cause" width="150"></el-table-column>
+            <el-table-column label="原始链接" prop="url" width="150">
+              <template #default="scope">
+                <el-link :href="scope.row.url" target="_blank" type="primary">
+                  <span class="hidden"> {{ scope.row.url }}</span>
+                </el-link>
+              </template>
+            </el-table-column>
+            <el-table-column label="文书类型" prop="type" width="150"></el-table-column>
+            <el-table-column label="审理程序" prop="process" width="150"></el-table-column>
+            <el-table-column label="详细案由" prop="label" width="180"></el-table-column>
+            <el-table-column label="案件来源" prop="sourceId" width="150">
+              <template #default="scope">
+                <dict-tag :options="crawler_source" :value="scope.row.sourceId"/>
+              </template>
+            </el-table-column>
+            <el-table-column label="判决日期" prop="judgeDate" sortable width="150">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px">{{ scope.row.judgeDate }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <!--        <el-table-column label="公开日期" prop="pubDate" width="150"></el-table-column>-->
+            <el-table-column label="法律依据" prop="legalBasis" style="overflow: hidden" width="150">
+              <template #default="{ row }">
+                <el-tooltip effect="dark" placement="top">
+                  <template #content class="newLine">{{ row.legalBasis }}</template>
+                  <span class="hidden">{{ row.legalBasis }}</span>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <!--        <el-table-column label="当事人" prop="party" width="150"></el-table-column>-->
+            <!--        <el-table-column label="相关案件" prop="relatedCases" width="180"></el-table-column>-->
+            <el-table-column label="状态" prop="status" width="150">
+              <template #default="scope">
+                <dict-tag :options="crawl_common_status" :value="scope.row.status"/>
+              </template>
+            </el-table-column>
+            <el-table-column label="新建日期" prop="createTime" sortable width="180">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px">{{ scope.row.createTime }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column label="更新日期" prop="updateTime" sortable width="180">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px">{{ scope.row.updateTime }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column
+              align="center"
+              fixed="right"
+              label="操作"
+              width="180"
+            >
+              <template #default="scope">
+                <el-button
+                  v-hasPermi="['manage:case:edit']"
+                  icon="Edit"
+                  size="small"
+                  type="primary"
+                  @click="handleUpdate(scope.row)"
+                >
+                  修改
+                </el-button>
+                <el-button
+                  v-hasPermi="['manage:case:remove']"
+                  icon="Delete"
+                  size="small"
+                  type="danger"
+                  @click="handleDelete(scope.row)"
+                >
+                  删除
+                </el-button>
+              </template>
+            </el-table-column>
+            <template #empty>
+              <el-empty></el-empty>
+            </template>
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
       <!-- 添加或修改司法案例对话框 -->
       <el-dialog v-model="open" :title="title" align-center>
         <el-form ref="dialogForm" :model="form" :rules="rules" label-width="100px">
@@ -950,14 +1238,16 @@ onMounted(() => {
                       原始正文
                     </el-header>
                     <el-form-item>
-                      <el-input v-model="data.content" :autosize="true" resize="vertical" type="textarea"/>
+                      <el-input v-model="data.content" :autosize="{ minRows: 25, maxRows: 25 }" resize="vertical"
+                                type="textarea"/>
                     </el-form-item>
                   </div>
                   <div v-else-if="processStep===1">
                     <el-header>
                       修正正文
                     </el-header>
-                    <el-input v-model="data.stripContent" :autosize="true" resize="vertical" type="textarea"/>
+                    <el-input v-model="data.stripContent" :autosize="{ minRows: 25, maxRows: 25 }" resize="vertical"
+                              type="textarea"/>
                   </div>
                 </el-col>
                 <el-col :span="12">
@@ -965,7 +1255,7 @@ onMounted(() => {
                     <el-header>
                       修正正文
                     </el-header>
-                    <el-input v-model="data.stripContent" :autosize="{ minRows: 10, maxRows: 200 }" type="textarea"/>
+                    <el-input v-model="data.stripContent" :autosize="{ minRows: 25, maxRows: 25 }" type="textarea"/>
                   </div>
                   <div v-else-if="processStep===1">
                     <el-header>
@@ -1017,6 +1307,7 @@ onMounted(() => {
               </el-form>
               <div class="flex justify-end items-end mt-3"> <!-- 添加 justify-end 和 items-end 类 -->
                 <el-button @click="cancelDialog">取 消</el-button>
+                <el-button :plain="true" type="primary" @click="resetProcess(data)">还原</el-button>
                 <el-button :disabled="processStep <= 0" :loading="buttonLoading" type="primary"
                            @click="handleProcessPrev">
                   上一步

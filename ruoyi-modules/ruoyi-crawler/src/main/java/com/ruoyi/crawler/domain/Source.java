@@ -1,9 +1,11 @@
 package com.ruoyi.crawler.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.math.BigDecimal;
@@ -21,7 +23,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 @TableName("source")
 public class Source extends BaseEntity {
 
-    private static final long serialVersionUID=1L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * 数据源id
@@ -32,6 +34,15 @@ public class Source extends BaseEntity {
      * 数据源名称
      */
     private String sourceName;
+
+    /**
+     * 数据源别名
+     */
+    private String alias;
+    /**
+     * 数据源授权（0：不需要授权；1：需要授权）
+     */
+    private Integer authorize;
     /**
      * 数据源url地址
      */

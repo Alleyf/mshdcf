@@ -7,6 +7,9 @@ import com.ruoyi.common.mybatis.core.page.TableDataInfo;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.ruoyi.crawler.domain.SourceType;
+import com.ruoyi.crawler.service.ISourceTypeService;
+import com.ruoyi.crawler.utils.GeneratorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.ruoyi.crawler.domain.bo.SourceBo;
@@ -15,9 +18,11 @@ import com.ruoyi.crawler.domain.Source;
 import com.ruoyi.crawler.mapper.SourceMapper;
 import com.ruoyi.crawler.service.ISourceService;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Collection;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * 爬虫数据源Service业务层处理
@@ -30,12 +35,14 @@ import java.util.Collection;
 public class SourceServiceImpl implements ISourceService {
 
     private final SourceMapper baseMapper;
+    private final ISourceTypeService sourceTypeService;
+    private final GeneratorCode generatorCode;
 
     /**
      * 查询爬虫数据源
      */
     @Override
-    public SourceVo queryById(Long id){
+    public SourceVo queryById(Long id) {
         return baseMapper.selectVoById(id);
     }
 
@@ -95,8 +102,55 @@ public class SourceServiceImpl implements ISourceService {
     /**
      * 保存前的数据校验
      */
-    private void validEntityBeforeSave(Source entity){
+    private void validEntityBeforeSave(Source entity) {
         //TODO 做一些数据校验,如唯一约束
+    }
+
+    @Override
+    public byte[] generateCode(Long id) throws IOException {
+        // 创建压缩包
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ZipOutputStream zos = new ZipOutputStream(baos);
+//        根据类型生成python爬虫模板文件
+        SourceVo sourceVo = queryById(id);
+        Long typeId = sourceVo.getSourceTypeId();
+        SourceType sourceType = sourceTypeService.queryById(typeId);
+        Map<String, Object> context = new HashMap<>();
+        context.put("source_name", sourceVo.getSourceName());
+        context.put("source_url", sourceVo.getSourceUrl());
+        context.put("start_urls", Arrays.asList(sourceVo.getSourceUrl()));
+        context.put("alias", sourceVo.getAlias());
+        // 这里添加必要的上下文变量到context中
+        switch (sourceType.getAlias()) {
+            case "Law":
+                String lawTemplate = generatorCode.renderTemplate(GeneratorCode.LAW_TEMPLATE_PATH, context);
+                ZipEntry lawEntry = new ZipEntry(sourceVo.getAlias() + sourceType.getAlias() + "Template.py");
+                zos.putNextEntry(lawEntry);
+                zos.write(lawTemplate.getBytes());
+                zos.closeEntry();
+                break;
+            case "Case":
+                String caseTemplate = generatorCode.renderTemplate(GeneratorCode.CASE_TEMPLATE_PATH, context);
+                ZipEntry caseEntry = new ZipEntry(sourceVo.getAlias() + sourceType.getAlias() + "Template.py");
+                zos.putNextEntry(caseEntry);
+                zos.write(caseTemplate.getBytes());
+                zos.closeEntry();
+                break;
+            default:
+                String template = generatorCode.renderTemplate(GeneratorCode.CASE_TEMPLATE_PATH, context);
+                ZipEntry entry = new ZipEntry(sourceVo.getAlias() + "CaseTemplate.py");
+                zos.putNextEntry(entry);
+                zos.write(template.getBytes());
+                zos.closeEntry();
+                template = generatorCode.renderTemplate(GeneratorCode.LAW_TEMPLATE_PATH, context);
+                entry = new ZipEntry(sourceVo.getAlias() + "LawTemplate.py");
+                zos.putNextEntry(entry);
+                zos.write(template.getBytes());
+                zos.closeEntry();
+                break;
+        }
+        zos.close();
+        return baos.toByteArray();
     }
 
     /**
@@ -104,7 +158,7 @@ public class SourceServiceImpl implements ISourceService {
      */
     @Override
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
-        if(isValid){
+        if (isValid) {
             //TODO 做一些业务上的校验,判断是否需要校验
         }
         return baseMapper.deleteBatchIds(ids) > 0;

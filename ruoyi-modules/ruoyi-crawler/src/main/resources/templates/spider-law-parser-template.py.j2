@@ -1,11 +1,10 @@
 class {{ alias }}RegulationParser(BaseParser):
     """{{ source_name }}法律法规爬虫解析器"""
-
     db = MysqlDB()
     current_page = 1
     total_page = 10
     current_item = 1
-    start_urls = {{ start_urls }}
+    start_urls = ["{{ source_url }}"]
     test_url = "{{ source_url }}"
     # 自定义配置
     __custom_setting__ = dict(
