@@ -1,27 +1,24 @@
 package com.ruoyi.retrieve.controller;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.ruoyi.common.core.constant.CacheConstants;
 import com.ruoyi.common.core.domain.R;
-import com.ruoyi.common.core.utils.BeanCopyUtils;
-import com.ruoyi.common.core.utils.StringUtils;
-import com.ruoyi.common.core.utils.WorldCloudUtils;
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
-import com.ruoyi.retrieve.api.domain.LawDoc;
+import com.ruoyi.common.redis.utils.RedisUtils;
 import com.ruoyi.retrieve.api.domain.LawDoc;
 import com.ruoyi.retrieve.esmapper.LawDocMapper;
+import com.ruoyi.retrieve.mq.producer.WorldCloudProducer;
 import com.ruoyi.retrieve.service.ILawDocService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.client.indices.GetIndexResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * 法律法规检索
@@ -35,11 +32,11 @@ import java.util.Objects;
 @RequestMapping("/law")
 @Validated
 @Slf4j
+@AllArgsConstructor
 public class LawDocController extends BaseController {
-    @Resource
-    private ILawDocService lawDocService;
-    @Resource
-    private LawDocMapper lawDocMapper;
+    private final ILawDocService lawDocService;
+    private final WorldCloudProducer worldCloudProducer;
+    private final LawDocMapper lawDocMapper;
 
     /**
      * 创建索引
@@ -83,16 +80,35 @@ public class LawDocController extends BaseController {
 //        if (StringUtils.isNotEmpty(lawDoc.getWordCloud())) {
 //            return R.ok(lawDoc.getWordCloud(), lawDoc);
 //        }
-        String worldCloud = WorldCloudUtils.genWorldCloud(lawDoc.getName(), lawDoc.getContent());
-        Map<String, Object> map = BeanCopyUtils.copyToMap(lawDoc);
-        if (map == null) {
-            map = new HashMap<>();
-        }
-        // 将worldCloud放入Map中
-        map.put("worldCloud", worldCloud);
-        return R.ok(worldCloud, map);
+//        String worldCloud = WorldCloudUtils.genWorldCloud(lawDoc.getName(), lawDoc.getContent());
+//        Map<String, Object> map = BeanCopyUtils.copyToMap(lawDoc);
+//        if (map == null) {
+//            map = new HashMap<>();
+//        }
+//        // 将worldCloud放入Map中
+//        map.put("worldCloud", worldCloud);
+//        return R.ok(worldCloud, map);
+        //        todo: 设置为异步生成词云，通过消息队列实现
+        worldCloudProducer.sendMsg(lawDoc.getId(), lawDoc.getName(), lawDoc.getContent(), 0L);
+        return R.ok(lawDoc);
     }
 
+    /**
+     * 根据id查询法条词云
+     *
+     * @param id id
+     * @return R
+     */
+    @GetMapping("/worldCloud/{id}")
+    public R<String> worldCloud(@PathVariable("id") Long id) {
+        String worldCloud;
+        try {
+            worldCloud = RedisUtils.getCacheObject(CacheConstants.REDIS_KEY_PREFIX + id);
+        } catch (Exception e) {
+            throw new ServiceException("该词云不存在");
+        }
+        return R.ok(worldCloud);
+    }
 
     /**
      * 查询列表

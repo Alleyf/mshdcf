@@ -4,15 +4,9 @@ import cn.easyes.annotation.*;
 import cn.easyes.annotation.rely.Analyzer;
 import cn.easyes.annotation.rely.FieldType;
 import cn.easyes.annotation.rely.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author fcs
@@ -42,7 +36,6 @@ public class CaseDoc implements Serializable {
      */
     @HighLight(mappingField = "highlightName", preTag = "<text style='color:red'>", postTag = "</text>")
     @IndexField(fieldType = FieldType.KEYWORD_TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
-//    @NotBlank(message = "标题不能为空")
     private String name;
     /**
      * 审判法院
@@ -84,7 +77,7 @@ public class CaseDoc implements Serializable {
     /**
      * 修正案件内容
      */
-    @HighLight(mappingField = "highlightContent", preTag = "<text style='color:red'>", postTag = "</text>")
+    @HighLight(mappingField = "highlightStripContent", preTag = "<text style='color:red'>", postTag = "</text>")
     @IndexField(fieldType = FieldType.TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
     private String stripContent;
 
@@ -140,9 +133,9 @@ public class CaseDoc implements Serializable {
      */
     @IndexField(exist = false)
     private String highlightContent;
-
     /**
-     * 词云图
+     * 修正正文高亮返回值被映射的字段
      */
-//    private String wordCloud;
+    @IndexField(exist = false)
+    private String highlightStripContent;
 }

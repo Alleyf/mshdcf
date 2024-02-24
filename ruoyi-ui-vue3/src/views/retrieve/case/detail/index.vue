@@ -1,6 +1,6 @@
 <script setup>
 import {getCurrentInstance, reactive, ref, toRefs, onMounted, onBeforeMount} from 'vue';
-import {pageCase, getCase, listCase} from "@/api/retrieve/case";
+import {pageCase, getCase, listCase, getCaseWorldCloud} from "@/api/retrieve/case";
 import {useRoute} from 'vue-router'
 import {Link} from "@element-plus/icons-vue";
 import {Icon} from '@iconify/vue';
@@ -37,6 +37,8 @@ const displayedText = ref('');
 const typeSpeed = 1; // 字符间隔时间，单位：毫秒
 const typewriter = ref(null);
 const wordCloud = ref(null);
+const worldCloudFlag = ref(false);
+
 
 let index = 0;
 
@@ -48,25 +50,39 @@ onMounted(() => {
   }
   getCase(id).then(res => {
     caseItem.value = res.data;
-    console.log(query)
+    // console.log(query)
     if (query.keyword !== "" || query.keyword === undefined) {
-      caseItem.value.content = res.data.content.replaceAll(query.keyword, `<strong class='text-red-500'>${query.keyword}</strong>`)
+      if (res.data.stripContent) {
+        caseItem.value.stripContent = res.data.stripContent.replaceAll(query.keyword, `<strong class='text-red-500'>${query.keyword}</strong>`)
+      } else {
+        caseItem.value.content = res.data.content.replaceAll(query.keyword, `<strong class='text-red-500'>${query.keyword}</strong>`)
+      }
     }
     // caseItem.value.content = res.data.content.split("\n").filter(element => element !== "").join("。<br/>&emsp;&emsp;");
-    console.log(caseItem.value.content)
+    // console.log(caseItem.value.content)
     if (res.data.extra !== null) {
       caseItem.value.extra = JSON.parse(caseItem.value.extra);
     } else {
       caseItem.value.extra = {};
     }
-    console.log(caseItem.value)
-    wordCloud.value = res.msg;
+    // console.log(caseItem.value)
+    // wordCloud.value = res.msg;
     proxy.$modal.msgSuccess(`获取数据成功`);
-    text.value = caseItem.value.content;
+    text.value = caseItem.value.stripContent !== undefined ? caseItem.value.stripContent : caseItem.value.content;
     // caseItem.value.sourceId = 1;
     // 获取来源
     const targetSource = crawler_source.value.filter(item => item.value === caseItem.value.sourceId.toString());
     caseItem.value.source = targetSource[0].label;
+    // 获取案例词云（添加10秒延迟，防止词云还未生成获取为空）
+    setTimeout(() => {
+      getCaseWorldCloud(id).then(res => {
+        // console.log(res.msg)
+        if (res.msg !== null) {
+          wordCloud.value = res.msg;
+          worldCloudFlag.value = true;
+        }
+      });
+    }, 5000); // 延迟10秒（10000毫秒）
     // 打字机效果
     const timer = setInterval(() => {
       if (index < text.value.length) {
@@ -81,6 +97,21 @@ onMounted(() => {
     // proxy.$modal.msgError(err.msg)
   })
 })
+
+
+const handleTabClick = (pane, ev) => {
+  if (pane.props.label === '案例词云' && worldCloudFlag.value === false) {
+    // 获取案例词云（添加10秒延迟，防止词云还未生成获取为空）
+    getCaseWorldCloud(route.params.id).then(res => {
+      if (res.msg === null) {
+        proxy.$modal.msgError("词云还未生成，请稍后")
+        return
+      }
+      wordCloud.value = res.msg;
+      worldCloudFlag.value = true;
+    });
+  }
+}
 </script>
 
 <template>
@@ -112,7 +143,7 @@ onMounted(() => {
       </el-col>
       <el-col :span="12" class="baseInfo">
 
-        <el-tabs class="mytabs" style="height: 200px" tab-position="top">
+        <el-tabs class="mytabs" style="height: 200px" tab-position="top" @tab-click="handleTabClick">
           <el-tab-pane label="基本信息">
             <el-card :shadow="'always'" class="el-space--vertical">
               <el-tag class="text-gray-500" style="font-weight: bold;font-size: large">基本信息</el-tag>
@@ -148,7 +179,7 @@ onMounted(() => {
                 <el-col v-if="caseItem.url">
                   <Icon :icon="icons['url']" class="text-2xl"/>
                   案件来源：
-                  <el-link :href="caseItem.url" type="primary">
+                  <el-link :href="caseItem.url" target="_blank" type="primary">
                     {{ caseItem.source }}
                   </el-link>
                 </el-col>
@@ -193,14 +224,16 @@ onMounted(() => {
           <!--              </ul>-->
           <!--            </el-card>-->
           <!--          </el-tab-pane>-->
-          <el-tab-pane v-if="wordCloud" :lazy="true" label="案例词云">
+          <el-tab-pane :lazy="true" label="案例词云">
             <el-card :shadow="'always'">
               <el-tag style="font-weight: bold;font-size: large" type="warning">案例词云</el-tag>
               <el-divider/>
-              <el-image :loading="'lazy'" :src="wordCloud" style="margin-left: 52px;height: 80%;width: 80%"/>
+              <el-image v-show="worldCloudFlag" :loading="'lazy'" :src="wordCloud"
+                        style="margin-left: 52px;height: 80%;width: 80%"/>
             </el-card>
           </el-tab-pane>
-          <el-tab-pane label="语义信息" style="font-weight: bold;font-size: medium">
+          <el-tab-pane v-if="Object.keys(caseItem.extra).length !== 0" label="语义信息"
+                       style="font-weight: bold;font-size: medium">
             <!--            <el-divider/>-->
             <!--            <el-tag style="font-weight: bold;font-size: large" type="warning">语义信息</el-tag>-->
 

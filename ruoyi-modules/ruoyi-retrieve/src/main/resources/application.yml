@@ -25,11 +25,66 @@ spring:
         # 配置组
         group: @nacos.config.group@
         namespace: ${spring.profiles.active}
+    stream:
+      function:
+        # 重点配置 与 binding 名与消费者对应
+        definition: delay;worldCloud;
   config:
     import:
       - optional:nacos:application-common.yml
       - optional:nacos:datasource.yml
       - optional:nacos:${spring.application.name}.yml
+
+
+
+--- # rabbitmq 配置
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    virtual-host: /retrieve
+    username: admin
+    password: admin
+  cloud:
+    stream:
+      rabbit:
+        bindings:
+          #          延迟交换机需要安装delayed-message插件
+          delay-in-0:
+            consumer:
+              delayedExchange: true
+          delay-out-0:
+            producer:
+              delayedExchange: true
+          worldCloud-in-0:
+            consumer:
+              delayedExchange: true
+          worldCloud-out-0:
+            producer:
+              delayedExchange: true
+      bindings:
+        #        最好将不同交换机和队列的destination和group分开，否则会混乱
+        delay-in-0:
+          destination: delay.exchange.cloud
+          content-type: application/json
+          group: delay-group
+          binder: rabbit
+        delay-out-0:
+          destination: delay.exchange.cloud
+          content-type: application/json
+          group: delay-group
+          binder: rabbit
+        worldCloud-in-0:
+          destination: worldCloud.exchange.cloud
+          content-type: application/json
+          group: worldCloud-group
+          binder: rabbit
+        worldCloud-out-0:
+          destination: worldCloud.exchange.cloud
+          content-type: application/json
+          group: worldCloud-group
+          binder: rabbit
+
 
 --- # elasticsearch 功能配置
 # 文档地址: https://www.easy-es.cn/

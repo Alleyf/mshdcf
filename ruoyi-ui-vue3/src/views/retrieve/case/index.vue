@@ -38,7 +38,7 @@
                 <el-col :span="12" class="horFlex">
                   <el-badge :value="index+1" class="mr-1" type="success"/>
                   <el-link :href="item.url" :underline="false" class="hidden" target="_blank" type="primary"
-                           v-html="item.highlightContent?item.highlightContent:item.name">
+                           v-html="item.highlightName?item.highlightName:item.name">
                   </el-link>
                   <el-button circle icon="View" style="font-size: 1em" @click="handleDetail(item)"/>
                 </el-col>

@@ -1,27 +1,24 @@
 package com.ruoyi.retrieve.controller;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.ruoyi.common.core.constant.CacheConstants;
 import com.ruoyi.common.core.domain.R;
-import com.ruoyi.common.core.utils.BeanCopyUtils;
-import com.ruoyi.common.core.utils.StringUtils;
-import com.ruoyi.common.core.utils.WorldCloudUtils;
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
+import com.ruoyi.common.redis.utils.RedisUtils;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
-import com.ruoyi.retrieve.api.domain.LawDoc;
 import com.ruoyi.retrieve.esmapper.CaseDocMapper;
+import com.ruoyi.retrieve.mq.producer.WorldCloudProducer;
 import com.ruoyi.retrieve.service.ICaseDocService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.client.indices.GetIndexResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * 司法案例检索
@@ -35,12 +32,12 @@ import java.util.Objects;
 @RequestMapping("/case")
 @Validated
 @Slf4j
+@AllArgsConstructor
 public class CaseDocController extends BaseController {
 
-    @Resource
-    private CaseDocMapper caseDocMapper;
-    @Resource
-    private ICaseDocService caseDocService;
+    private final WorldCloudProducer worldCloudProducer;
+    private final CaseDocMapper caseDocMapper;
+    private final ICaseDocService caseDocService;
 
     /**
      * 创建索引
@@ -83,15 +80,34 @@ public class CaseDocController extends BaseController {
 //        if (StringUtils.isNotEmpty(caseDoc.getWordCloud())) {
 //            return R.ok(caseDoc.getWordCloud(), caseDoc);
 //        }
-//        设置为异步生成词云，通过消息队列实现
-        String worldCloud = WorldCloudUtils.genWorldCloud(caseDoc.getName(), caseDoc.getContent());
-        Map<String, Object> map = BeanCopyUtils.copyToMap(caseDoc);
-        if (map == null) {
-            map = new HashMap<>();
-        }
+//        todo: 设置为异步生成词云，通过消息队列实现
+        worldCloudProducer.sendMsg(caseDoc.getId(), caseDoc.getName(), caseDoc.getContent(), 0L);
+//        String worldCloud = WorldCloudUtils.genWorldCloud(caseDoc.getName(), caseDoc.getContent());
+//        Map<String, Object> map = BeanCopyUtils.copyToMap(caseDoc);
+//        if (map == null) {
+//            map = new HashMap<>();
+//        }
         // 将worldCloud放入Map中
-        map.put("worldCloud", worldCloud);
-        return R.ok(worldCloud, map);
+//        map.put("worldCloud", worldCloud);
+//        return R.ok(worldCloud, map);
+        return R.ok(caseDoc);
+    }
+
+    /**
+     * 根据id查询案例词云
+     *
+     * @param id id
+     * @return R
+     */
+    @GetMapping("/worldCloud/{id}")
+    public R<String> worldCloud(@PathVariable("id") Long id) {
+        String worldCloud;
+        try {
+            worldCloud = RedisUtils.getCacheObject(CacheConstants.REDIS_KEY_PREFIX + id);
+        } catch (Exception e) {
+            throw new ServiceException("该词云不存在");
+        }
+        return R.ok(worldCloud);
     }
 
     /**

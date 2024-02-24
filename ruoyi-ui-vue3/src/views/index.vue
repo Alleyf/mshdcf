@@ -1,6 +1,6 @@
 <template>
   <div class=" home mt-0.5">
-    <div class="container mx-auto">
+    <div class="container mx-auto my-8">
       <el-row :gutter="20" class="flex justify-between items-center">
         <!-- 装饰元素 -->
         <el-col :span="6">
@@ -15,7 +15,7 @@
           <time class="text-xl font-bold">{{ currentTime }}</time>
         </el-col>
       </el-row>
-      <el-row :gutter="20" class="mt-1">
+      <el-row :gutter="20" class="my-8">
         <el-col v-for="(card,index) in cards" :key="card.title" :span="6">
           <el-card :class="{'cursor-pointer':true}" :shadow="'hover'" class="box-card" @click="handleClick(index)">
             <div class="flex justify-between">
@@ -42,7 +42,7 @@
           <el-card class="box-card bg-blue-100">
             <h2 class="text-2xl font-bold text-center">最新司法案例TOP10</h2>
             <div class="scroll-container">
-              <ul class="scroll-list">
+              <ul v-if="topTenCases!==undefined" class="scroll-list">
                 <li v-for="(caseItem, index) in topTenCases" :key="index" class="scroll-list-item">
                   <el-link :underline="false" class="decoration-0 hover:text-red-500" type="primary">
                     <router-link :to="{name:'CaseDetail',params:{id:caseItem.id}}"
@@ -60,7 +60,7 @@
           <el-card class="box-card">
             <h2 class="text-2xl font-bold text-center">最新法律法规TOP10</h2>
             <div class="scroll-container">
-              <ul class="scroll-list">
+              <ul v-if="topTenLaws!==undefined" class="scroll-list">
                 <li v-for="(lawItem, index) in topTenLaws" :key="index" class="scroll-list-item">
                   <el-link :underline="false" class="decoration-0 hover:text-red-500" type="primary">
                     <router-link :to="{name:'LawDetail',params:{id:lawItem.id}}"
@@ -183,7 +183,6 @@ const option = ref({
 
     axisPointer: {
       type: 'cross',
-      // type: 'shadow',
       label: {
         backgroundColor: '#6a7985'
       }
@@ -346,13 +345,16 @@ const getCardData = async () => {
     totalLaw(),
     incrementLaw()
   ]);
+  // alert(totalCaseRes.data, incrementCaseRes.data, totalLawRes.data, incrementLawRes.data)
   // 将获取到的数据赋值给相应的变量
   caseTotal.value = totalCaseRes.data;
   caseIncrement.value = incrementCaseRes.data;
   lawTotal.value = totalLawRes.data;
   lawIncrement.value = incrementLawRes.data;
   totalDocs.value = caseTotal.value + lawTotal.value;
-  setCards();
+  if (totalDocs.value) {
+    setCards();
+  }
 }
 
 const setCards = () => {
@@ -430,6 +432,10 @@ const getTopTen = async () => {
   ]);
   topTenCases.value = rankTenCasesRes.data;
   topTenLaws.value = rankTenLawsRes.data;
+  console.log(topTenCases.value, topTenLaws.value)
+  if (topTenCases.value && topTenLaws.value) {
+    updateList();
+  }
 }
 
 
@@ -446,7 +452,6 @@ onMounted(() => {
   getCardData();
   // getProvince();
   getTopTen();
-  updateList();
 })
 
 

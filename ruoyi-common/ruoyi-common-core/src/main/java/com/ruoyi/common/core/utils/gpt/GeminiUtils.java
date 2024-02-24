@@ -1,10 +1,12 @@
 package com.ruoyi.common.core.utils.gpt;
 
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.ruoyi.common.core.constant.GPTConstants;
+import com.ruoyi.common.core.domain.GeminiGPTBo;
 import com.ruoyi.common.core.enums.PromptTemplate;
-import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.StringUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +21,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Formatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 /**
- * 使用cloudFlare代理的国内域名限制每月请求3000次
+ * Gemini-Pro速度还行（使用cloudFlare代理的国内域名限制每月请求3000次）
  *
  * @author fcs
  * @date 2024/2/5 20:49
@@ -32,28 +37,24 @@ import java.util.Formatter;
 @Slf4j
 public class GeminiUtils {
 
-    //    public static final String GEMINI_API_URL = "https://gemini-pro-chat-iota-silk.vercel.app/api/generate";
-
     /**
-     * 请求地址
+     * 请求选项
      */
-    public static final String GEMINI_API_URL = "https://gemini.gxnas.eu.org/api/generate";
-    /**
-     * 代理地址
-     */
-    public static final String PROXY_HOST = "127.0.0.1";
-    /**
-     * 代理端口
-     */
-    public static final int PROXY_PORT = 7890;
+    public static final int OPTION = 2;
     /**
      * 代理
      */
-    public static Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(PROXY_HOST, PROXY_PORT));
+    public static Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(GPTConstants.PROXY_HOST, GPTConstants.PROXY_PORT));
     /**
      * 创建OkHttpClient时设置代理
      */
-    public static OkHttpClient client = new OkHttpClient.Builder().proxy(proxy).build();
+//    public static OkHttpClient client = new OkHttpClient.Builder().build();
+    public static OkHttpClient client = new OkHttpClient.Builder()
+//            设置代理
+            .proxy(proxy)
+            // 设置读取超时时间为60秒
+            .readTimeout(20, TimeUnit.SECONDS)
+            .build();
 
     /**
      * 同步请求
@@ -74,12 +75,22 @@ public class GeminiUtils {
     private static String syncGetResponse(String text) {
         try {
             Request request = getRequest(text);
+//            获取请求信息
             Response response = client.newCall(request).execute();
             if (response.isSuccessful()) {
-                String body = response.body().string();
-                return StringUtils.isNotEmpty(body) ? body : null;
+                String body = null;
+                if (response.body() != null) {
+                    if (GeminiUtils.OPTION == 1) {
+                        body = response.body().string().trim();
+                    } else {
+                        // 解析 JSON 字符串
+                        body = xiaKeParseResponse(response);
+                    }
+                }
+                return StringUtils.isNotBlank(body) ? body : null;
             } else {
-                log.error("Gemini请求失败：" + response.message());
+                log.error("Gemini请求失败：" + response.body().string());
+//                log.error("Gemini请求失败：" + JSON.parseObject(response.body().string()).get("message"));
 //                throw new ServiceException(response.message());
             }
 
@@ -152,6 +163,44 @@ public class GeminiUtils {
      * @return Request 请求对象
      */
     private static Request getRequest(String text) {
+        Map<String, String> jsonRequest = getJsonRequest(GeminiUtils.OPTION, text);
+        log.info("请求体内容: " + jsonRequest);
+        // 创建RequestBody
+        RequestBody body = RequestBody.create(jsonRequest.get("text"), MediaType.get("application/json; charset=utf-8"));
+        // 创建Request
+        return new Request.Builder()
+                .url(jsonRequest.get("url"))
+                .post(body)
+                .addHeader("Authorization", GPTConstants.GEMINI_XIAKE_API_SECRET)
+                .addHeader("Host", "chat.xiake.pro")
+                .build();
+    }
+
+    private static Map<String, String> getJsonRequest(int option, String text) {
+        if (option == 1) {
+            return new HashMap<String, String>(2) {
+                {
+                    put("url", GPTConstants.GEMINI_API_URL);
+                    put("text", officialRequest(text));
+                }
+            };
+        } else {
+            return new HashMap<String, String>(2) {
+                {
+                    put("url", GPTConstants.GEMINI_XIAKE_API_URL);
+                    put("text", xiaKeRequest(text));
+                }
+            };
+        }
+    }
+
+    private static String xiaKeRequest(String text) {
+        GeminiGPTBo geminiGPTBo = new GeminiGPTBo();
+        geminiGPTBo.setContents("", text);
+        return JSON.toJSONString(geminiGPTBo);
+    }
+
+    private static String officialRequest(String text) {
         long timeStamp = Instant.now().toEpochMilli();
         AuthPayload payload = new AuthPayload(timeStamp, text);
         String signature = generateSignature(payload, "");
@@ -171,15 +220,7 @@ public class GeminiUtils {
         requestBody.put("time", timeStamp);
         requestBody.put("pass", null);
         requestBody.put("sign", signature);
-        String jsonRequest = requestBody.toJSONString();
-        log.info("请求体内容: " + jsonRequest);
-        // 创建RequestBody
-        RequestBody body = RequestBody.create(jsonRequest, MediaType.get("application/json; charset=utf-8"));
-        // 创建Request
-        return new Request.Builder()
-                .url(GEMINI_API_URL)
-                .post(body)
-                .build();
+        return requestBody.toJSONString();
     }
 
     /**
@@ -197,8 +238,15 @@ public class GeminiUtils {
             if (response.isSuccessful()) {
                 if (response.body() != null) {
                     String res = response.body().string().trim();
-                    if (StringUtils.isNotEmpty(res)) {
-                        JSONObject jsonObject = JSONObject.parseObject(res);
+                    String body;
+                    if (GeminiUtils.OPTION == 1) {
+                        body = res;
+                    } else {
+                        // 解析 JSON 字符串
+                        body = xiaKeParseResponse(response);
+                    }
+                    if (StringUtils.isNotEmpty(body)) {
+                        JSONObject jsonObject = JSONObject.parseObject(body);
                         log.info(jsonObject.toJSONString());
 //                        必须转化为json字符串才可以
                         return jsonObject.toJSONString();
@@ -214,6 +262,18 @@ public class GeminiUtils {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private static String xiaKeParseResponse(Response response) throws IOException {
+//        String body;
+        JSONObject resObj = JSON.parseObject(response.body().string());
+        JSONArray candidates = (JSONArray) resObj.get("candidates");
+        JSONObject obj = (JSONObject) candidates.get(0);
+        obj = (JSONObject) obj.get("content");
+        JSONArray array = (JSONArray) obj.get("parts");
+        obj = (JSONObject) array.get(0);
+        // 获取文本部分
+        return (String) obj.get("text");
     }
 
     /**

@@ -68,7 +68,7 @@ public class LawDoc implements Serializable {
     /**
      * 修正法条内容
      */
-    @HighLight(mappingField = "highlightContent", preTag = "<text style='color:red'>", postTag = "</text>")
+    @HighLight(mappingField = "highlightStripContent", preTag = "<text style='color:red'>", postTag = "</text>")
     @IndexField(fieldType = FieldType.TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
     private String stripContent;
     /**
@@ -129,6 +129,11 @@ public class LawDoc implements Serializable {
      */
     @IndexField(exist = false)
     private String highlightContent;
+    /**
+     * 修正正文高亮返回值被映射的字段
+     */
+    @IndexField(exist = false)
+    private String highlightStripContent;
 
 
 }
