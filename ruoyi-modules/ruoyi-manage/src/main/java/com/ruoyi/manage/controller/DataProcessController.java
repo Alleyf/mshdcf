@@ -5,11 +5,14 @@ import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.LawRegulation;
 import com.ruoyi.manage.service.impl.DataProcessService;
+import com.ruoyi.websocket.api.RemoteWebSocketService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -29,6 +32,8 @@ public class DataProcessController extends BaseController {
 
     @Resource
     private DataProcessService dataProcessService;
+    @DubboReference
+    private RemoteWebSocketService remoteWebSocketService;
 
 
     /**
@@ -173,4 +178,13 @@ public class DataProcessController extends BaseController {
         return toAjax(dataProcessService.lawInfoMiningSave(null));
     }
 
+    @GetMapping("/push")
+    public R<Void> push(@RequestParam(value = "clientId", required = false) String clientId, @RequestParam("message") String message) {
+        if (null != clientId) {
+            remoteWebSocketService.sendToOne(message, clientId);
+        } else {
+            remoteWebSocketService.sendToAll(message);
+        }
+        return R.ok();
+    }
 }

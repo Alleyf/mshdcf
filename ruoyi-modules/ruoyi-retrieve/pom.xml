@@ -33,7 +33,6 @@
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-api-retrieve</artifactId>
-            <version>${ruoyi.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>HdrHistogram</artifactId>

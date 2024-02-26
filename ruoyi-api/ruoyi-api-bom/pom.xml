@@ -29,7 +29,18 @@
                 <artifactId>ruoyi-api-resource</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
+            <!-- 检索服务接口-->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-api-retrieve</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- websocket服务接口-->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-api-websocket</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
