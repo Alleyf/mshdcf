@@ -10,6 +10,8 @@ import com.ruoyi.common.mybatis.core.page.TableDataInfo;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.ruoyi.common.satoken.utils.LoginHelper;
+import com.ruoyi.common.websocket.websocket.WebSocketService;
 import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.LawRegulation;
 import com.ruoyi.manage.domain.bo.ProcessBo;
@@ -114,25 +116,30 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
     public Integer insertBatch() {
         List<LawRegulation> allLaw = baseMapper.selectList();
         List<LawDoc> all = BeanCopyUtils.copyList(allLaw, LawDoc.class);
+        int allLawSize = allLaw.size();
         //        设置mysqlId
         Assert.notNull(all, "数据库暂无案例数据，请先新增数据");
         all = all.stream().peek(lawDoc -> lawDoc.setMysqlId(lawDoc.getId())).collect(Collectors.toList());
-        int successNum = 0, insertNum = 300;
-        if (all.size() <= insertNum) {
+        int successNum = 0, insertNum = 100;
+        if (allLawSize <= insertNum) {
             successNum = remoteLawRetrieveService.insertBatch(all);
+            //            发送同步进展消息
+            WebSocketService.sendMessage(LoginHelper.getLoginUser().getLoginId(), successNum + "/" + allLawSize);
         } else {
 //            判断是否为300的整数倍
-            boolean remain = all.size() % 300 != 0;
+            boolean remain = all.size() % insertNum != 0;
 //            查询批量插入总批次
-            int epoch = remain ? all.size() / 300 + 1 : all.size() / 300;
+            int epoch = remain ? all.size() / insertNum + 1 : all.size() / insertNum;
             for (int i = 0; i < epoch; i += 1) {
                 List<LawDoc> subList;
                 if (remain && i == epoch - 1) {
-                    subList = all.subList(i * 300, all.size());
+                    subList = all.subList(i * insertNum, all.size());
                 } else {
-                    subList = all.subList(i * 300, (i + 1) * 300);
+                    subList = all.subList(i * insertNum, (i + 1) * insertNum);
                 }
                 successNum += remoteLawRetrieveService.insertBatch(subList);
+                //            发送同步进展消息
+                WebSocketService.sendMessage(LoginHelper.getLoginUser().getLoginId(), successNum + "/" + allLawSize);
             }
         }
         return successNum;

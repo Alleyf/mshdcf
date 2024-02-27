@@ -10,6 +10,8 @@ import com.ruoyi.common.mybatis.core.page.TableDataInfo;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.ruoyi.common.satoken.utils.LoginHelper;
+import com.ruoyi.common.websocket.websocket.WebSocketService;
 import com.ruoyi.manage.domain.bo.ProcessBo;
 import com.ruoyi.manage.enums.MiningStatus;
 import com.ruoyi.retrieve.api.RemoteCaseDocRetrieveService;
@@ -122,29 +124,32 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     @Override
     public Integer insertBatch() {
         List<DocCase> allCase = baseMapper.selectList();
-//        log.info("批量新增案例：{}", allCase);
         List<CaseDoc> all = BeanCopyUtils.copyList(allCase, CaseDoc.class);
-//        log.info("批量新增索引案例：{}", all);
+        int allCaseSize = allCase.size();
 //        设置mysqlId
         Assert.notNull(all, "数据库暂无案例数据，请先新增数据");
         all = all.stream().peek(caseDoc -> caseDoc.setMysqlId(caseDoc.getId())).collect(Collectors.toList());
-//        log.info("批量新增过滤后的索引案例：{}", all);
-        int successNum = 0, insertNum = 300;
-        if (all.size() <= insertNum) {
+//      分块同步
+        int successNum = 0, insertNum = 100;
+        if (allCaseSize <= insertNum) {
             successNum = remoteCaseRetrieveService.insertBatch(all);
+//            发送同步进展消息
+            WebSocketService.sendMessage(LoginHelper.getLoginUser().getLoginId(), successNum + "/" + allCaseSize);
         } else {
 //            判断是否为300的整数倍
-            boolean remain = all.size() % 300 != 0;
+            boolean remain = all.size() % insertNum != 0;
 //            查询批量插入总批次
-            int epoch = remain ? all.size() / 300 + 1 : all.size() / 300;
+            int epoch = remain ? all.size() / insertNum + 1 : all.size() / insertNum;
             for (int i = 0; i < epoch; i += 1) {
                 List<CaseDoc> subList;
                 if (remain && i == epoch - 1) {
-                    subList = all.subList(i * 300, all.size());
+                    subList = all.subList(i * insertNum, all.size());
                 } else {
-                    subList = all.subList(i * 300, (i + 1) * 300);
+                    subList = all.subList(i * insertNum, (i + 1) * insertNum);
                 }
                 successNum += remoteCaseRetrieveService.insertBatch(subList);
+                //            发送同步进展消息
+                WebSocketService.sendMessage(LoginHelper.getLoginUser().getLoginId(), successNum + "/" + allCaseSize);
             }
         }
         return successNum;

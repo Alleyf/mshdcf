@@ -1,5 +1,6 @@
 package com.ruoyi.common.websocket.config;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -13,7 +14,8 @@ import org.springframework.web.socket.server.standard.ServerEndpointExporter;
  * @site <a href="https://alleyf.github.io">getHelp</a>
  * @description
  */
-@Configuration
+@AutoConfiguration
+@EnableWebSocket
 public class WebSocketConfig {
 
     @Bean
@@ -22,3 +24,4 @@ public class WebSocketConfig {
     }
 
 }
+

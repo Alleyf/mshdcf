@@ -27,7 +27,7 @@ spring:
         namespace: ${spring.profiles.active}
     stream:
       function:
-        # 重点配置 与 binding 名与消费者对应
+        # 重点配置 与 binding 名以及消费者方法名对应
         definition: delay;worldCloud;
   config:
     import:
@@ -42,7 +42,7 @@ spring:
   rabbitmq:
     host: localhost
     port: 5672
-    virtual-host: /retrieve
+    virtual-host: /mshdcf
     username: admin
     password: admin
   cloud:

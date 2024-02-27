@@ -4,7 +4,7 @@ import {
   getCase,
   delCase,
   addCase,
-  updateCase, saveProcessCase,
+  updateCase, saveProcessCase, syncAllCase,
 } from '@/api/manage/case'
 import {download} from '@/utils/request'
 import {getCurrentInstance, onMounted, reactive, ref, toRefs} from "vue";
@@ -515,6 +515,20 @@ const handleExportSelected = () => {
     , `case_${new Date().getTime()}.xlsx`)
 }
 
+//全量同步司法案例
+const handleSync = () => {
+  ElMessageBox.confirm('是否确认同步所有数据项？').then(() => {
+    loading.value = true
+    return syncAllCase()
+  }).then(() => {
+    ElMessage.success('同步成功')
+    getList()
+  }).catch(() => {
+  }).finally(() => {
+    loading.value = false
+  })
+}
+
 onMounted(() => {
   getList()
 
@@ -678,6 +692,17 @@ onMounted(() => {
             type="warning"
             @click="handleExport"
           >导出
+          </el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
+            v-hasPermi="['manage:case:sync']"
+            icon="Plus"
+            plain
+            size="default"
+            type="success"
+            @click="handleSync"
+          >全量同步
           </el-button>
         </el-col>
         <el-col :span="1.5">

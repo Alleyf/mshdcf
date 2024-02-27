@@ -26,6 +26,14 @@ export function addRegulation(data) {
   })
 }
 
+// 全量同步法律法规
+export function syncAllRegulation(data) {
+  return request({
+    url: '/manage/regulation/syncAll',
+    method: 'get'
+  })
+}
+
 // 修改法律法规
 export function updateRegulation(data) {
   return request({

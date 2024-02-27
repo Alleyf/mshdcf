@@ -11,11 +11,14 @@ import com.ruoyi.common.log.annotation.Log;
 import com.ruoyi.common.log.enums.BusinessType;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
+import com.ruoyi.common.satoken.utils.LoginHelper;
 import com.ruoyi.manage.domain.bo.LawRegulationBo;
 import com.ruoyi.manage.domain.bo.ProcessBo;
 import com.ruoyi.manage.domain.vo.LawRegulationImportVo;
 import com.ruoyi.manage.domain.vo.LawRegulationVo;
+import com.ruoyi.manage.enums.SocketMsgType;
 import com.ruoyi.manage.listener.LawRegulationImportListener;
+import com.ruoyi.manage.mq.producer.WebsocketProducer;
 import com.ruoyi.manage.service.ILawRegulationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -44,6 +47,7 @@ import java.util.List;
 public class LawRegulationController extends BaseController {
 
     private final ILawRegulationService lawRegulationService;
+    private final WebsocketProducer websocketProducer;
 
     /**
      * 查询法律法规列表
@@ -116,8 +120,11 @@ public class LawRegulationController extends BaseController {
 //    @Log(title = "法律法规", businessType = BusinessType.INSERT)
     @GetMapping("/syncAll")
     public R<Void> syncAll() {
-        return R.ok("成功同步法条数据：" + lawRegulationService.insertBatch() + "条");
-
+        //        采用消息队列异步处理，借助websocket实时发送处理进度通知
+        websocketProducer.sendMsg(SocketMsgType.LAW.getType(), "开始同步司法案例数据", LoginHelper.getLoginUser().getLoginId(), 0L);
+//        return R.ok("成功同步司法案例数据：" + docCaseService.insertBatch() + "条");
+        return R.ok("开始同步法条数据");
+//        return R.ok("成功同步法条数据：" + lawRegulationService.insertBatch() + "条");
     }
 
     /**

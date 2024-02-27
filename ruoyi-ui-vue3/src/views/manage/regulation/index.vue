@@ -4,7 +4,7 @@ import {
   getRegulation,
   delRegulation,
   addRegulation,
-  updateRegulation, saveProcessRegulation,
+  updateRegulation, saveProcessRegulation, syncAllRegulation,
 } from '@/api/manage/regulation'
 import {download} from '@/utils/request'
 import {getCurrentInstance, onMounted, reactive, ref, toRefs} from "vue";
@@ -402,8 +402,22 @@ const handleDelete = row => {
 const handleExport = () => {
   console.log({...queryParams.value})
   proxy.download('manage/regulation/export',
-      {...queryParams.value}
-      , `regulation_${new Date().getTime()}.xlsx`)
+    {...queryParams.value}
+    , `regulation_${new Date().getTime()}.xlsx`)
+}
+
+//全量同步法律法规
+const handleSync = () => {
+  ElMessageBox.confirm('是否确认同步所有数据项？').then(() => {
+    loading.value = true
+    return syncAllRegulation()
+  }).then(() => {
+    ElMessage.success('同步成功')
+    getList()
+  }).catch(() => {
+  }).finally(() => {
+    loading.value = false
+  })
 }
 
 onMounted(() => {
@@ -479,12 +493,23 @@ onMounted(() => {
         </el-col>
         <el-col :span="1.5">
           <el-button
-              v-hasPermi="['manage:case:process']"
-              :disabled="multiple"
-              icon="Edit"
-              size="default"
-              type="primary"
-              @click="handleProcess"
+            v-hasPermi="['manage:regulation:sync']"
+            icon="Plus"
+            plain
+            size="default"
+            type="success"
+            @click="handleSync"
+          >全量同步
+          </el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
+            v-hasPermi="['manage:case:process']"
+            :disabled="multiple"
+            icon="Edit"
+            size="default"
+            type="primary"
+            @click="handleProcess"
           >清洗挖掘
           </el-button>
         </el-col>
@@ -495,15 +520,15 @@ onMounted(() => {
       <el-tabs v-model="defaultListTab" :tab-position="'right'" class="el-tabs" style="height: 500px">
         <el-tab-pane :name="1" label="未清洗挖掘">
           <el-table
-              v-loading="loading"
-              :data="regulationListOrigin"
-              :default-sort="{ prop: 'releaseDate', order: 'descending' }"
-              border
-              height="500"
-              stripe
-              style="width: 100%;text-align: center"
-              table-layout="auto"
-              @selection-change="handleSelectionChange"
+            v-loading="loading"
+            :data="regulationListOrigin"
+            :default-sort="{ prop: 'releaseDate', order: 'descending' }"
+            border
+            height="500"
+            stripe
+            style="width: 100%;text-align: center"
+            table-layout="auto"
+            @selection-change="handleSelectionChange"
           >
             <el-table-column align="center" type="selection" width="55"/>
             <!--      <el-table-column v-if="true" align="center" label="法律法规主键id" prop="id"/>-->
@@ -598,15 +623,15 @@ onMounted(() => {
         </el-tab-pane>
         <el-tab-pane :name="2" label="已清洗">
           <el-table
-              v-loading="loading"
-              :data="regulationListStriped"
-              :default-sort="{ prop: 'releaseDate', order: 'descending' }"
-              border
-              height="500"
-              stripe
-              style="width: 100%;text-align: center"
-              table-layout="auto"
-              @selection-change="handleSelectionChange"
+            v-loading="loading"
+            :data="regulationListStriped"
+            :default-sort="{ prop: 'releaseDate', order: 'descending' }"
+            border
+            height="500"
+            stripe
+            style="width: 100%;text-align: center"
+            table-layout="auto"
+            @selection-change="handleSelectionChange"
           >
             <el-table-column align="center" type="selection" width="55"/>
             <!--      <el-table-column v-if="true" align="center" label="法律法规主键id" prop="id"/>-->
@@ -702,15 +727,15 @@ onMounted(() => {
         </el-tab-pane>
         <el-tab-pane :name="3" label="已挖掘">
           <el-table
-              v-loading="loading"
-              :data="regulationList"
-              :default-sort="{ prop: 'releaseDate', order: 'descending' }"
-              border
-              height="500"
-              stripe
-              style="width: 100%;text-align: center"
-              table-layout="auto"
-              @selection-change="handleSelectionChange"
+            v-loading="loading"
+            :data="regulationList"
+            :default-sort="{ prop: 'releaseDate', order: 'descending' }"
+            border
+            height="500"
+            stripe
+            style="width: 100%;text-align: center"
+            table-layout="auto"
+            @selection-change="handleSelectionChange"
           >
             <el-table-column align="center" type="selection" width="55"/>
             <!--      <el-table-column v-if="true" align="center" label="法律法规主键id" prop="id"/>-->
@@ -984,11 +1009,11 @@ onMounted(() => {
       </el-dialog>
     </el-card>
     <pagination
-        v-show="total>0"
-        v-model:limit="queryParams.pageSize"
-        v-model:page="queryParams.pageNum"
-        :total="total"
-        @pagination="getList"
+      v-show="total>0"
+      v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNum"
+      :total="total"
+      @pagination="getList"
     />
   </div>
 </template>

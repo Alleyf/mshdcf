@@ -1,6 +1,6 @@
-package com.ruoyi.retrieve.mq.producer;
+package com.ruoyi.common.mq.producer;
 
-import com.ruoyi.retrieve.mq.Messaging;
+import com.ruoyi.common.mq.Messaging;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;

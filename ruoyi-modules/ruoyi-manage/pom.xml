@@ -118,6 +118,16 @@
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-api-websocket</artifactId>
         </dependency>
+        <!--        websocket服务-->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-common-websocket</artifactId>
+        </dependency>
+        <!--        mq消息队列服务-->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-common-mq</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

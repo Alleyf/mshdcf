@@ -178,6 +178,13 @@ public class DataProcessController extends BaseController {
         return toAjax(dataProcessService.lawInfoMiningSave(null));
     }
 
+    /**
+     * 推送消息
+     *
+     * @param clientId 客户端id
+     * @param message  消息内容
+     * @return R<Void>
+     */
     @GetMapping("/push")
     public R<Void> push(@RequestParam(value = "clientId", required = false) String clientId, @RequestParam("message") String message) {
         if (null != clientId) {

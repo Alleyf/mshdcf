@@ -10,9 +10,12 @@ import com.ruoyi.common.excel.utils.ExcelUtil;
 import com.ruoyi.common.log.annotation.Log;
 import com.ruoyi.common.log.enums.BusinessType;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
+import com.ruoyi.common.satoken.utils.LoginHelper;
 import com.ruoyi.manage.domain.bo.ProcessBo;
 import com.ruoyi.manage.domain.vo.DocCaseImportVo;
+import com.ruoyi.manage.enums.SocketMsgType;
 import com.ruoyi.manage.listener.DocCaseImportListener;
+import com.ruoyi.manage.mq.producer.WebsocketProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -44,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 public class DocCaseController extends BaseController {
 
     private final IDocCaseService docCaseService;
+    private final WebsocketProducer websocketProducer;
 
     /**
      * 查询司法案例列表
@@ -129,7 +133,10 @@ public class DocCaseController extends BaseController {
 //    @Log(title = "司法案例", businessType = BusinessType.INSERT)
     @GetMapping("/syncAll")
     public R<Void> syncAll() {
-        return R.ok("成功同步司法案例数据：" + docCaseService.insertBatch() + "条");
+//        采用消息队列异步处理，借助websocket实时发送处理进度通知
+        websocketProducer.sendMsg(SocketMsgType.CASE.getType(), "开始同步司法案例数据", LoginHelper.getLoginUser().getLoginId(), 0L);
+//        return R.ok("成功同步司法案例数据：" + docCaseService.insertBatch() + "条");
+        return R.ok("开始同步司法案例数据");
     }
 
     /**
@@ -188,5 +195,18 @@ public class DocCaseController extends BaseController {
     @DeleteMapping("/{ids}")
     public R<Void> remove(@Validated @NotEmpty(message = "主键不能为空") @PathVariable Long[] ids) {
         return toAjax(docCaseService.deleteWithValidByIds(Arrays.asList(ids), true));
+    }
+
+    /**
+     * 测试mq-websocket
+     *
+     * @param msg      消息
+     * @param clientId 客户端id
+     * @return R<Void>
+     */
+    @GetMapping("/testmq")
+    public R<Void> testmq(String msg, String clientId) {
+        websocketProducer.sendMsg(SocketMsgType.NORMAL.getType(), msg, LoginHelper.getLoginUser().getLoginId(), 0L);
+        return R.ok("test mq send websocket msg");
     }
 }

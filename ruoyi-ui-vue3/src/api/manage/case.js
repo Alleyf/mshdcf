@@ -26,6 +26,14 @@ export function addCase(data) {
   })
 }
 
+// 全量同步司法案例
+export function syncAllCase(data) {
+  return request({
+    url: '/manage/case/syncAll',
+    method: 'get'
+  })
+}
+
 // 修改司法案例
 export function updateCase(data) {
   return request({

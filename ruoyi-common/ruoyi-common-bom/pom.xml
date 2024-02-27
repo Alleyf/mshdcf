@@ -173,7 +173,18 @@
                 <artifactId>ruoyi-common-encrypt</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
+            <!--        websocket服务-->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-common-websocket</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!--            mq服务-->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-common-mq</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
