@@ -134,7 +134,7 @@ public class DocCaseController extends BaseController {
     @GetMapping("/syncAll")
     public R<Void> syncAll() {
 //        采用消息队列异步处理，借助websocket实时发送处理进度通知
-        websocketProducer.sendMsg(SocketMsgType.CASE.getType(), "开始同步司法案例数据", LoginHelper.getLoginUser().getLoginId(), 0L);
+        websocketProducer.sendMsg("全量同步司法案例", SocketMsgType.CASE.getType(), "开始同步司法案例数据", LoginHelper.getLoginId(), 0L);
 //        return R.ok("成功同步司法案例数据：" + docCaseService.insertBatch() + "条");
         return R.ok("开始同步司法案例数据");
     }
@@ -206,7 +206,7 @@ public class DocCaseController extends BaseController {
      */
     @GetMapping("/testmq")
     public R<Void> testmq(String msg, String clientId) {
-        websocketProducer.sendMsg(SocketMsgType.NORMAL.getType(), msg, LoginHelper.getLoginUser().getLoginId(), 0L);
+        websocketProducer.sendMsg("testmq", SocketMsgType.NORMAL.getType(), msg, LoginHelper.getLoginId(), 0L);
         return R.ok("test mq send websocket msg");
     }
 }

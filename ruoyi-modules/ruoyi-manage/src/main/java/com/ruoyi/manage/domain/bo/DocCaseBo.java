@@ -144,5 +144,7 @@ public class DocCaseBo extends BaseEntity {
     /**
      * 挖掘状态
      */
-    private MiningStatus isMining;
+    private Integer isMining;
+
+
 }

@@ -1,20 +1,21 @@
 <template>
-  <div :class="{ 'show': show }" class="header-search">
-    <svg-icon class-name="search-icon" icon-class="search" @click.stop="click"/>
+  <div :class="{ 'show': show }" class="header-search flex justify-start justify-items-center">
     <el-select
-        ref="headerSearchSelectRef"
-        v-model="search"
-        :remote-method="querySearch"
-        class="header-search-select"
-        default-first-option
-        filterable
-        placeholder="Search"
-        remote
-        @change="change"
+      ref="headerSearchSelectRef"
+      v-model="search"
+      :remote-method="querySearch"
+      class="header-search-select"
+      default-first-option
+      filterable
+      placeholder="Search"
+      remote
+      @change="change"
     >
       <el-option v-for="option in options" :key="option.item.path" :label="option.item.title.join(' > ')"
                  :value="option.item"/>
     </el-select>
+    <svg-icon class-name="search-icon" icon-class="search" @click.stop="click"/>
+
   </div>
 </template>
 
@@ -158,11 +159,14 @@ watch(searchPool, (list) => {
 <style lang='scss' scoped>
 .header-search {
   font-size: 0 !important;
+  margin: auto 0;
+
 
   .search-icon {
     cursor: pointer;
     font-size: 18px;
     vertical-align: middle;
+    margin: auto;
   }
 
   .header-search-select {
@@ -173,7 +177,7 @@ watch(searchPool, (list) => {
     background: transparent;
     border-radius: 0;
     display: inline-block;
-    vertical-align: middle;
+    vertical-align: center;
 
     :deep(.el-input__inner) {
       border-radius: 0;
@@ -188,8 +192,8 @@ watch(searchPool, (list) => {
 
   &.show {
     .header-search-select {
-      width: 210px;
-      margin-left: 10px;
+      width: 180px;
+      margin-right: 10px;
     }
   }
 }

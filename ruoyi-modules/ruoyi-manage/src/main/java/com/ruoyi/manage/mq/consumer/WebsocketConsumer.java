@@ -1,6 +1,7 @@
 package com.ruoyi.manage.mq.consumer;
 
 
+import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.common.websocket.websocket.WebSocketService;
 import com.ruoyi.manage.enums.SocketMsgType;
 import com.ruoyi.manage.mq.WebscoketMessage;
@@ -31,12 +32,13 @@ public class WebsocketConsumer {
     Consumer<WebscoketMessage> websocket() {
         log.info("初始化订阅");
         return obj -> {
-            log.info("消息接收成功：" + obj);
-            WebSocketService.sendMessage(obj.getClientId(), obj.getMsgText());
+            String jsonMsg = JSONObject.toJSONString(obj);
+            log.info("消息接收成功：" + jsonMsg);
+            WebSocketService.sendMessage(obj.getClientId(), jsonMsg);
             if (obj.getMsgType().equals(SocketMsgType.CASE.getType())) {
-                docCaseService.insertBatch();
+                docCaseService.insertBatch(obj.getClientId());
             } else if (obj.getMsgType().equals(SocketMsgType.LAW.getType())) {
-                lawRegulationService.insertBatch();
+                lawRegulationService.insertBatch(obj.getClientId());
             } else {
                 // TODO: 2024/2/27 处理其他消息
             }

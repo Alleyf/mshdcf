@@ -2,6 +2,9 @@ package com.ruoyi.manage.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.core.utils.BeanCopyUtils;
 import com.ruoyi.common.core.utils.StringUtils;
@@ -14,6 +17,8 @@ import com.ruoyi.common.satoken.utils.LoginHelper;
 import com.ruoyi.common.websocket.websocket.WebSocketService;
 import com.ruoyi.manage.domain.bo.ProcessBo;
 import com.ruoyi.manage.enums.MiningStatus;
+import com.ruoyi.manage.enums.SocketMsgType;
+import com.ruoyi.manage.mq.WebscoketMessage;
 import com.ruoyi.retrieve.api.RemoteCaseDocRetrieveService;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +65,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     public TableDataInfo<DocCaseVo> queryPageList(DocCaseBo bo, PageQuery pageQuery) {
 //        构建条件查询修饰器
         LambdaQueryWrapper<DocCase> lqw = buildQueryWrapper(bo);
+        lqw.eq(ObjectUtil.isNotNull(bo.getIsMining()), DocCase::getIsMining, MiningStatus.getMiningStatus(bo.getIsMining()));
 //        传入分页查询器和条件查询修饰器进行分页查询
         Page<DocCaseVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
@@ -122,7 +128,8 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     }
 
     @Override
-    public Integer insertBatch() {
+    public Integer insertBatch(String clientId) {
+//        String clientId = LoginHelper.getLoginId();
         List<DocCase> allCase = baseMapper.selectList();
         List<CaseDoc> all = BeanCopyUtils.copyList(allCase, CaseDoc.class);
         int allCaseSize = allCase.size();
@@ -134,7 +141,8 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         if (allCaseSize <= insertNum) {
             successNum = remoteCaseRetrieveService.insertBatch(all);
 //            发送同步进展消息
-            WebSocketService.sendMessage(LoginHelper.getLoginUser().getLoginId(), successNum + "/" + allCaseSize);
+            WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.CASE.getType(), "全量同步司法案例", "同步进度：" + successNum + "/" + allCaseSize, clientId);
+            WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
         } else {
 //            判断是否为300的整数倍
             boolean remain = all.size() % insertNum != 0;
@@ -149,7 +157,8 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
                 }
                 successNum += remoteCaseRetrieveService.insertBatch(subList);
                 //            发送同步进展消息
-                WebSocketService.sendMessage(LoginHelper.getLoginUser().getLoginId(), successNum + "/" + allCaseSize);
+                WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.CASE.getType(), "全量同步司法案例", "同步进度：" + successNum + "/" + allCaseSize, clientId);
+                WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
             }
         }
         return successNum;

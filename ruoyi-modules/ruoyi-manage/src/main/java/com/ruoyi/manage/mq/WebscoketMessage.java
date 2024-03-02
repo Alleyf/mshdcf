@@ -1,6 +1,8 @@
 package com.ruoyi.manage.mq;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -8,6 +10,8 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class WebscoketMessage {
     /**
      * 消息id
@@ -17,6 +21,10 @@ public class WebscoketMessage {
      * 消息类型
      */
     private String msgType;
+    /**
+     * 消息标题
+     */
+    private String msgTitle;
     /**
      * 消息内容
      */

@@ -2,6 +2,9 @@ package com.ruoyi.manage.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.core.utils.BeanCopyUtils;
 import com.ruoyi.common.core.utils.StringUtils;
@@ -16,7 +19,9 @@ import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.LawRegulation;
 import com.ruoyi.manage.domain.bo.ProcessBo;
 import com.ruoyi.manage.enums.MiningStatus;
+import com.ruoyi.manage.enums.SocketMsgType;
 import com.ruoyi.manage.mapper.LawRegulationMapper;
+import com.ruoyi.manage.mq.WebscoketMessage;
 import com.ruoyi.retrieve.api.RemoteLawDocRetrieveService;
 import com.ruoyi.retrieve.api.RemoteRetrieveService;
 import com.ruoyi.retrieve.api.domain.LawDoc;
@@ -30,6 +35,7 @@ import com.ruoyi.manage.domain.vo.LawRegulationVo;
 import com.ruoyi.manage.domain.LawRegulation;
 import com.ruoyi.manage.mapper.LawRegulationMapper;
 import com.ruoyi.manage.service.ILawRegulationService;
+import org.springframework.util.SimpleIdGenerator;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -67,6 +73,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
     @Override
     public TableDataInfo<LawRegulationVo> queryPageList(LawRegulationBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<LawRegulation> lqw = buildQueryWrapper(bo);
+        lqw.eq(ObjectUtil.isNotNull(bo.getIsMining()), LawRegulation::getIsMining, MiningStatus.getMiningStatus(bo.getIsMining()));
         Page<LawRegulationVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
     }
@@ -113,7 +120,8 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
      * 批量新增
      */
     @Override
-    public Integer insertBatch() {
+    public Integer insertBatch(String clientId) {
+//        String clientId = LoginHelper.getLoginId();
         List<LawRegulation> allLaw = baseMapper.selectList();
         List<LawDoc> all = BeanCopyUtils.copyList(allLaw, LawDoc.class);
         int allLawSize = allLaw.size();
@@ -124,7 +132,8 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         if (allLawSize <= insertNum) {
             successNum = remoteLawRetrieveService.insertBatch(all);
             //            发送同步进展消息
-            WebSocketService.sendMessage(LoginHelper.getLoginUser().getLoginId(), successNum + "/" + allLawSize);
+            WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.LAW.getType(), "全量同步法律法规", successNum + "/" + allLawSize, clientId);
+            WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
         } else {
 //            判断是否为300的整数倍
             boolean remain = all.size() % insertNum != 0;
@@ -138,8 +147,9 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
                     subList = all.subList(i * insertNum, (i + 1) * insertNum);
                 }
                 successNum += remoteLawRetrieveService.insertBatch(subList);
-                //            发送同步进展消息
-                WebSocketService.sendMessage(LoginHelper.getLoginUser().getLoginId(), successNum + "/" + allLawSize);
+                //            发送同步进展消息 todo 没有token鉴权失败
+                WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.LAW.getType(), "全量同步法律法规", successNum + "/" + allLawSize, clientId);
+                WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
             }
         }
         return successNum;

@@ -33,8 +33,9 @@ const icons = {
   party: 'material-symbols:supervisor-account'
 };
 const text = ref("")
+const textLs = ref([]);
 const displayedText = ref('');
-const typeSpeed = 1; // 字符间隔时间，单位：毫秒
+const typeSpeed = 10; // 字符间隔时间，单位：毫秒
 const typewriter = ref(null);
 const wordCloud = ref(null);
 const worldCloudFlag = ref(false);
@@ -48,15 +49,15 @@ onMounted(() => {
     proxy.$modal.msgError("请传入id")
     return
   }
-  getCase(id).then(res => {
+  getCase(id).then(async res => {
     caseItem.value = res.data;
     // console.log(query)
     if (query.keyword !== "" || query.keyword === undefined) {
-      if (res.data.stripContent) {
-        caseItem.value.stripContent = res.data.stripContent.replaceAll(query.keyword, `<strong class='text-red-500'>${query.keyword}</strong>`)
-      } else {
-        caseItem.value.content = res.data.content.replaceAll(query.keyword, `<strong class='text-red-500'>${query.keyword}</strong>`)
-      }
+      // if (res.data.stripContent) {
+      //   // caseItem.value.stripContent = res.data.stripContent.replaceAll(query.keyword, `<strong class='text-red-500'>${query.keyword}</strong>`)
+      // } else {
+      //   // caseItem.value.content = res.data.content.replaceAll(query.keyword, `<strong class='text-red-500'>${query.keyword}</strong>`)
+      // }
     }
     // caseItem.value.content = res.data.content.split("\n").filter(element => element !== "").join("。<br/>&emsp;&emsp;");
     // console.log(caseItem.value.content)
@@ -69,6 +70,7 @@ onMounted(() => {
     // wordCloud.value = res.msg;
     proxy.$modal.msgSuccess(`获取数据成功`);
     text.value = caseItem.value.stripContent !== undefined ? caseItem.value.stripContent : caseItem.value.content;
+    textLs.value = text.value.split("\n")
     // caseItem.value.sourceId = 1;
     // 获取来源
     const targetSource = crawler_source.value.filter(item => item.value === caseItem.value.sourceId.toString());
@@ -84,20 +86,36 @@ onMounted(() => {
       });
     }, 5000); // 延迟10秒（10000毫秒）
     // 打字机效果
-    const timer = setInterval(() => {
-      if (index < text.value.length) {
-        displayedText.value += text.value[index];
-        index++;
-      } else {
-        clearInterval(timer);
-      }
-      typewriter.scrollLeft = typewriter.scrollWidth; // 滚动到最新输入字符位置
-    }, typeSpeed);
+    // const timer = setInterval(() => {
+    //   if (index < text.value.length) {
+    //     displayedText.value += text.value[index];
+    //     index++;
+    //   } else {
+    //     clearInterval(timer);
+    //   }
+    //   typewriter.scrollLeft = typewriter.scrollWidth; // 滚动到最新输入字符位置
+    // }, typeSpeed);
+    console.log(textLs.value)
+    await Promise.all(textLs.value.map(typeText));
   }).catch(err => {
     // proxy.$modal.msgError(err.msg)
   })
 })
 
+
+async function typeText(text) {
+  // 获取要添加标签的 div 元素
+  const divElement = document.getElementById('content');
+  const element = document.createElement('p');
+  divElement.appendChild(element); // 添加到页面中，你也可以根据需要添加到特定容器中
+  for (let i = 0; i < text.length; i++) {
+    element.innerHTML += text[i];
+    divElement.scrollLeft = divElement.scrollWidth; // 滚动到最新输入字符位置
+    // typewriter.scrollLeft = typewriter.scrollWidth; // 滚动到最新输入字符位置
+    await new Promise(resolve => setTimeout(resolve, typeSpeed));
+  }
+  element.innerHTML = element.innerHTML.replace(query.keyword, `<strong class='text-red-500'>${query.keyword}</strong>`);
+}
 
 const handleTabClick = (pane, ev) => {
   if (pane.props.label === '案例词云' && worldCloudFlag.value === false) {
@@ -137,8 +155,15 @@ const handleTabClick = (pane, ev) => {
               {{ caseItem.judgeDate }}
           </span>
         </p>
-        <el-card ref="typewriter" class="content">
-          <p style="padding: 10px;" v-html="displayedText"/>
+        <el-card ref="typewriter">
+          <div id="content" class="content" style="padding: 10px;">
+            <!--          <div v-for="(item,index) in textLs" :key="index" style="padding: 10px;">-->
+            <!--              todo 加粗的html也被显示出来了-->
+            <!--            <span v-for="str in handleContent(item)" v-html="str"/>-->
+            <!--          <p v-html="displayedText"/>-->
+            <!--          </div>-->
+            <!--            <p v-for="(text, index) in textLs" :key="index" style="padding: 10px;"/>-->
+          </div>
         </el-card>
       </el-col>
       <el-col :span="12" class="baseInfo">
@@ -233,7 +258,7 @@ const handleTabClick = (pane, ev) => {
             </el-card>
           </el-tab-pane>
           <el-tab-pane v-if="Object.keys(caseItem.extra).length !== 0" label="语义信息"
-                       style="font-weight: bold;font-size: medium">
+                       style="font-weight: normal;font-size: medium">
             <!--            <el-divider/>-->
             <!--            <el-tag style="font-weight: bold;font-size: large" type="warning">语义信息</el-tag>-->
 
@@ -247,13 +272,33 @@ const handleTabClick = (pane, ev) => {
                       ⚖️
                       <el-tag size="small" type="danger">{{ caseItem.extra.party.defendant }}</el-tag>
                     </div>
-                    <el-col v-if="caseItem.extra.keyword">关键字：{{ caseItem.extra.keyword }}</el-col>
-                    <el-col v-if="caseItem.extra.plea">诉讼要求：{{ caseItem.extra.plea }}</el-col>
-                    <el-col v-if="caseItem.extra.label">案件类型：{{ caseItem.extra.label }}</el-col>
-                    <el-col v-if="caseItem.extra.plai">原告诉述：{{ caseItem.extra.plai }}</el-col>
-                    <el-col v-if="caseItem.extra.defe">被告辩称：{{ caseItem.extra.defe }}</el-col>
-                    <el-col v-if="caseItem.extra.fact">案件事实：{{ caseItem.extra.fact }}</el-col>
-                    <el-col v-if="caseItem.extra.note">判决记录：{{ caseItem.extra.note }}</el-col>
+                    <el-col v-if="caseItem.extra.keyword">
+                      <span class="font-black">关键字：</span>{{ caseItem.extra.keyword }}
+                    </el-col>
+                    <el-col v-if="caseItem.extra.plea"><span class="font-black">诉讼要求：</span>{{
+                        caseItem.extra.plea
+                      }}
+                    </el-col>
+                    <el-col v-if="caseItem.extra.label"><span class="font-black">案件类型：</span>{{
+                        caseItem.extra.label
+                      }}
+                    </el-col>
+                    <el-col v-if="caseItem.extra.plai"><span class="font-black">原告诉述：</span>{{
+                        caseItem.extra.plai
+                      }}
+                    </el-col>
+                    <el-col v-if="caseItem.extra.defe"><span class="font-black">被告辩称：</span>{{
+                        caseItem.extra.defe
+                      }}
+                    </el-col>
+                    <el-col v-if="caseItem.extra.fact"><span class="font-black">案件事实：</span>{{
+                        caseItem.extra.fact
+                      }}
+                    </el-col>
+                    <el-col v-if="caseItem.extra.note"><span class="font-black">判决记录：</span>{{
+                        caseItem.extra.note
+                      }}
+                    </el-col>
                   </el-row>
                 </el-card>
               </el-tab-pane>
@@ -314,7 +359,7 @@ $secondary-color: #e1c199;
 
 
   .el-tag {
-    @apply font-bold text-xs text-center
+    @apply font-bold text-xl text-center
   }
 
   .el-divider {
@@ -394,12 +439,16 @@ $secondary-color: #e1c199;
   font-size: large;
 }
 
+.addInfo {
+  font-weight: normal;
+  font-size: medium
+}
+
 .content {
   text-shadow: #ebeee8 1px 10px 1px;
   text-align: justify;
   text-justify: auto;
-  text-indent: 2em;
-  white-space: pre-wrap; /* 保持空白，正常换行 */
+  text-indent: 2em; /* 设置段落首行缩进两个字符 */
 }
 
 .mytabs {

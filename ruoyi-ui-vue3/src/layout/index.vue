@@ -25,6 +25,8 @@ import defaultSettings from '@/settings'
 import useAppStore from '@/store/modules/app'
 import useSettingsStore from '@/store/modules/settings'
 import {ElFooter} from "element-plus";
+import {onMounted, onUnmounted, ref} from "vue";
+import useUserStore from "@/store/modules/user";
 
 const settingsStore = useSettingsStore()
 const theme = computed(() => settingsStore.theme);
@@ -65,6 +67,16 @@ const settingRef = ref(null);
 function setLayout() {
   settingRef.value.openSetting();
 }
+
+
+onMounted(() => {
+  // connect()
+})
+
+onUnmounted(() => {
+  // close()
+})
+
 </script>
 
 <style lang="scss" scoped>

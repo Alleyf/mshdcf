@@ -44,6 +44,7 @@ const data = reactive({
     releaseOrganization: null,
     sourceId: null,
     status: null,
+    isMining: 0
   },
   rules: {
     id: [],
@@ -105,6 +106,8 @@ const open = ref(false)
 const processDialog = ref(false)
 const defaultTab = ref(0)
 const defaultListTab = ref(1)
+const currentTab = ref(1);
+
 const processStep = ref(0)
 const openContent = ref(false)
 
@@ -281,6 +284,23 @@ const getList = () => {
 
 }
 
+const handleTabClick = (pane, ev) => {
+  // todo 数据清洗挖掘tab页切换回调函数
+  console.log(pane.props.name)
+  if (pane.props.name === 1) {
+    // 设置分页的总页数为ORIGIN的总页数
+    queryParams.value.isMining = 0
+  } else if (pane.props.name === 2) {
+    // 设置分页的总页数为STRIPED的总页数
+    queryParams.value.isMining = 1
+  } else if (pane.props.name === 3) {
+    // 设置分页的总页数为MININGED的总页数
+    queryParams.value.isMining = 2
+  }
+  currentTab.value = queryParams.value.isMining
+  getList()
+}
+
 const handleQuery = () => {
   queryParams.value.pageNum = 1
   getList()
@@ -297,7 +317,9 @@ const resetQueryForm = () => {
     releaseOrganization: null,
     sourceId: null,
     status: null,
+    isMining: currentTab.value
   }
+
 }
 
 const resetQuery = () => {
@@ -517,7 +539,8 @@ onMounted(() => {
       </el-row>
 
       <!--      数据列表-->
-      <el-tabs v-model="defaultListTab" :tab-position="'right'" class="el-tabs" style="height: 500px">
+      <el-tabs v-model="defaultListTab" :tab-position="'right'" class="el-tabs" style="height: 500px"
+               @tab-click="handleTabClick">
         <el-tab-pane :name="1" label="未清洗挖掘">
           <el-table
             v-loading="loading"
@@ -530,8 +553,8 @@ onMounted(() => {
             table-layout="auto"
             @selection-change="handleSelectionChange"
           >
-            <el-table-column align="center" type="selection" width="55"/>
-            <!--      <el-table-column v-if="true" align="center" label="法律法规主键id" prop="id"/>-->
+            <el-table-column type="selection" width="55"/>
+            <el-table-column align="center" label="序号" prop="id" type="index" width="150"/>
             <el-table-column align="center" fixed label="法规名称" prop="name" width="230">
               <template #default="{ row }">
                 <el-tooltip effect="dark" placement="top">
@@ -592,12 +615,12 @@ onMounted(() => {
                 <dict-tag :options="crawl_common_status" :value="scope.row.status"/>
               </template>
             </el-table-column>
-            <el-table-column align="center" label="创建时间" prop="createTime" width="180">
+            <el-table-column align="center" label="创建时间" prop="createTime" width="200">
               <template #default="scope">
                 <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
               </template>
             </el-table-column>
-            <el-table-column align="center" label="更新时间" prop="updateTime" width="180">
+            <el-table-column align="center" label="更新时间" prop="updateTime" width="200">
               <template #default="scope">
                 <span>{{ parseTime(scope.row.updateTime, '{y}-{m}-{d}') }}</span>
               </template>
@@ -633,8 +656,8 @@ onMounted(() => {
             table-layout="auto"
             @selection-change="handleSelectionChange"
           >
-            <el-table-column align="center" type="selection" width="55"/>
-            <!--      <el-table-column v-if="true" align="center" label="法律法规主键id" prop="id"/>-->
+            <el-table-column type="selection" width="55"/>
+            <el-table-column align="center" label="序号" prop="id" type="index" width="150"/>
             <el-table-column align="center" fixed label="法规名称" prop="name" width="230">
               <template #default="{ row }">
                 <el-tooltip effect="dark" placement="top">
@@ -737,8 +760,8 @@ onMounted(() => {
             table-layout="auto"
             @selection-change="handleSelectionChange"
           >
-            <el-table-column align="center" type="selection" width="55"/>
-            <!--      <el-table-column v-if="true" align="center" label="法律法规主键id" prop="id"/>-->
+            <el-table-column type="selection" width="55"/>
+            <el-table-column align="center" label="序号" prop="id" type="index" width="150"/>
             <el-table-column align="center" fixed label="法规名称" prop="name" width="230">
               <template #default="{ row }">
                 <el-tooltip effect="dark" placement="top">

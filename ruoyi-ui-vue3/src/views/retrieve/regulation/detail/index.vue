@@ -32,8 +32,9 @@ const icons = {
   url: 'mdi:web'
 };
 const text = ref("")
+const textLs = ref([]);
 const displayedText = ref('');
-const typeSpeed = 1; // 字符间隔时间，单位：毫秒
+const typeSpeed = 10; // 字符间隔时间，单位：毫秒
 const typewriter = ref(null);
 const wordCloud = ref(null);
 const worldCloudFlag = ref(false);
@@ -47,16 +48,16 @@ onMounted(() => {
     proxy.$modal.msgError("请传入id")
     return
   }
-  getRegulation(id).then(res => {
+  getRegulation(id).then(async res => {
     lawItem.value = res.data;
     // 正文内容处理(应该用es高亮查询的结果，但是es高亮结果为空)
     if (query.keyword !== "" || query.keyword === undefined) {
-      console.log(query.keyword)
-      if (res.data.stripContent) {
-        lawItem.value.stripContent = res.data.stripContent.replaceAll(query.keyword, `<strong class='text-red-500'>${query.keyword}</strong>`)
-      } else {
-        lawItem.value.content = res.data.content.replaceAll(query.keyword, `<strong class='text-red-500'>${query.keyword}</strong>`)
-      }
+      // console.log(query.keyword)
+      // if (res.data.stripContent) {
+      // lawItem.value.stripContent = res.data.stripContent.replaceAll(query.keyword, `<strong class='text-red-500'>${query.keyword}</strong>`)
+      // } else {
+      // lawItem.value.content = res.data.content.replaceAll(query.keyword, `<strong class='text-red-500'>${query.keyword}</strong>`)
+      // }
     }
     // 语义信息处理
     if (res.data.extra !== null) {
@@ -67,6 +68,7 @@ onMounted(() => {
     // console.log(lawItem.value.extra)
     proxy.$modal.msgSuccess(`获取数据成功`);
     text.value = lawItem.value.stripContent !== undefined ? lawItem.value.stripContent : lawItem.value.content;
+    textLs.value = text.value.split("\n")
     lawItem.value.sourceId = 1;
     // todo: extra不一定有会导致报错，需要改为case一样
     // 获取来源
@@ -82,20 +84,36 @@ onMounted(() => {
       });
     }, 5000); // 延迟10秒（10000毫秒）
     // 打字机效果
-    const timer = setInterval(() => {
-      if (index < text.value.length) {
-        displayedText.value += text.value[index];
-        index++;
-      } else {
-        clearInterval(timer);
-      }
-      typewriter.scrollLeft = typewriter.scrollWidth; // 滚动到最新输入字符位置
-    }, typeSpeed);
+    // const timer = setInterval(() => {
+    //   if (index < text.value.length) {
+    //     displayedText.value += text.value[index];
+    //     index++;
+    //   } else {
+    //     clearInterval(timer);
+    //   }
+    //   typewriter.scrollLeft = typewriter.scrollWidth; // 滚动到最新输入字符位置
+    // }, typeSpeed);
+    console.log(textLs.value)
+    await Promise.all(textLs.value.map(typeText));
   }).catch(err => {
     // proxy.$modal.msgError(err.msg, text.value)
   })
 })
 
+
+async function typeText(text) {
+  // 获取要添加标签的 div 元素
+  const divElement = document.getElementById('content');
+  const element = document.createElement('p');
+  divElement.appendChild(element); // 添加到页面中，你也可以根据需要添加到特定容器中
+  for (let i = 0; i < text.length; i++) {
+    element.innerHTML += text[i];
+    divElement.scrollLeft = divElement.scrollWidth; // 滚动到最新输入字符位置
+    // typewriter.scrollLeft = typewriter.scrollWidth; // 滚动到最新输入字符位置
+    await new Promise(resolve => setTimeout(resolve, typeSpeed));
+  }
+  element.innerHTML = element.innerHTML.replace(query.keyword, `<strong class='text-red-500'>${query.keyword}</strong>`);
+}
 
 const handleTabClick = (pane, ev) => {
   // console.log(pane.props.label, pane)
@@ -137,8 +155,16 @@ const handleTabClick = (pane, ev) => {
               {{ lawItem.releaseDate }}
           </span>
         </p>
-        <el-card ref="typewriter" class="content">
-          <p style="padding: 10px;" v-html="displayedText"/>
+        <el-card ref="typewriter">
+          <div id="content" class="content" style="padding: 10px;">
+            <!--          <div v-for="(item,index) in textLs" :key="index" style="padding: 10px;">-->
+            <!--              todo 加粗的html也被显示出来了-->
+            <!--            <span v-for="str in handleContent(item)" v-html="str"/>-->
+            <!--          <p v-html="displayedText"/>-->
+            <!--          </div>-->
+            <!--            <p v-for="(text, index) in textLs" :key="index" style="padding: 10px;"/>-->
+          </div>
+          <!--          <p style="padding: 10px;" v-html="displayedText"/>-->
         </el-card>
       </el-col>
       <el-col :span="12" class="baseInfo">
@@ -201,19 +227,32 @@ const handleTabClick = (pane, ev) => {
             </el-card>
           </el-tab-pane>
           <el-tab-pane v-if="Object.keys(lawItem.extra).length !== 0" label="语义信息"
-                       style="font-weight: bold;font-size: medium">
+                       style="font-weight: normal;font-size: medium">
 
             <el-tabs tab-position="right">
 
               <el-tab-pane v-if="Object.keys(lawItem.extra).length !== 0" label="附加信息">
                 <el-card :shadow="'always'">
                   <el-row :gutter="20" :justify="'space-between'">
-                    <el-col v-if="lawItem.extra.field">所属领域：{{ lawItem.extra.field }}</el-col>
-                    <el-col v-if="lawItem.extra.type">法条类型：{{ lawItem.extra.type }}</el-col>
-                    <el-col v-if="lawItem.extra.organization">颁布组织：{{ lawItem.extra.organization }}</el-col>
-                    <el-col v-if="lawItem.extra.release">发行日期：{{ lawItem.extra.release }}</el-col>
-                    <el-col v-if="lawItem.extra.execute">实施日期：{{ lawItem.extra.execute }}</el-col>
-                    <el-col v-if="lawItem.extra.scope">作用范围：{{ lawItem.extra.scope }}</el-col>
+                    <el-col v-if="lawItem.extra.field"><span class="font-black">所属领域：</span>{{
+                        lawItem.extra.field
+                      }}
+                    </el-col>
+                    <el-col v-if="lawItem.extra.type"><span class="font-black">法条类型：</span>{{ lawItem.extra.type }}
+                    </el-col>
+                    <el-col v-if="lawItem.extra.organization"><span
+                        class="font-black">颁布组织：</span>{{ lawItem.extra.organization }}
+                    </el-col>
+                    <el-col v-if="lawItem.extra.release"><span
+                        class="font-black">发行日期：</span>{{ lawItem.extra.release }}
+                    </el-col>
+                    <el-col v-if="lawItem.extra.execute"><span
+                        class="font-black">实施日期：</span>{{ lawItem.extra.execute }}
+                    </el-col>
+                    <el-col v-if="lawItem.extra.scope"><span class="font-black">作用范围：</span>{{
+                        lawItem.extra.scope
+                      }}
+                    </el-col>
                   </el-row>
                 </el-card>
               </el-tab-pane>
@@ -281,7 +320,7 @@ $secondary-color: #e1c199;
 
 
   .el-tag {
-    @apply font-bold text-xs text-center
+    @apply font-bold text-xl text-center
   }
 
   .el-divider {
@@ -369,8 +408,9 @@ $secondary-color: #e1c199;
   text-shadow: #ebeee8 1px 10px 1px;
   text-align: justify;
   text-justify: auto;
-  white-space: pre-wrap; /* 保持空白，正常换行 */
+  text-indent: 2em; /* 设置段落首行缩进两个字符 */
 }
+
 
 .mytabs {
   min-height: 800px;

@@ -2,6 +2,7 @@ package com.ruoyi.manage.controller;
 
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.web.controller.BaseController;
+import com.ruoyi.common.websocket.websocket.WebSocketService;
 import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.LawRegulation;
 import com.ruoyi.manage.service.impl.DataProcessService;
@@ -32,8 +33,8 @@ public class DataProcessController extends BaseController {
 
     @Resource
     private DataProcessService dataProcessService;
-    @DubboReference
-    private RemoteWebSocketService remoteWebSocketService;
+//    @DubboReference
+//    private RemoteWebSocketService remoteWebSocketService;
 
 
     /**
@@ -188,9 +189,9 @@ public class DataProcessController extends BaseController {
     @GetMapping("/push")
     public R<Void> push(@RequestParam(value = "clientId", required = false) String clientId, @RequestParam("message") String message) {
         if (null != clientId) {
-            remoteWebSocketService.sendToOne(message, clientId);
+            WebSocketService.sendMessage(clientId, message);
         } else {
-            remoteWebSocketService.sendToAll(message);
+            WebSocketService.sendMessage("", message);
         }
         return R.ok();
     }

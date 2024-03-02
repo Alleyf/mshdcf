@@ -121,8 +121,7 @@ public class LawRegulationController extends BaseController {
     @GetMapping("/syncAll")
     public R<Void> syncAll() {
         //        采用消息队列异步处理，借助websocket实时发送处理进度通知
-        websocketProducer.sendMsg(SocketMsgType.LAW.getType(), "开始同步司法案例数据", LoginHelper.getLoginUser().getLoginId(), 0L);
-//        return R.ok("成功同步司法案例数据：" + docCaseService.insertBatch() + "条");
+        websocketProducer.sendMsg("全量同步法条数据", SocketMsgType.LAW.getType(), "开始同步司法案例数据", LoginHelper.getLoginId(), 0L);
         return R.ok("开始同步法条数据");
 //        return R.ok("成功同步法条数据：" + lawRegulationService.insertBatch() + "条");
     }

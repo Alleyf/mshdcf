@@ -13,6 +13,9 @@ spring:
 
 --- # nacos 配置
 spring:
+  main:
+    # 允许bean覆盖
+    allow-bean-definition-overriding: true
   cloud:
     nacos:
       # nacos 服务地址
@@ -34,6 +37,7 @@ spring:
       - optional:nacos:application-common.yml
       - optional:nacos:datasource.yml
       - optional:nacos:${spring.application.name}.yml
+
 
 
 

@@ -42,7 +42,7 @@ public interface IDocCaseService extends IService<DocCase> {
     /**
      * 批量插入
      */
-    Integer insertBatch();
+    Integer insertBatch(String clientId);
 
     /**
      * 修改司法案例

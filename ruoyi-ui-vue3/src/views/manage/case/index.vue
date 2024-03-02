@@ -15,6 +15,7 @@ import {Edit, Picture, Switch, UploadFilled, UserFilled} from "@element-plus/ico
 import {Icon} from '@iconify/vue';
 import {miningCase, reviseCase} from "@/api/manage/process";
 import {getRegulation} from "@/api/manage/regulation";
+import {getCaseWorldCloud} from "@/api/retrieve/case";
 
 const {proxy} = getCurrentInstance();
 const {
@@ -36,6 +37,7 @@ const ids = ref([]);
 const single = ref(true);
 const multiple = ref(true);
 const showSearch = ref(true);
+const currentTab = ref(1);
 
 /*** 案例导入参数 */
 const upload = reactive({
@@ -71,6 +73,7 @@ const data = reactive({
     legalBasis: null,
     party: null,
     status: null,
+    isMining: 0
   },
 
   form: {},
@@ -155,6 +158,7 @@ const openContent = ref(false)
 const queryForm = ref(null)
 const dialogForm = ref(null)
 
+
 //案例数据清洗挖掘
 const handleProcess = () => {
   // 浅拷贝
@@ -211,7 +215,7 @@ const handleProcessStage = (data) => {
     });
   }
   console.log(processDataStage.value)
-  ElMessage.success(`数据<${data.name}>暂存成功`)
+  ElMessage.success(`数据<${data.name}>暂存成功，已经暂存${processDataStage.value.length}条数据}`)
 }
 const handleProcessSubmit = () => {
   if (processDataStage.value.length === 0) {
@@ -222,11 +226,11 @@ const handleProcessSubmit = () => {
   saveProcessCase(processDataStage.value).then(res => {
     if (res.code === 200) {
       // 数据更新重新获取
-      getList()
       ElMessage.success(res.msg)
     } else {
       ElMessage.error(res.msg)
     }
+    getList()
   })
 }
 
@@ -325,6 +329,24 @@ const getList = () => {
 
 }
 
+
+const handleTabClick = (pane, ev) => {
+  // todo 数据清洗挖掘tab页切换回调函数
+  console.log(pane.props.name)
+  if (pane.props.name === 1) {
+    // 设置分页的总页数为ORIGIN的总页数
+    queryParams.value.isMining = 0
+  } else if (pane.props.name === 2) {
+    // 设置分页的总页数为STRIPED的总页数
+    queryParams.value.isMining = 1
+  } else if (pane.props.name === 3) {
+    // 设置分页的总页数为MININGED的总页数
+    queryParams.value.isMining = 2
+  }
+  currentTab.value = queryParams.value.isMining
+  getList()
+}
+
 const handleQuery = () => {
   queryParams.value.pageNum = 1
   getList()
@@ -352,8 +374,8 @@ const resetQueryForm = () => {
     legalBasis: null,
     party: null,
     status: null,
+    isMining: currentTab.value
   }
-
 
 }
 
@@ -531,7 +553,7 @@ const handleSync = () => {
 
 onMounted(() => {
   getList()
-
+  // proxy.sendWebMessage("欢迎使用来到管理分析页面")
 })
 </script>
 
@@ -719,7 +741,8 @@ onMounted(() => {
         <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
       </el-row>
       <!--      数据列表-->
-      <el-tabs v-model="defaultListTab" :tab-position="'right'" class="el-tabs" style="height: 500px">
+      <el-tabs v-model="defaultListTab" :tab-position="'right'" class="el-tabs" style="height: 500px"
+               @tab-click="handleTabClick">
         <el-tab-pane :name="1" label="未清洗挖掘">
           <el-table
             v-loading="loading"
@@ -732,8 +755,8 @@ onMounted(() => {
             table-layout="auto"
             @selection-change="handleSelectionChange"
           >
-            <el-table-column type="selection" width="55"></el-table-column>
-            <!--        <el-table-column label="案件主键id" prop="id" width="150"></el-table-column>-->
+            <el-table-column type="selection" width="55"/>
+            <el-table-column align="center" label="序号" prop="id" type="index" width="150"/>
             <el-table-column fixed label="案件名称" prop="name" width="200">
               <template #default="{ row }">
                 <el-tooltip effect="dark" placement="top">
@@ -793,7 +816,7 @@ onMounted(() => {
                 <dict-tag :options="crawl_common_status" :value="scope.row.status"/>
               </template>
             </el-table-column>
-            <el-table-column label="新建日期" prop="createTime" sortable width="180">
+            <el-table-column label="创建时间" prop="createTime" sortable width="200">
               <template #default="scope">
                 <div style="display: flex; align-items: center">
                   <el-icon>
@@ -803,7 +826,7 @@ onMounted(() => {
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="更新日期" prop="updateTime" sortable width="180">
+            <el-table-column label="更新时间" prop="updateTime" sortable width="200">
               <template #default="scope">
                 <div style="display: flex; align-items: center">
                   <el-icon>
@@ -857,8 +880,8 @@ onMounted(() => {
             table-layout="auto"
             @selection-change="handleSelectionChange"
           >
-            <el-table-column type="selection" width="55"></el-table-column>
-            <!--        <el-table-column label="案件主键id" prop="id" width="150"></el-table-column>-->
+            <el-table-column type="selection" width="55"/>
+            <el-table-column align="center" label="序号" prop="id" type="index" width="150"/>
             <el-table-column fixed label="案件名称" prop="name" width="200">
               <template #default="{ row }">
                 <el-tooltip effect="dark" placement="top">
@@ -983,8 +1006,8 @@ onMounted(() => {
             table-layout="auto"
             @selection-change="handleSelectionChange"
           >
-            <el-table-column type="selection" width="55"></el-table-column>
-            <!--        <el-table-column label="案件主键id" prop="id" width="150"></el-table-column>-->
+            <el-table-column type="selection" width="55"/>
+            <el-table-column align="center" label="序号" prop="id" type="index" width="150"/>
             <el-table-column fixed label="案件名称" prop="name" width="200">
               <template #default="{ row }">
                 <el-tooltip effect="dark" placement="top">
@@ -1385,7 +1408,6 @@ onMounted(() => {
   text-align: center;
   justify-content: center;
   align-content: center;
-
 }
 
 .hidden {

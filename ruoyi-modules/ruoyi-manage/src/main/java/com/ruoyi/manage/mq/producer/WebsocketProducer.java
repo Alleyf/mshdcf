@@ -20,10 +20,11 @@ public class WebsocketProducer {
     @Autowired
     private StreamBridge streamBridge;
 
-    public void sendMsg(String msgType, String msg, String clientId, Long delay) {
+    public void sendMsg(String msgTitle, String msgType, String msg, String clientId, Long delay) {
         // 构建消息对象
         WebscoketMessage testMessaging = new WebscoketMessage()
             .setMsgId(UUID.randomUUID().toString())
+            .setMsgTitle(msgTitle)
             .setMsgType(msgType)
             .setMsgText(msg)
             .setClientId(clientId);

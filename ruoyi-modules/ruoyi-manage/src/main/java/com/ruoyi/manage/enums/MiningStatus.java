@@ -5,6 +5,8 @@ import lombok.Getter;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
+ * 挖掘状态
+ *
  * @author fcs
  * @date 2024/2/12 12:42
  * @site <a href="https://alleyf.github.io">getHelp</a>
@@ -32,4 +34,20 @@ public enum MiningStatus {
         this.code = code;
         this.message = message;
     }
+
+    /**
+     * 根据状态码获取挖矿状态
+     *
+     * @param code 代码
+     * @return 挖矿状态
+     */
+    public static MiningStatus getMiningStatus(int code) {
+        for (MiningStatus miningStatus : MiningStatus.values()) {
+            if (miningStatus.getCode() == code) {
+                return miningStatus;
+            }
+        }
+        return null;
+    }
+
 }

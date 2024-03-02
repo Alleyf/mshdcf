@@ -1,4 +1,4 @@
-import {createApp} from 'vue'
+import {createApp, ref} from 'vue'
 
 import Cookies from 'js-cookie'
 
@@ -18,6 +18,8 @@ import VueCharts from 'vue-echarts'
 // 注册指令
 import plugins from './plugins' // plugins
 import {download} from '@/utils/request'
+import {sendWebMessage} from "@/utils/websocket";
+
 
 // svg图标
 import 'virtual:svg-icons-register'
@@ -53,9 +55,13 @@ import TreeSelect from '@/components/TreeSelect'
 import DictTag from '@/components/DictTag'
 // iframe组件
 import IFrame from "@/components/IFrame";
+import useUserStore from "@/store/modules/user";
 
 
 const app = createApp(App)
+
+// 全局变量
+
 
 // 全局方法挂载
 app.config.globalProperties.useDict = useDict
@@ -68,6 +74,7 @@ app.config.globalProperties.handleTree = handleTree
 app.config.globalProperties.addDateRange = addDateRange
 app.config.globalProperties.selectDictLabel = selectDictLabel
 app.config.globalProperties.selectDictLabels = selectDictLabels
+app.config.globalProperties.sendWebMessage = sendWebMessage
 
 // 全局组件挂载
 app.component('DictTag', DictTag)
