@@ -16,6 +16,7 @@
         <module>ruoyi-crawler</module>
         <module>ruoyi-manage</module>
         <module>ruoyi-retrieve</module>
+        <module>ruoyi-websocket</module>
     </modules>
 
     <artifactId>ruoyi-modules</artifactId>

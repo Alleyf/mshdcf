@@ -4,12 +4,15 @@ import {
   getRegulation,
   delRegulation,
   addRegulation,
-  updateRegulation,
+  updateRegulation, saveProcessRegulation, syncAllRegulation,
 } from '@/api/manage/regulation'
 import {download} from '@/utils/request'
 import {getCurrentInstance, onMounted, reactive, ref, toRefs} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {parseTime} from "@/utils/ruoyi";
+import {saveProcessCase} from "@/api/manage/case";
+import {miningCase, miningLaw, reviseCase, reviseLaw} from "@/api/manage/process";
+import {Edit, Switch, UploadFilled, UserFilled} from "@element-plus/icons-vue";
 
 const {proxy} = getCurrentInstance();
 
@@ -20,6 +23,8 @@ const {
 } = proxy.useDict('crawler_source', 'crawl_common_status', 'law_type')
 
 const regulationList = ref([])
+const regulationListStriped = ref([])
+const regulationListOrigin = ref([])
 const total = ref(0)
 const loading = ref(true)
 const buttonLoading = ref(false)
@@ -27,7 +32,6 @@ const ids = ref([])
 const single = ref(true)
 const multiple = ref(true)
 const showSearch = ref(true)
-const openContent = ref(false)
 
 const data = reactive({
   form: {},
@@ -40,6 +44,7 @@ const data = reactive({
     releaseOrganization: null,
     sourceId: null,
     status: null,
+    isMining: 0
   },
   rules: {
     id: [],
@@ -70,25 +75,230 @@ const data = reactive({
     status: [
       {required: true, message: '状态不能为空', trigger: 'change'},
     ],
+  },
+  processData: [],
+  processDataForm: {
+    id: null,
+    content: '',
+    stripContent: '',
+    extra: '',
+  },
+  processDataStage: [],
+  extra: {
+    keyword: '',
+    field: '',
+    type: '',
+    organization: '',
+    release: '',
+    execute: '',
+    basis: [],
+    scope: '',
+    main: [],
+    abstract: ''
   }
 })
 
-const {queryParams, form, rules} = toRefs(data);
+const {queryParams, form, rules, processData, processDataForm, processDataStage, extra} = toRefs(data);
+
 
 const title = ref('')
 const open = ref(false)
+const processDialog = ref(false)
+const defaultTab = ref(0)
+const defaultListTab = ref(1)
+const currentTab = ref(1);
+
+const processStep = ref(0)
+const openContent = ref(false)
 
 const queryForm = ref(null)
 const dialogForm = ref(null)
 
+//法条数据清洗挖掘
+const handleProcess = () => {
+  // 浅拷贝
+  processData.value = []
+  console.log(processData.value)
+  const toAdd = []
+  const tempList = regulationListOrigin.value
+  if (defaultListTab.value === 1) {
+    tempList.value = regulationListOrigin.value
+  } else if (defaultListTab.value === 2) {
+    tempList.value = regulationListStriped.value
+  } else {
+    tempList.value = regulationList.value
+  }
+  tempList.value.forEach(item => {
+    const exist = processData.value.findIndex(data => item.id === data.id) !== -1
+    if (ids.value.includes(item.id) && !exist) {
+      // 判断extra是否是非空字符串，是则需要解析，否则无需解析
+      if ((item.extra !== "" || item.extra !== null) && typeof item.extra === 'string') {
+        // 解析json字符串
+        item.extra = JSON.parse(item.extra);
+      } else {
+        item.extra = extra.value
+      }
+      toAdd.push(item); // 将元素添加到新数组中
+      // 将解析后的json对象还原为json字符串
+      // item.extra = JSON.stringify(item.extra);
+    }
+  })
+  processData.value = processData.value.concat(toAdd);
+  processDialog.value = true
+  // processData.value = regulationListCopy
+  // console.log(ids.value, processData.value)
+}
+
+const handleProcessStage = (data) => {
+  // todo: 按照正确格式对data进行处理，某些字段处理为数组
+  console.log(data)
+  // 检查数组中是否存在具有相同 id 的元素
+  const existingIndex = processDataStage.value.findIndex(item => item.id === data.id);
+  if (existingIndex !== -1) {
+    // 如果找到，更新数组中的元素
+    processDataStage.value[existingIndex] = {
+      id: data.id,
+      content: data.content,
+      stripContent: data.stripContent,
+      extra: JSON.stringify(data.extra),
+    };
+  } else {
+    // 如果没有找到，将新元素添加到数组中
+    processDataStage.value.push({
+      id: data.id,
+      content: data.content,
+      stripContent: data.stripContent,
+      extra: JSON.stringify(data.extra),
+    });
+  }
+  console.log(processDataStage.value)
+  ElMessage.success(`数据<${data.name}>暂存成功`)
+}
+const handleProcessSubmit = () => {
+  if (processDataStage.value.length === 0) {
+    ElMessage.error("请先暂存已修改的数据")
+    return
+  }
+  console.log(processDataStage.value)
+  saveProcessRegulation(processDataStage.value).then(res => {
+    if (res.code === 200) {
+      // 数据更新重新获取
+      getList()
+      ElMessage.success(res.msg)
+    } else {
+      ElMessage.error(res.msg)
+    }
+  })
+}
+
+const handleProcessNext = () => {
+  // todo 数据清洗挖掘下一步按钮回调函数
+  if (processStep.value++ > 0) processStep.value = 1
+  console.log(processStep.value)
+
+}
+
+const handleProcessPrev = () => {
+  // todo 数据清洗挖掘上一步按钮回调函数
+  if (processStep.value-- < 1) processStep.value = 0
+  console.log(processStep.value)
+}
+
+const handleRemoveTab = (targetName) => {
+  // todo 数据清洗挖掘tab页删除回调函数
+  // 找到要删除的标签页的索引
+  const index = targetName;
+  if (index !== 0) {
+    // 从数组中移除标签页
+    processData.value.splice(index, 1);
+  }
+  // 如果删除的是当前选中的标签页，需要更新 defaultTab
+  if (defaultTab.value === targetName) {
+    // 设置新的 defaultTab，例如选中第一个标签页
+    defaultTab.value = 0;
+  }
+}
+
+const handleProcessStrip = (data) => {
+  // todo 调用数据清洗接口，并将结果更新到processData中
+  console.log(data)
+  loading.value = true
+  reviseLaw(data.id).then(res => {
+    if (res.code === 200) {
+      // 数据更新重新获取
+      data.stripContent = res.data.stripContent
+      ElMessage.success(res.msg)
+    } else {
+      ElMessage.error(res.data)
+    }
+    loading.value = false
+  })
+}
+
+const handleProcessMining = (data) => {
+  // todo 调用数据挖掘接口，并将结果更新到processData中
+  console.log(data)
+  loading.value = true
+  miningLaw(data.id).then(res => {
+    if (res.code === 200) {
+      // 数据更新重新获取
+      data.extra = JSON.parse(res.data.extra)
+      console.log(data.extra, res.data.extra)
+      ElMessage.success(res.msg)
+    } else {
+      ElMessage.error(res.data)
+    }
+    loading.value = false
+  })
+}
+
+const resetProcess = (data) => {
+  getRegulation(data.id).then(res => {
+    if (processStep.value === 0) {
+      data.stripContent = res.data.stripContent
+    } else {
+      data.extra = JSON.parse(res.data.extra)
+    }
+  })
+
+}
+
+
+// ---------------分割线---------------
 const getList = () => {
   loading.value = true
   listRegulation(queryParams.value).then((res) => {
-    regulationList.value = res.rows
+    // regulationList.value = res.rows
+    regulationList.value = res.rows.filter(item => {
+      return item.isMining === "MININGED"
+    })
+    regulationListStriped.value = res.rows.filter(item => {
+      return item.isMining === "STRIPED"
+    })
+    regulationListOrigin.value = res.rows.filter(item => {
+      return item.isMining === "ORIGIN"
+    })
     total.value = res.total
     loading.value = false
   })
 
+}
+
+const handleTabClick = (pane, ev) => {
+  // todo 数据清洗挖掘tab页切换回调函数
+  console.log(pane.props.name)
+  if (pane.props.name === 1) {
+    // 设置分页的总页数为ORIGIN的总页数
+    queryParams.value.isMining = 0
+  } else if (pane.props.name === 2) {
+    // 设置分页的总页数为STRIPED的总页数
+    queryParams.value.isMining = 1
+  } else if (pane.props.name === 3) {
+    // 设置分页的总页数为MININGED的总页数
+    queryParams.value.isMining = 2
+  }
+  currentTab.value = queryParams.value.isMining
+  getList()
 }
 
 const handleQuery = () => {
@@ -107,7 +317,9 @@ const resetQueryForm = () => {
     releaseOrganization: null,
     sourceId: null,
     status: null,
+    isMining: currentTab.value
   }
+
 }
 
 const resetQuery = () => {
@@ -148,6 +360,7 @@ const resetForm = () => {
 
 const cancelDialog = () => {
   open.value = false
+  processDialog.value = false
   resetForm()
 }
 
@@ -213,6 +426,20 @@ const handleExport = () => {
   proxy.download('manage/regulation/export',
     {...queryParams.value}
     , `regulation_${new Date().getTime()}.xlsx`)
+}
+
+//全量同步法律法规
+const handleSync = () => {
+  ElMessageBox.confirm('是否确认同步所有数据项？').then(() => {
+    loading.value = true
+    return syncAllRegulation()
+  }).then(() => {
+    ElMessage.success('同步成功')
+    getList()
+  }).catch(() => {
+  }).finally(() => {
+    loading.value = false
+  })
 }
 
 onMounted(() => {
@@ -286,108 +513,344 @@ onMounted(() => {
                      @click="handleExport">导出
           </el-button>
         </el-col>
+        <el-col :span="1.5">
+          <el-button
+            v-hasPermi="['manage:regulation:sync']"
+            icon="Plus"
+            plain
+            size="default"
+            type="success"
+            @click="handleSync"
+          >全量同步
+          </el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
+            v-hasPermi="['manage:case:process']"
+            :disabled="multiple"
+            icon="Edit"
+            size="default"
+            type="primary"
+            @click="handleProcess"
+          >清洗挖掘
+          </el-button>
+        </el-col>
         <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
       </el-row>
 
-      <el-table
-        v-loading="loading"
-        :data="regulationList"
-        :default-sort="{ prop: 'releaseDate', order: 'descending' }"
-        border
-        height="500"
-        stripe
-        style="width: 100%;text-align: center"
-        table-layout="auto"
-        @selection-change="handleSelectionChange"
-      >
-        <el-table-column align="center" type="selection" width="55"/>
-        <!--      <el-table-column v-if="true" align="center" label="法律法规主键id" prop="id"/>-->
-        <el-table-column align="center" fixed label="法规名称" prop="name" width="230">
-          <template #default="{ row }">
-            <el-tooltip effect="dark" placement="top">
-              <template #content class="newLine">{{ row.name }}</template>
-              <span class="hidden">{{ row.name }}</span>
-            </el-tooltip>
-          </template>
-        </el-table-column>
-        <!--      <el-table-column align="center" label="领域类别" prop="field"/>-->
-        <el-table-column align="center" label="法规类型" prop="type" width="180">
-          <template #default="scope">
-            <dict-tag v-if="scope.row.type!==null" :options="law_type" :value="scope.row.type" width="180"/>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" label="原始链接" prop="url" width="120">
-          <template #default="scope">
-            <el-link :href="scope.row.url" target="_blank" type="primary">
-              <span class="hidden">{{ scope.row.url }}</span>
-            </el-link>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" label="有效性" prop="isValidity" width="180">
-          <template #default="scope">
-            <dict-tag :options="crawl_common_status" :value="scope.row.isValidity"/>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" label="发布日期" prop="releaseDate" sortable width="180">
-          <template #default="scope">
-            <div style="display: flex; align-items: center">
-              <el-icon>
-                <timer/>
-              </el-icon>
-              <span style="margin-left: 10px;color: #1c84c6">{{ scope.row.releaseDate }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" label="实施日期" prop="executeDate" width="180">
-          <template #default="scope">
-            <div style="display: flex; align-items: center">
-              <el-icon>
-                <timer/>
-              </el-icon>
-              <span style="margin-left: 10px;color: #b96060">{{ scope.row.executeDate }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" label="发布机关" prop="releaseOrganization" width="180"/>
-        <!--      <el-table-column align="center" label="法规正文" prop="content"/>-->
-        <el-table-column align="center" label="法规来源" prop="sourceId" width="180">
-          <template #default="scope">
-            <dict-tag :options="crawler_source" :value="scope.row.sourceId"/>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" label="法规结构" prop="structure" width="180"/>
-        <el-table-column align="center" label="修改次数" prop="reviseNum" width="180"/>
-        <el-table-column align="center" label="状态" prop="status" width="180">
-          <template #default="scope">
-            <dict-tag :options="crawl_common_status" :value="scope.row.status"/>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" label="创建时间" prop="createTime" width="180">
-          <template #default="scope">
-            <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column align="center" label="更新时间" prop="updateTime" width="180">
-          <template #default="scope">
-            <span>{{ parseTime(scope.row.updateTime, '{y}-{m}-{d}') }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column align="center"
-                         class-name="small-padding fixed-width"
-                         fixed="right" label="操作" width="180">
-          <template #default="scope">
-            <el-button v-hasPermi="['manage:regulation:edit']" icon="Edit" size="default" type="text"
-                       @click="handleUpdate(scope.row)">修改
-            </el-button>
-            <el-button v-hasPermi="['manage:regulation:remove']" icon="Delete" size="default" type="text" width="180"
-                       @click="handleDelete(scope.row)">删除
-            </el-button>
-          </template>
-        </el-table-column>
-        <template #empty>
-          <el-empty></el-empty>
-        </template>
-      </el-table>
+      <!--      数据列表-->
+      <el-tabs v-model="defaultListTab" :tab-position="'right'" class="el-tabs" style="height: 500px"
+               @tab-click="handleTabClick">
+        <el-tab-pane :name="1" label="未清洗挖掘">
+          <el-table
+            v-loading="loading"
+            :data="regulationListOrigin"
+            :default-sort="{ prop: 'releaseDate', order: 'descending' }"
+            border
+            height="500"
+            stripe
+            style="width: 100%;text-align: center"
+            table-layout="auto"
+            @selection-change="handleSelectionChange"
+          >
+            <el-table-column type="selection" width="55"/>
+            <el-table-column align="center" label="序号" prop="id" type="index" width="150"/>
+            <el-table-column align="center" fixed label="法规名称" prop="name" width="230">
+              <template #default="{ row }">
+                <el-tooltip effect="dark" placement="top">
+                  <template #content class="newLine">{{ row.name }}</template>
+                  <span class="hidden">{{ row.name }}</span>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <!--      <el-table-column align="center" label="领域类别" prop="field"/>-->
+            <el-table-column align="center" label="法规类型" prop="type" width="180">
+              <template #default="scope">
+                <dict-tag v-if="scope.row.type!==null" :options="law_type" :value="scope.row.type" width="180"/>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="原始链接" prop="url" width="120">
+              <template #default="scope">
+                <el-link :href="scope.row.url" target="_blank" type="primary">
+                  <span class="hidden">{{ scope.row.url }}</span>
+                </el-link>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="有效性" prop="isValidity" width="180">
+              <template #default="scope">
+                <dict-tag :options="crawl_common_status" :value="scope.row.isValidity"/>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="发布日期" prop="releaseDate" sortable width="180">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px;color: #1c84c6">{{ scope.row.releaseDate }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="实施日期" prop="executeDate" width="180">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px;color: #b96060">{{ scope.row.executeDate }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="发布机关" prop="releaseOrganization" width="180"/>
+            <!--      <el-table-column align="center" label="法规正文" prop="content"/>-->
+            <el-table-column align="center" label="法规来源" prop="sourceId" width="180">
+              <template #default="scope">
+                <dict-tag :options="crawler_source" :value="scope.row.sourceId"/>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="法规结构" prop="structure" width="180"/>
+            <el-table-column align="center" label="修改次数" prop="reviseNum" width="180"/>
+            <el-table-column align="center" label="状态" prop="status" width="180">
+              <template #default="scope">
+                <dict-tag :options="crawl_common_status" :value="scope.row.status"/>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="创建时间" prop="createTime" width="200">
+              <template #default="scope">
+                <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="更新时间" prop="updateTime" width="200">
+              <template #default="scope">
+                <span>{{ parseTime(scope.row.updateTime, '{y}-{m}-{d}') }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column align="center"
+                             class-name="small-padding fixed-width"
+                             fixed="right" label="操作" width="180">
+              <template #default="scope">
+                <el-button v-hasPermi="['manage:regulation:edit']" icon="Edit" size="default" type="text"
+                           @click="handleUpdate(scope.row)">修改
+                </el-button>
+                <el-button v-hasPermi="['manage:regulation:remove']" icon="Delete" size="default" type="text"
+                           width="180"
+                           @click="handleDelete(scope.row)">删除
+                </el-button>
+              </template>
+            </el-table-column>
+            <template #empty>
+              <el-empty></el-empty>
+            </template>
+          </el-table>
+
+        </el-tab-pane>
+        <el-tab-pane :name="2" label="已清洗">
+          <el-table
+            v-loading="loading"
+            :data="regulationListStriped"
+            :default-sort="{ prop: 'releaseDate', order: 'descending' }"
+            border
+            height="500"
+            stripe
+            style="width: 100%;text-align: center"
+            table-layout="auto"
+            @selection-change="handleSelectionChange"
+          >
+            <el-table-column type="selection" width="55"/>
+            <el-table-column align="center" label="序号" prop="id" type="index" width="150"/>
+            <el-table-column align="center" fixed label="法规名称" prop="name" width="230">
+              <template #default="{ row }">
+                <el-tooltip effect="dark" placement="top">
+                  <template #content class="newLine">{{ row.name }}</template>
+                  <span class="hidden">{{ row.name }}</span>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <!--      <el-table-column align="center" label="领域类别" prop="field"/>-->
+            <el-table-column align="center" label="法规类型" prop="type" width="180">
+              <template #default="scope">
+                <dict-tag v-if="scope.row.type!==null" :options="law_type" :value="scope.row.type" width="180"/>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="原始链接" prop="url" width="120">
+              <template #default="scope">
+                <el-link :href="scope.row.url" target="_blank" type="primary">
+                  <span class="hidden">{{ scope.row.url }}</span>
+                </el-link>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="有效性" prop="isValidity" width="180">
+              <template #default="scope">
+                <dict-tag :options="crawl_common_status" :value="scope.row.isValidity"/>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="发布日期" prop="releaseDate" sortable width="180">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px;color: #1c84c6">{{ scope.row.releaseDate }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="实施日期" prop="executeDate" width="180">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px;color: #b96060">{{ scope.row.executeDate }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="发布机关" prop="releaseOrganization" width="180"/>
+            <!--      <el-table-column align="center" label="法规正文" prop="content"/>-->
+            <el-table-column align="center" label="法规来源" prop="sourceId" width="180">
+              <template #default="scope">
+                <dict-tag :options="crawler_source" :value="scope.row.sourceId"/>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="法规结构" prop="structure" width="180"/>
+            <el-table-column align="center" label="修改次数" prop="reviseNum" width="180"/>
+            <el-table-column align="center" label="状态" prop="status" width="180">
+              <template #default="scope">
+                <dict-tag :options="crawl_common_status" :value="scope.row.status"/>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="创建时间" prop="createTime" width="180">
+              <template #default="scope">
+                <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="更新时间" prop="updateTime" width="180">
+              <template #default="scope">
+                <span>{{ parseTime(scope.row.updateTime, '{y}-{m}-{d}') }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column align="center"
+                             class-name="small-padding fixed-width"
+                             fixed="right" label="操作" width="180">
+              <template #default="scope">
+                <el-button v-hasPermi="['manage:regulation:edit']" icon="Edit" size="default" type="text"
+                           @click="handleUpdate(scope.row)">修改
+                </el-button>
+                <el-button v-hasPermi="['manage:regulation:remove']" icon="Delete" size="default" type="text"
+                           width="180"
+                           @click="handleDelete(scope.row)">删除
+                </el-button>
+              </template>
+            </el-table-column>
+            <template #empty>
+              <el-empty></el-empty>
+            </template>
+          </el-table>
+
+
+        </el-tab-pane>
+        <el-tab-pane :name="3" label="已挖掘">
+          <el-table
+            v-loading="loading"
+            :data="regulationList"
+            :default-sort="{ prop: 'releaseDate', order: 'descending' }"
+            border
+            height="500"
+            stripe
+            style="width: 100%;text-align: center"
+            table-layout="auto"
+            @selection-change="handleSelectionChange"
+          >
+            <el-table-column type="selection" width="55"/>
+            <el-table-column align="center" label="序号" prop="id" type="index" width="150"/>
+            <el-table-column align="center" fixed label="法规名称" prop="name" width="230">
+              <template #default="{ row }">
+                <el-tooltip effect="dark" placement="top">
+                  <template #content class="newLine">{{ row.name }}</template>
+                  <span class="hidden">{{ row.name }}</span>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <!--      <el-table-column align="center" label="领域类别" prop="field"/>-->
+            <el-table-column align="center" label="法规类型" prop="type" width="180">
+              <template #default="scope">
+                <dict-tag v-if="scope.row.type!==null" :options="law_type" :value="scope.row.type" width="180"/>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="原始链接" prop="url" width="120">
+              <template #default="scope">
+                <el-link :href="scope.row.url" target="_blank" type="primary">
+                  <span class="hidden">{{ scope.row.url }}</span>
+                </el-link>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="有效性" prop="isValidity" width="180">
+              <template #default="scope">
+                <dict-tag :options="crawl_common_status" :value="scope.row.isValidity"/>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="发布日期" prop="releaseDate" sortable width="180">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px;color: #1c84c6">{{ scope.row.releaseDate }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="实施日期" prop="executeDate" width="180">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-icon>
+                    <timer/>
+                  </el-icon>
+                  <span style="margin-left: 10px;color: #b96060">{{ scope.row.executeDate }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="发布机关" prop="releaseOrganization" width="180"/>
+            <!--      <el-table-column align="center" label="法规正文" prop="content"/>-->
+            <el-table-column align="center" label="法规来源" prop="sourceId" width="180">
+              <template #default="scope">
+                <dict-tag :options="crawler_source" :value="scope.row.sourceId"/>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="法规结构" prop="structure" width="180"/>
+            <el-table-column align="center" label="修改次数" prop="reviseNum" width="180"/>
+            <el-table-column align="center" label="状态" prop="status" width="180">
+              <template #default="scope">
+                <dict-tag :options="crawl_common_status" :value="scope.row.status"/>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="创建时间" prop="createTime" width="180">
+              <template #default="scope">
+                <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" label="更新时间" prop="updateTime" width="180">
+              <template #default="scope">
+                <span>{{ parseTime(scope.row.updateTime, '{y}-{m}-{d}') }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column align="center"
+                             class-name="small-padding fixed-width"
+                             fixed="right" label="操作" width="180">
+              <template #default="scope">
+                <el-button v-hasPermi="['manage:regulation:edit']" icon="Edit" size="default" type="text"
+                           @click="handleUpdate(scope.row)">修改
+                </el-button>
+                <el-button v-hasPermi="['manage:regulation:remove']" icon="Delete" size="default" type="text"
+                           width="180"
+                           @click="handleDelete(scope.row)">删除
+                </el-button>
+              </template>
+            </el-table-column>
+            <template #empty>
+              <el-empty></el-empty>
+            </template>
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
 
       <!-- 添加或修改法律法规对话框 -->
       <el-dialog v-model="open" :title="title" align-center width="50%">
@@ -430,7 +893,7 @@ onMounted(() => {
           <el-form-item label="法规正文" prop="content">
             <el-link href="javascript:void(0);" type="primary" @click="openContent=true">进入法条正文</el-link>
             <el-dialog v-model="openContent" title="输入法条正文">
-              <editor v-model="form.content" :min-height="300"/>
+              <q-editor v-model="form.content" :min-height="300"/>
             </el-dialog>
           </el-form-item>
           <el-form-item label="法规来源" prop="sourceId">
@@ -458,6 +921,115 @@ onMounted(() => {
           <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
         </template>
       </el-dialog>
+
+      <!-- 清洗挖掘对话框 -->
+      <el-dialog v-model="processDialog" :fullscreen="true" title="法律法规数据清洗挖掘" width="100%">
+        <el-steps :active="processStep" align-center class="mb-10" finish-status="success">
+          <el-step :icon="Edit" description="对数据格式进行格式化并去除异常字符" title="Step 1：数据清洗"/>
+          <el-step :icon="UploadFilled" :status="'finish'" description="对数据进行挖掘分析提取潜在信息"
+                   title="Step 2：数据挖掘"/>
+        </el-steps>
+        <el-tabs v-model="defaultTab" :closable="true" :tab-position="'left'" @tab-remove="handleRemoveTab">
+          <el-card :shadow="'hover'" class="mt-3 shadow-sm w-100%">
+            <el-tab-pane v-for="(data,index) in processData" :key="data.id" :label="data.name" :name="index">
+              <template #label>
+                <el-tooltip :content="data.name" class="item" effect="dark" placement="top">
+                  <span class="text-overflow overflow-hidden whitespace-nowrap text-sm">{{
+                      data.name.substring(0, 15) + '...'
+                    }}</span>
+                </el-tooltip>
+              </template>
+              <el-form :label-position="'left'" :model="data" :size="'default'" class="flex">
+                <el-col :span="12" class="mr-2">
+                  <div v-if="processStep===0">
+                    <el-header>
+                      原始正文
+                    </el-header>
+                    <el-form-item>
+                      <el-input v-model="data.content" :autosize="{ minRows: 25, maxRows: 25 }" resize="vertical"
+                                type="textarea"/>
+                    </el-form-item>
+                  </div>
+                  <div v-else-if="processStep===1">
+                    <el-header>
+                      修正正文
+                    </el-header>
+                    <el-input v-model="data.stripContent" :autosize="{ minRows: 25, maxRows: 25 }" resize="vertical"
+                              type="textarea"/>
+                  </div>
+                </el-col>
+                <el-col :span="12">
+                  <div v-if="processStep===0">
+                    <el-header>
+                      修正正文
+                    </el-header>
+                    <el-input v-model="data.stripContent" :autosize="{ minRows: 25, maxRows: 25 }" type="textarea"/>
+                  </div>
+                  <div v-else-if="processStep===1">
+                    <el-header>
+                      语义信息
+                    </el-header>
+                    <el-card :shadow="'never'">
+                      <el-form-item label="所属领域">
+                        <el-input v-model="data.extra.field"/>
+                      </el-form-item>
+                      <el-form-item label="颁布组织">
+                        <el-input v-model="data.extra.organization" :prefix-icon="Switch"/>
+                      </el-form-item>
+                      <el-form-item label="适用范围">
+                        <el-input v-model="data.extra.scope" type="textarea"/>
+                      </el-form-item>
+                      <el-form-item label="法条依据">
+                        <el-input v-model="data.extra.basis" :autosize="true" type="textarea"/>
+                      </el-form-item>
+                      <el-form-item label="主要内容">
+                        <el-input v-model="data.extra.main" :autosize="true" type="textarea"/>
+                      </el-form-item>
+                      <el-form-item label="法条摘要">
+                        <el-input v-model="data.extra.summary" :autosize="true" type="textarea"/>
+                      </el-form-item>
+                    </el-card>
+                  </div>
+                </el-col>
+              </el-form>
+              <div class="flex justify-end items-end mt-3"> <!-- 添加 justify-end 和 items-end 类 -->
+                <el-button @click="cancelDialog">取 消</el-button>
+                <el-button :plain="true" type="primary" @click="resetProcess(data)">还原</el-button>
+                <el-button :disabled="processStep <= 0" :loading="buttonLoading" type="primary"
+                           @click="handleProcessPrev">
+                  上一步
+                </el-button>
+                <el-button :disabled="processStep >= 1" :loading="buttonLoading" type="primary"
+                           @click="handleProcessNext">
+                  下一步
+                </el-button>
+                <el-button :disabled="processStep !== 0" :loading="buttonLoading" type="warning"
+                           @click="handleProcessStrip(data)">
+                  开始清洗
+                </el-button>
+                <el-button :disabled="processStep !== 1" :loading="buttonLoading" type="warning"
+                           @click="handleProcessMining(data)">
+                  开始挖掘
+                </el-button>
+                <el-button :disabled="processStep !== 1" :loading="buttonLoading" type="success"
+                           @click="handleProcessStage(data)">
+                  暂 存
+                </el-button>
+                <el-button :disabled="processDataStage.length===0" :loading="buttonLoading" type="warning"
+                           @click="handleProcessSubmit">
+                  提 交
+                </el-button>
+
+              </div>
+            </el-tab-pane>
+
+
+          </el-card>
+
+        </el-tabs>
+
+
+      </el-dialog>
     </el-card>
     <pagination
       v-show="total>0"
@@ -482,5 +1054,11 @@ onMounted(() => {
   overflow-wrap: break-word; /* 当内容溢出容器边界时允许单词内部断行 */
   word-break: break-word; /* 对于不区分单词的脚本（如中文、日文等），也可以使用此属性 */
   white-space: normal; /* 这是默认值，保持常规空白处理和换行行为 */
+}
+
+.el-header {
+  text-align: center;
+  font-size: large;
+  font-weight: bold;
 }
 </style>

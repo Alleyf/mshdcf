@@ -2,6 +2,7 @@ package com.ruoyi.manage.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import com.ruoyi.manage.enums.MiningStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -67,6 +68,16 @@ public class DocCase extends BaseEntity {
      */
     private String content;
     /**
+     * 修正后的案件正文
+     */
+    private String stripContent;
+
+    /**
+     * 语义信息
+     */
+    private String extra;
+
+    /**
      * 案件来源（关联source表主键）
      */
     private Long sourceId;
@@ -74,12 +85,12 @@ public class DocCase extends BaseEntity {
      * 判决日期
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date judgeDate;
+    private String judgeDate;
     /**
      * 公开日期
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date pubDate;
+    private String pubDate;
     /**
      * 法律依据
      */
@@ -98,5 +109,10 @@ public class DocCase extends BaseEntity {
      * 状态（0：停用；1：正常）
      */
     private Integer status;
+
+    /**
+     * 挖掘状态
+     */
+    private MiningStatus isMining;
 
 }

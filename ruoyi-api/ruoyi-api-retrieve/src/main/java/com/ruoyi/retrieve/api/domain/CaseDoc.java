@@ -4,14 +4,9 @@ import cn.easyes.annotation.*;
 import cn.easyes.annotation.rely.Analyzer;
 import cn.easyes.annotation.rely.FieldType;
 import cn.easyes.annotation.rely.IdType;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author fcs
@@ -41,7 +36,6 @@ public class CaseDoc implements Serializable {
      */
     @HighLight(mappingField = "highlightName", preTag = "<text style='color:red'>", postTag = "</text>")
     @IndexField(fieldType = FieldType.KEYWORD_TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
-//    @NotBlank(message = "标题不能为空")
     private String name;
     /**
      * 审判法院
@@ -81,14 +75,29 @@ public class CaseDoc implements Serializable {
     @IndexField(fieldType = FieldType.TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
     private String content;
     /**
+     * 修正案件内容
+     */
+    @HighLight(mappingField = "highlightStripContent", preTag = "<text style='color:red'>", postTag = "</text>")
+    @IndexField(fieldType = FieldType.TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
+    private String stripContent;
+
+    /**
+     * 附加语义信息（json格式）
+     */
+    @IndexField(fieldType = FieldType.TEXT)
+    private String extra;
+    /**
      * 判决日期
      */
+    // TODO: 2024/2/7 日期无法从mysql同步到es
     @IndexField(fieldType = FieldType.DATE, dateFormat = "yyyy-MM-dd")
+//    @IndexField(fieldType = FieldType.KEYWORD)
     private String judgeDate;
     /**
      * 公开日期
      */
     @IndexField(fieldType = FieldType.DATE, dateFormat = "yyyy-MM-dd")
+//    @IndexField(fieldType = FieldType.KEYWORD)
     private String pubDate;
     /**
      * 法律依据
@@ -124,9 +133,9 @@ public class CaseDoc implements Serializable {
      */
     @IndexField(exist = false)
     private String highlightContent;
-
     /**
-     * 词云图
+     * 修正正文高亮返回值被映射的字段
      */
-    private String wordCloud;
+    @IndexField(exist = false)
+    private String highlightStripContent;
 }

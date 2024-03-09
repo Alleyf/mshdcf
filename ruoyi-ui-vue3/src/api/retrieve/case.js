@@ -9,6 +9,14 @@ export function getCase(id) {
   })
 }
 
+// 获取司法案例词云
+export function getCaseWorldCloud(id) {
+  return request({
+    url: '/retrieve/case/worldCloud/' + id,
+    method: 'get'
+  })
+}
+
 // 查询司法案例列表
 export function listCase(query) {
   return request({

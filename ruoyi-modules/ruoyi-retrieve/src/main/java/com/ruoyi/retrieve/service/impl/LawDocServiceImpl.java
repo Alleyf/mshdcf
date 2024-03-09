@@ -56,8 +56,8 @@ public class LawDocServiceImpl implements ILawDocService {
     @Override
     public Integer insert(LawDoc lawDoc) {
         //        设置词云
-        String wordCloud = getWordCloud(lawDoc.getName(), lawDoc.getContent());
-        lawDoc.setWordCloud(wordCloud);
+//        String wordCloud = getWordCloud(lawDoc.getName(), lawDoc.getContent());
+//        lawDoc.setWordCloud(wordCloud);
         return lawDocMapper.insert(lawDoc);
     }
 
@@ -70,8 +70,8 @@ public class LawDocServiceImpl implements ILawDocService {
     @Override
     public Integer update(LawDoc lawDoc) {
         //        设置词云
-        String wordCloud = getWordCloud(lawDoc.getName(), lawDoc.getContent());
-        lawDoc.setWordCloud(wordCloud);
+//        String wordCloud = getWordCloud(lawDoc.getName(), lawDoc.getContent());
+//        lawDoc.setWordCloud(wordCloud);
         return lawDocMapper.updateById(lawDoc);
     }
 
@@ -138,10 +138,10 @@ public class LawDocServiceImpl implements ILawDocService {
      */
     public List<LawDoc> preciseSearchList(String keyword) {
         return EsWrappers.lambdaChainQuery(lawDocMapper)
-            .eq(StringUtils.isNotEmpty(keyword), LawDoc::getName, keyword)
-            .or()
-            .match(StringUtils.isNotEmpty(keyword), LawDoc::getContent, keyword)
-            .list();
+                .eq(StringUtils.isNotEmpty(keyword), LawDoc::getName, keyword)
+                .or()
+                .match(StringUtils.isNotEmpty(keyword), LawDoc::getContent, keyword)
+                .list();
     }
 
     /**
@@ -152,10 +152,10 @@ public class LawDocServiceImpl implements ILawDocService {
      */
     public List<LawDoc> fuzzySearchList(String keyword) {
         return EsWrappers.lambdaChainQuery(lawDocMapper)
-            .match(StringUtils.isNotEmpty(keyword), LawDoc::getName, keyword)
-            .or()
-            .match(StringUtils.isNotEmpty(keyword), LawDoc::getContent, keyword)
-            .list();
+                .match(StringUtils.isNotEmpty(keyword), LawDoc::getName, keyword)
+                .or()
+                .match(StringUtils.isNotEmpty(keyword), LawDoc::getContent, keyword)
+                .list();
     }
 
     /**
@@ -186,10 +186,10 @@ public class LawDocServiceImpl implements ILawDocService {
     @Override
     public TableDataInfo<LawDoc> selectPage(String keyword, PageQuery pageQuery) {
         LambdaEsQueryChainWrapper<LawDoc> lqw = EsWrappers.lambdaChainQuery(lawDocMapper)
-            .match(StringUtils.isNotEmpty(keyword), LawDoc::getName, keyword)
-            .or()
-            .match(StringUtils.isNotEmpty(keyword), LawDoc::getContent, keyword)
-            .sortByScore(SortOrder.DESC);
+                .match(StringUtils.isNotEmpty(keyword), LawDoc::getName, keyword)
+                .or()
+                .match(StringUtils.isNotEmpty(keyword), LawDoc::getContent, keyword)
+                .sortByScore(SortOrder.DESC);
         // 物理分页
         validatePageQuery(pageQuery);
         int from = (pageQuery.getPageNum() - 1) * pageQuery.getPageSize();
@@ -256,16 +256,18 @@ public class LawDocServiceImpl implements ILawDocService {
         LambdaEsQueryWrapper<LawDoc> lqw = EsWrappers.lambdaQuery(LawDoc.class);
         // 必须指定一种排序规则,且排序字段值必须唯一 此处我选择用id进行排序 实际可根据业务场景自由指定,不推荐用创建时间,因为可能会相同
         lqw.match(StringUtils.isNotEmpty(bo.getName()), LawDoc::getName, bo.getName())
-            .or()
-            .match(LawDoc::getContent, StringUtils.isNotEmpty(bo.getContent()) ? bo.getContent() : bo.getName())
-            .like(StringUtils.isNotEmpty(bo.getField()), LawDoc::getField, bo.getField())
-            .eq(StringUtils.isNotEmpty(bo.getReviseNum()), LawDoc::getReviseNum, bo.getReviseNum())
-            .eq(StringUtils.isNotEmpty(bo.getType()), LawDoc::getType, bo.getType())
-            .like(StringUtils.isNotEmpty(bo.getStructure()), LawDoc::getStructure, bo.toString())
-            .ge(ObjectUtil.isNotNull(bo.getReleaseDate()), LawDoc::getReleaseDate, bo.getReleaseDate())
-            .le(ObjectUtil.isNotNull(bo.getExecuteDate()), LawDoc::getExecuteDate, bo.getExecuteDate())
-            .like(StringUtils.isNotEmpty(bo.getReleaseOrganization()), LawDoc::getReleaseOrganization, bo.getReleaseOrganization())
-            .sortByScore(SortOrder.DESC);
+                .or()
+                .match(LawDoc::getContent, StringUtils.isNotEmpty(bo.getContent()) ? bo.getContent() : bo.getName())
+                .or()
+                .match(LawDoc::getStripContent, StringUtils.isNotEmpty(bo.getContent()) ? bo.getContent() : bo.getName())
+                .like(StringUtils.isNotEmpty(bo.getField()), LawDoc::getField, bo.getField())
+                .eq(StringUtils.isNotEmpty(bo.getReviseNum()), LawDoc::getReviseNum, bo.getReviseNum())
+                .eq(StringUtils.isNotEmpty(bo.getType()), LawDoc::getType, bo.getType())
+                .like(StringUtils.isNotEmpty(bo.getStructure()), LawDoc::getStructure, bo.toString())
+                .ge(ObjectUtil.isNotNull(bo.getReleaseDate()), LawDoc::getReleaseDate, bo.getReleaseDate())
+                .le(ObjectUtil.isNotNull(bo.getExecuteDate()), LawDoc::getExecuteDate, bo.getExecuteDate())
+                .like(StringUtils.isNotEmpty(bo.getReleaseOrganization()), LawDoc::getReleaseOrganization, bo.getReleaseOrganization())
+                .sortByScore(SortOrder.DESC);
         return lqw;
     }
 }

@@ -1,13 +1,20 @@
 <template>
-  <div :class="{ 'collapse': collapse }" :style="{ backgroundColor: sideTheme === 'theme-dark' ? variables.menuBackground : variables.menuLightBackground }" class="sidebar-logo-container">
+  <div :class="{ 'collapse': collapse }"
+       :style="{ backgroundColor: sideTheme === 'theme-dark' ? variables.menuBackground : variables.menuLightBackground }"
+       class="sidebar-logo-container">
     <transition name="sidebarLogoFade">
       <router-link v-if="collapse" key="collapse" class="sidebar-logo-link" to="/">
-        <img v-if="logo" :src="logo" class="sidebar-logo" />
-        <h1 v-else :style="{ color: sideTheme === 'theme-dark' ? variables.logoTitleColor : variables.logoLightTitleColor }" class="sidebar-title">{{ title }}</h1>
+        <el-image v-if="logo" :src="'https://qnpicmap.fcsluck.top/pics/202312311949932.png'" class="sidebar-logo"
+                  sizes="64px"/>
+        <h1 v-else
+            :style="{ color: sideTheme === 'theme-dark' ? variables.logoTitleColor : variables.logoLightTitleColor }"
+            class="sidebar-title">{{ title }}</h1>
       </router-link>
       <router-link v-else key="expand" class="sidebar-logo-link" to="/">
-        <img v-if="logo" :src="logo" class="sidebar-logo" />
-        <h1 :style="{ color: sideTheme === 'theme-dark' ? variables.logoTitleColor : variables.logoLightTitleColor }" class="sidebar-title">{{ title }}</h1>
+        <el-image v-if="logo" :src="'https://qnpicmap.fcsluck.top/pics/202312311949932.png'" class="sidebar-logo"
+                  sizes="64px"/>
+        <h1 :style="{ color: sideTheme === 'theme-dark' ? variables.logoTitleColor : variables.logoLightTitleColor }"
+            class="sidebar-title">{{ title }}</h1>
       </router-link>
     </transition>
   </div>
@@ -25,7 +32,7 @@ defineProps({
   }
 })
 
-const title = ref('RuoYi-Cloud-Plus');
+const title = ref('MSHDCF');
 const settingsStore = useSettingsStore();
 const sideTheme = computed(() => settingsStore.sideTheme);
 </script>

@@ -5,10 +5,12 @@
     <breadcrumb v-if="!settingsStore.topNav" id="breadcrumb-container" class="breadcrumb-container"/>
     <top-nav v-if="settingsStore.topNav" id="topmenu-container" class="topmenu-container"/>
 
-    <div class="right-menu">
+    <div class="right-menu mt-auto">
       <template v-if="appStore.device !== 'mobile'">
-        <header-search id="header-search" class="right-menu-item"/>
+        <header-search id="header-search" class="hover-effect "/>
         <!--  联系我-->
+        <notify id="notification" class="right-menu-item hover-effect mt-auto"/>
+
         <!--        <Contact/>-->
         <el-tooltip content="源码地址" effect="dark" placement="bottom">
           <ruo-yi-git id="ruoyi-git" class="right-menu-item hover-effect"/>
@@ -21,19 +23,19 @@
         <screenfull id="screenfull" class="right-menu-item hover-effect"/>
 
         <el-tooltip content="布局大小" effect="dark" placement="bottom">
-          <size-select id="size-select" class="right-menu-item hover-effect"/>
+          <size-select id="size-select" class="right-menu-item hover-effect mt-auto"/>
         </el-tooltip>
       </template>
-      <div class="avatar-container">
-        <el-dropdown class="right-menu-item hover-effect" trigger="click" @command="handleCommand">
-          <div class="avatar-wrapper">
-            <img :src="userStore.avatar" class="user-avatar"/>
+      <div class="avatar-container mt-auto">
+        <el-dropdown class="right-menu-item hover-effect mt-auto" trigger="click" @command="handleCommand">
+          <div class="avatar-wrapper mt-auto">
+            <el-image :src="userStore.avatar" class="user-avatar mt-auto"/>
             <el-icon>
               <caret-bottom/>
             </el-icon>
           </div>
           <template #dropdown>
-            <el-dropdown-menu>
+            <el-dropdown-menu class="mt-auto">
               <router-link to="/user/profile">
                 <el-dropdown-item>个人中心</el-dropdown-item>
               </router-link>
@@ -48,6 +50,7 @@
         </el-dropdown>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -61,10 +64,10 @@ import SizeSelect from '@/components/SizeSelect'
 import HeaderSearch from '@/components/HeaderSearch'
 import RuoYiGit from '@/components/RuoYi/Git'
 import RuoYiDoc from '@/components/RuoYi/Doc'
+import Notify from '@/components/RuoYi/Notify'
 import useAppStore from '@/store/modules/app'
 import useUserStore from '@/store/modules/user'
 import useSettingsStore from '@/store/modules/settings'
-import Contact from "@/components/Contact/index.vue";
 
 const appStore = useAppStore()
 const userStore = useUserStore()
@@ -143,10 +146,11 @@ function setLayout() {
   }
 
   .right-menu {
-    float: right;
-    height: 100%;
-    line-height: 50px;
     display: flex;
+    margin: auto;
+    justify-content: flex-end;
+    justify-items: center;
+
 
     &:focus {
       outline: none;
@@ -155,10 +159,9 @@ function setLayout() {
     .right-menu-item {
       display: inline-block;
       padding: 0 8px;
-      height: 100%;
       font-size: 18px;
       color: #5a5e66;
-      vertical-align: text-bottom;
+      margin: auto 0;
 
       &.hover-effect {
         cursor: pointer;
@@ -174,7 +177,6 @@ function setLayout() {
       margin-right: 40px;
 
       .avatar-wrapper {
-        margin-top: 5px;
         position: relative;
 
         .user-avatar {

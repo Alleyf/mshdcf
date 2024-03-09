@@ -3,6 +3,7 @@ package com.ruoyi.manage.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.LawRegulation;
+import com.ruoyi.manage.domain.bo.ProcessBo;
 import com.ruoyi.manage.domain.vo.LawRegulationVo;
 import com.ruoyi.manage.domain.bo.LawRegulationBo;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
@@ -43,7 +44,7 @@ public interface ILawRegulationService extends IService<LawRegulation> {
     /**
      * 批量插入
      */
-    Boolean insertBatch();
+    Integer insertBatch(String clientId);
 
     /**
      * 修改法律法规
@@ -59,4 +60,10 @@ public interface ILawRegulationService extends IService<LawRegulation> {
      * 根据名称查询法律法规
      */
     LawRegulation selectLawRegulationByName(String name);
+
+    int process(List<ProcessBo> processList);
+
+    int processContent(List<ProcessBo> processList);
+
+    int processExtra(List<ProcessBo> processList);
 }

@@ -7,6 +7,7 @@ import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ObjectUtil;
+import com.ruoyi.common.core.constant.CacheConstants;
 import com.ruoyi.common.core.constant.UserConstants;
 import com.ruoyi.common.core.enums.DeviceType;
 import com.ruoyi.common.core.enums.UserType;
@@ -111,6 +112,19 @@ public class LoginHelper {
         }
         return userId;
     }
+
+    /**
+     * 获取登录ID
+     *
+     * @return 登录ID
+     */
+    public static String getLoginId() {
+        Long userId = getUserId();
+        String userType = getUserType().getUserType();
+        // 返回用户类型和用户ID拼接的登录ID
+        return userType + CacheConstants.LOGINID_JOIN_CODE + userId;
+    }
+
 
     /**
      * 获取部门ID

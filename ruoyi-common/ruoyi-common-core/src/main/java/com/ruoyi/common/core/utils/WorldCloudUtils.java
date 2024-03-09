@@ -4,27 +4,20 @@ import com.kennycason.kumo.CollisionMode;
 import com.kennycason.kumo.WordCloud;
 import com.kennycason.kumo.WordFrequency;
 import com.kennycason.kumo.bg.CircleBackground;
-import com.kennycason.kumo.bg.PixelBoundaryBackground;
 import com.kennycason.kumo.font.KumoFont;
-import com.kennycason.kumo.font.scale.LinearFontScalar;
 import com.kennycason.kumo.font.scale.SqrtFontScalar;
 import com.kennycason.kumo.nlp.FrequencyAnalyzer;
 import com.kennycason.kumo.nlp.tokenizers.ChineseWordTokenizer;
 import com.kennycason.kumo.palette.LinearGradientColorPalette;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.util.ResourceUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 词云工具包
@@ -50,10 +43,8 @@ public class WorldCloudUtils {
     public static String genWorldCloud(String name, String text) {
         try {
             //指定源文本，生成词频集合
-            text = StringUtils.stripUnicode(text);
             List<String> textLs = StringUtils.str2List(text, "\n", true, true);
-//            System.out.println("词频集合大小：" + textLs.size());
-            final List<WordFrequency> wordFrequencyList = FREQUENCY_ANALYZER.load(textLs);
+            List<WordFrequency> wordFrequencyList = FREQUENCY_ANALYZER.load(textLs);
             //设置图片分辨率
             WordCloud wordCloud = getWordCloud();
             //生成词云

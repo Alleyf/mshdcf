@@ -50,7 +50,10 @@ export default defineConfig(({mode, command}) => {
                 }
               }
             }
-          }
+          },
+          // tailwindcss配置，否则不生效
+          require('tailwindcss'),
+          require('autoprefixer')
         ]
       }
     }

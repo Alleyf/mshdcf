@@ -36,7 +36,6 @@
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-api-retrieve</artifactId>
-            <version>${ruoyi.version}</version>
         </dependency>
 
         <!--        sentinel-->
@@ -108,11 +107,27 @@
             <artifactId>ruoyi-api-system</artifactId>
         </dependency>
 
+        <!--        资源管理依赖api-->
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-api-resource</artifactId>
         </dependency>
 
+        <!--         websocket远程服务api-->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-api-websocket</artifactId>
+        </dependency>
+        <!--        websocket服务-->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-common-websocket</artifactId>
+        </dependency>
+        <!--        mq消息队列服务-->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-common-mq</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -26,10 +26,45 @@ export function addCase(data) {
   })
 }
 
+// 全量同步司法案例
+export function syncAllCase(data) {
+  return request({
+    url: '/manage/case/syncAll',
+    method: 'get'
+  })
+}
+
 // 修改司法案例
 export function updateCase(data) {
   return request({
     url: '/manage/case',
+    method: 'put',
+    data: data
+  })
+}
+
+// 批量智能处理保存司法案例
+export function saveProcessCase(data) {
+  return request({
+    url: '/manage/case/process',
+    method: 'put',
+    data: data
+  })
+}
+
+// 批量清洗保存司法案例
+export function saveReviseCase(data) {
+  return request({
+    url: '/manage/case/revise',
+    method: 'put',
+    data: data
+  })
+}
+
+// 批量挖掘保存司法案例
+export function saveMiningCase(data) {
+  return request({
+    url: '/manage/case/mining',
     method: 'put',
     data: data
   })

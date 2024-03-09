@@ -3,6 +3,7 @@ package com.ruoyi.manage.domain.bo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.core.validate.EditGroup;
+import com.ruoyi.manage.enums.MiningStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -84,6 +85,15 @@ public class DocCaseBo extends BaseEntity {
      */
     @NotBlank(message = "案件正文不能为空", groups = {AddGroup.class, EditGroup.class})
     private String content;
+    /**
+     * 修正后的案件正文
+     */
+    private String stripContent;
+
+    /**
+     * 语义信息
+     */
+    private String extra;
 
     /**
      * 案件来源（关联source表主键）
@@ -97,7 +107,7 @@ public class DocCaseBo extends BaseEntity {
     @NotNull(message = "判决日期不能为空", groups = {AddGroup.class, EditGroup.class})
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date judgeDate;
+    private String judgeDate;
 
     /**
      * 公开日期
@@ -105,7 +115,7 @@ public class DocCaseBo extends BaseEntity {
 //    @NotNull(message = "公开日期不能为空", groups = {AddGroup.class, EditGroup.class})
     @JsonFormat(pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date pubDate;
+    private String pubDate;
 
     /**
      * 法律依据
@@ -130,6 +140,11 @@ public class DocCaseBo extends BaseEntity {
      */
     @NotNull(message = "状态（0：停用；1：正常）不能为空", groups = {AddGroup.class, EditGroup.class})
     private Integer status;
+
+    /**
+     * 挖掘状态
+     */
+    private Integer isMining;
 
 
 }

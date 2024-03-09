@@ -55,17 +55,17 @@ public class ChatGPTUtils {
         //！！！生产或者测试环境建议设置为这三种级别：NONE,BASIC,HEADERS,！！！
         httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-//            .proxy(proxy)
-            .addInterceptor(httpLoggingInterceptor)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build();
+                .proxy(proxy)
+                .addInterceptor(httpLoggingInterceptor)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
         OpenAiClient openAiClient = OpenAiClient.builder()
-            .apiKey(Arrays.asList(apiKey))
-            .apiHost(apiHost)
-            .okHttpClient(okHttpClient)
-            .build();
+                .apiKey(Arrays.asList(apiKey))
+                .apiHost(apiHost)
+                .okHttpClient(okHttpClient)
+                .build();
         //聊天模型：gpt-3.5
         Message message = Message.builder().role(Message.Role.USER).content("你好！").build();
         ChatCompletion chatCompletion = ChatCompletion.builder().messages(Arrays.asList(message)).build();
@@ -78,28 +78,28 @@ public class ChatGPTUtils {
     //    @Before
     public void before() {
         //国内访问需要做代理，国外服务器不需要
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 1082));
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 7890));
         HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor(new OpenAILogger());
         //！！！！千万别再生产或者测试环境打开BODY级别日志！！！！
         //！！！生产或者测试环境建议设置为这三种级别：NONE,BASIC,HEADERS,！！！
         httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
         OkHttpClient okHttpClient = new OkHttpClient
-            .Builder()
+                .Builder()
 //                .proxy(proxy)
-            .addInterceptor(httpLoggingInterceptor)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build();
+                .addInterceptor(httpLoggingInterceptor)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
         client = OpenAiStreamClient.builder()
-            .apiKey(Arrays.asList(apiKey))
-            //自定义key的获取策略：默认KeyRandomStrategy
-            .keyStrategy(new KeyRandomStrategy())
+                .apiKey(Arrays.asList(apiKey))
+                //自定义key的获取策略：默认KeyRandomStrategy
+                .keyStrategy(new KeyRandomStrategy())
 //            .keyStrategy(new First())
-            .okHttpClient(okHttpClient)
-            //自己做了代理就传代理地址，没有可不不传（(关注公众号回复：openai ，获取免费的测试代理地址)）
+                .okHttpClient(okHttpClient)
+                //自己做了代理就传代理地址，没有可不不传（(关注公众号回复：openai ，获取免费的测试代理地址)）
 //            .apiHost(apiHost)
-            .build();
+                .build();
     }
 
     @Test
@@ -131,13 +131,13 @@ public class ChatGPTUtils {
         ConsoleEventSourceListener eventSourceListener = new ConsoleEventSourceListener();
         Message message = Message.builder().role(Message.Role.USER).content("random one word！").build();
         ChatCompletion chatCompletion = ChatCompletion
-            .builder()
-            .model(ChatCompletion.Model.GPT_3_5_TURBO.getName())
-            .temperature(0.2)
-            .maxTokens(2048)
-            .messages(Collections.singletonList(message))
-            .stream(true)
-            .build();
+                .builder()
+                .model(ChatCompletion.Model.GPT_3_5_TURBO.getName())
+                .temperature(0.2)
+                .maxTokens(2048)
+                .messages(Collections.singletonList(message))
+                .stream(true)
+                .build();
         client.streamChatCompletion(chatCompletion, eventSourceListener);
         CountDownLatch countDownLatch = new CountDownLatch(1);
         try {
@@ -151,9 +151,9 @@ public class ChatGPTUtils {
     public void completions() {
         ConsoleEventSourceListener eventSourceListener = new ConsoleEventSourceListener();
         Completion q = Completion.builder()
-            .prompt("我想申请转专业，从计算机专业转到会计学专业，帮我完成一份两百字左右的申请书")
-            .stream(true)
-            .build();
+                .prompt("我想申请转专业，从计算机专业转到会计学专业，帮我完成一份两百字左右的申请书")
+                .stream(true)
+                .build();
         client.streamCompletions(q, eventSourceListener);
         CountDownLatch countDownLatch = new CountDownLatch(1);
         try {

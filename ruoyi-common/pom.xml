@@ -36,6 +36,8 @@
         <module>ruoyi-common-prometheus</module>
         <module>ruoyi-common-translation</module>
         <module>ruoyi-common-encrypt</module>
+        <module>ruoyi-common-websocket</module>
+        <module>ruoyi-common-mq</module>
     </modules>
 
     <artifactId>ruoyi-common</artifactId>

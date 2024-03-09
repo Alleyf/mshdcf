@@ -2,15 +2,15 @@
   <el-container style="height: 80vh;display: flex">
     <el-header v-show="headerShow" class="search">
       <el-input
-        v-model="advancedForm.name"
-        class="input-with-select keyword"
-        clearable
-        maxlength="20"
-        placeholder="请输入关键词进行搜索..."
-        prefix-icon="Document"
-        show-word-limit
-        suffix-icon="Search"
-        @keydown.enter.native="handleSearch()"
+          v-model="advancedForm.name"
+          class="input-with-select keyword"
+          clearable
+          maxlength="20"
+          placeholder="请输入关键词进行搜索..."
+          prefix-icon="Document"
+          show-word-limit
+          suffix-icon="Search"
+          @keydown.enter.native="handleSearch()"
       >
         <template #prepend>
           <el-select v-model="selectAdvance" placeholder="请选择检索类型">
@@ -23,13 +23,13 @@
     <right-toolbar v-model:showSearch="headerShow" class="toolbar" @queryTable="handleSearch()"></right-toolbar>
     <el-main v-show="!headerShow" style="margin-top: 10%">
       <el-carousel
-        v-show="lawList.length > 0"
-        :interval="5000"
-        arrow="hover"
-        autoplay
-        direction="horizontal"
-        indicator-position="none"
-        type="card"
+          v-show="lawList.length > 0"
+          :interval="5000"
+          arrow="hover"
+          autoplay
+          direction="horizontal"
+          indicator-position="none"
+          type="card"
       >
         <el-carousel-item v-for="(item,index) in lawList" :key="item.id">
           <el-card class="box-card" shadow="always">
@@ -38,7 +38,7 @@
                 <el-col :span="12" class="horFlex">
                   <el-badge :value="index+1" class="mr-1" type="success"/>
                   <el-link :href="item.url" :underline="false" class="hidden" target="_blank" type="primary"
-                           v-html="item.highlightContent?item.highlightContent:item.name">
+                           v-html="item.highlightName?item.highlightName:item.name">
                   </el-link>
                   <el-button circle icon="View" style="font-size: 1em" @click="handleDetail(item)"/>
                 </el-col>
@@ -86,28 +86,28 @@
         </el-carousel-item>
       </el-carousel>
       <pagination
-        v-show="total>0"
-        v-model:limit="advancedForm.pageSize"
-        v-model:page="advancedForm.pageNum"
-        :total="total"
-        @pagination="handleSearch"
+          v-show="total>0"
+          v-model:limit="advancedForm.pageSize"
+          v-model:page="advancedForm.pageNum"
+          :total="total"
+          @pagination="handleSearch"
       />
     </el-main>
     <!--  高级检索条件选择对话框-->
     <el-dialog
-      v-model="dialogVisible"
-      align-center
-      draggable
-      title="检索条件"
-      width="30%"
+        v-model="dialogVisible"
+        align-center
+        draggable
+        title="检索条件"
+        width="30%"
     >
       <el-form
-        ref="advancedFormRef"
-        :inline="true"
-        :label-width="formLabelWidth"
-        :model="advancedForm"
-        class="form-inline"
-        label-position="top"
+          ref="advancedFormRef"
+          :inline="true"
+          :label-width="formLabelWidth"
+          :model="advancedForm"
+          class="form-inline"
+          label-position="top"
       >
         <el-row :gutter="10">
           <el-col :span="12">
@@ -126,10 +126,10 @@
             <el-form-item label="法条类型" label-width="80" prop="type">
               <el-select v-model="advancedForm.type">
                 <el-option
-                  v-for="item in law_type"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                    v-for="item in law_type"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
                 />
               </el-select>
             </el-form-item>
@@ -165,20 +165,20 @@
           <el-col :span="12">
             <el-form-item label="判决日期" prop="releaseDate">
               <el-date-picker
-                v-model="advancedForm.releaseDate"
-                placeholder="选择日期"
-                type="date"
-                value-format="YYYY-MM-DD"
+                  v-model="advancedForm.releaseDate"
+                  placeholder="选择日期"
+                  type="date"
+                  value-format="YYYY-MM-DD"
               />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="公开日期" prop="executeDate">
               <el-date-picker
-                v-model="advancedForm.executeDate"
-                placeholder="选择日期"
-                type="date"
-                value-format="YYYY-MM-DD"
+                  v-model="advancedForm.executeDate"
+                  placeholder="选择日期"
+                  type="date"
+                  value-format="YYYY-MM-DD"
               />
             </el-form-item>
           </el-col>
@@ -303,7 +303,7 @@ const handleSearch = () => {
 const handleDetail = (item) => {
   // 打开遮罩层
   proxy?.$modal.loading("正在打开" + item.name + "法条文书，请稍后...");
-  proxy.$router.push("/retrieve/law/lawDetail/" + item.id)
+  proxy.$router.push("/retrieve/law/lawDetail/" + item.id + "?" + `keyword=${advancedForm.value.name}`)
   // 关闭遮罩层
   proxy?.$modal.closeLoading();
 }

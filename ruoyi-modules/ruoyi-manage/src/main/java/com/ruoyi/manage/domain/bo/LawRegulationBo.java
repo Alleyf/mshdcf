@@ -3,6 +3,7 @@ package com.ruoyi.manage.domain.bo;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.core.validate.EditGroup;
+import com.ruoyi.manage.enums.MiningStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -66,7 +67,7 @@ public class LawRegulationBo extends BaseEntity {
     @NotNull(message = "发布日期不能为空", groups = {AddGroup.class, EditGroup.class})
     @JsonFormat(pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date releaseDate;
+    private String releaseDate;
 
     /**
      * 实施日期
@@ -74,7 +75,7 @@ public class LawRegulationBo extends BaseEntity {
 //    @NotNull(message = "实施日期不能为空", groups = {AddGroup.class, EditGroup.class})
     @JsonFormat(pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date executeDate;
+    private String executeDate;
 
     /**
      * 发布机关
@@ -87,6 +88,15 @@ public class LawRegulationBo extends BaseEntity {
      */
     @NotBlank(message = "法规正文不能为空", groups = {AddGroup.class, EditGroup.class})
     private String content;
+    /**
+     * 修正后的法条正文
+     */
+    private String stripContent;
+
+    /**
+     * 语义信息
+     */
+    private String extra;
 
     /**
      * 法规来源（关联source表主键）
@@ -112,5 +122,8 @@ public class LawRegulationBo extends BaseEntity {
     @NotNull(message = "状态不能为空", groups = {AddGroup.class, EditGroup.class})
     private Integer status;
 
-
+    /**
+     * 挖掘状态
+     */
+    private Integer isMining;
 }

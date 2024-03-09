@@ -14,6 +14,7 @@ import org.springframework.boot.context.metrics.buffering.BufferingApplicationSt
  */
 @SpringBootApplication
 @EnableDubbo
+@EsMapperScan("com.ruoyi.retrieve.esmapper")
 public class RuoYiRetrieveApplication {
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(RuoYiRetrieveApplication.class);

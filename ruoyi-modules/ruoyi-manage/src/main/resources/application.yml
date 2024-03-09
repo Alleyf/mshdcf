@@ -25,6 +25,10 @@ spring:
         # 配置组
         group: @nacos.config.group@
         namespace: ${spring.profiles.active}
+    stream:
+      function:
+        # 重点配置 与 binding 名与消费者对应
+        definition: delay;websocket;
   config:
     import:
       - optional:nacos:application-common.yml
@@ -55,3 +59,52 @@ dubbo:
     payload: 104857600 #10MB
   consumer:
     timeout: 200000
+
+--- # rabbitmq 配置
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    # 虚拟主机必须提前在mq山创建好
+    virtual-host: /mshdcf
+    username: admin
+    password: admin
+  cloud:
+    stream:
+      rabbit:
+        bindings:
+          #          延迟交换机需要安装delayed-message插件
+          delay-in-0:
+            consumer:
+              delayedExchange: true
+          delay-out-0:
+            producer:
+              delayedExchange: true
+          websocket-in-0:
+            consumer:
+              delayedExchange: true
+          websocket-out-0:
+            producer:
+              delayedExchange: true
+      bindings:
+        #        最好将不同交换机和队列的destination和group分开，否则会混乱
+        delay-in-0:
+          destination: delay.exchange.cloud
+          content-type: application/json
+          group: delay-group
+          binder: rabbit
+        delay-out-0:
+          destination: delay.exchange.cloud
+          content-type: application/json
+          group: delay-group
+          binder: rabbit
+        websocket-in-0:
+          destination: websocket.exchange.cloud
+          content-type: application/json
+          group: websocket-group
+          binder: rabbit
+        websocket-out-0:
+          destination: websocket.exchange.cloud
+          content-type: application/json
+          group: websocket-group
+          binder: rabbit

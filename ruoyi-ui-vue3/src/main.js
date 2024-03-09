@@ -1,4 +1,4 @@
-import {createApp} from 'vue'
+import {createApp, ref} from 'vue'
 
 import Cookies from 'js-cookie'
 
@@ -6,20 +6,27 @@ import ElementPlus from 'element-plus'
 import locale from 'element-plus/lib/locale/lang/zh-cn' // 中文语言
 
 import '@/assets/styles/index.scss' // global css
+import '@/assets/styles/tailwind.css'
+
 
 import App from './App'
 import store from './store'
 import router from './router'
 import directive from './directive' // directive
+import VueCharts from 'vue-echarts'
 
 // 注册指令
 import plugins from './plugins' // plugins
 import {download} from '@/utils/request'
+import {sendWebMessage} from "@/utils/websocket";
+
 
 // svg图标
 import 'virtual:svg-icons-register'
 import SvgIcon from '@/components/SvgIcon'
 import elementIcons from '@/components/SvgIcon/svgicon'
+import {Icon} from '@iconify/vue';
+
 
 import './permission' // permission control
 
@@ -48,8 +55,13 @@ import TreeSelect from '@/components/TreeSelect'
 import DictTag from '@/components/DictTag'
 // iframe组件
 import IFrame from "@/components/IFrame";
+import useUserStore from "@/store/modules/user";
+
 
 const app = createApp(App)
+
+// 全局变量
+
 
 // 全局方法挂载
 app.config.globalProperties.useDict = useDict
@@ -62,6 +74,7 @@ app.config.globalProperties.handleTree = handleTree
 app.config.globalProperties.addDateRange = addDateRange
 app.config.globalProperties.selectDictLabel = selectDictLabel
 app.config.globalProperties.selectDictLabels = selectDictLabels
+app.config.globalProperties.sendWebMessage = sendWebMessage
 
 // 全局组件挂载
 app.component('DictTag', DictTag)
@@ -74,6 +87,8 @@ app.component('RightToolbar', RightToolbar)
 app.component('WEditor', WEditor)
 app.component('QEditor', QEditor)
 app.component('IFrame', IFrame)
+app.component('v-chart', VueCharts)
+
 
 app.use(router)
 app.use(store)
@@ -85,9 +100,9 @@ directive(app)
 
 // 使用element-plus 并且设置全局的大小
 app.use(ElementPlus, {
-  locale: locale,
-  // 支持 large、default、small
-  size: Cookies.get('size') || 'default'
+    locale: locale,
+    // 支持 large、default、small
+    size: Cookies.get('size') || 'default'
 })
 
 // 修改 el-dialog 默认点击遮照为不关闭

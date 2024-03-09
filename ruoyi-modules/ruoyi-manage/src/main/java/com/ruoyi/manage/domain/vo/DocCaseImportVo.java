@@ -2,13 +2,17 @@ package com.ruoyi.manage.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.excel.annotation.ExcelDictFormat;
 import com.ruoyi.common.excel.convert.ExcelDictConvert;
+import com.ruoyi.manage.enums.MiningStatus;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 
 /**
@@ -91,14 +95,14 @@ public class DocCaseImportVo implements Serializable {
      */
     @ExcelProperty(value = "判决日期")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date judgeDate;
+    private String judgeDate;
 
     /**
      * 公开日期
      */
     @ExcelProperty(value = "公开日期")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date pubDate;
+    private String pubDate;
 
     /**
      * 法律依据
@@ -117,6 +121,17 @@ public class DocCaseImportVo implements Serializable {
      */
     @ExcelProperty(value = "正文")
     private String content;
+    /**
+     * 修正后的案件正文
+     */
+    @ExcelProperty(value = "修正正文")
+    private String stripContent;
+
+    /**
+     * 附加语义信息（json格式）
+     */
+    @ExcelProperty(value = "语义信息")
+    private String extra;
 
     /**
      * 状态（0：停用；1：正常）
@@ -125,5 +140,9 @@ public class DocCaseImportVo implements Serializable {
     @ExcelDictFormat(dictType = "crawl_common_status")
     private Integer status;
 
-
+    /**
+     * 挖掘状态
+     */
+    @ExcelProperty(value = "挖掘状态")
+    private MiningStatus isMining;
 }

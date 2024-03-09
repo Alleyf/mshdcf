@@ -1,6 +1,5 @@
 <template>
-  <div :class="{ 'show': show }" class="header-search">
-    <svg-icon class-name="search-icon" icon-class="search" @click.stop="click" />
+  <div :class="{ 'show': show }" class="header-search flex justify-start justify-items-center">
     <el-select
       ref="headerSearchSelectRef"
       v-model="search"
@@ -12,15 +11,18 @@
       remote
       @change="change"
     >
-      <el-option v-for="option in options" :key="option.item.path" :label="option.item.title.join(' > ')" :value="option.item" />
+      <el-option v-for="option in options" :key="option.item.path" :label="option.item.title.join(' > ')"
+                 :value="option.item"/>
     </el-select>
+    <svg-icon class-name="search-icon" icon-class="search" @click.stop="click"/>
+
   </div>
 </template>
 
 <script setup>
 import Fuse from 'fuse.js'
-import { getNormalPath } from '@/utils/ruoyi'
-import { isHttp } from '@/utils/validate'
+import {getNormalPath} from '@/utils/ruoyi'
+import {isHttp} from '@/utils/validate'
 import usePermissionStore from '@/store/modules/permission'
 
 const search = ref('');
@@ -38,11 +40,13 @@ function click() {
     headerSearchSelectRef.value && headerSearchSelectRef.value.focus()
   }
 };
+
 function close() {
   headerSearchSelectRef.value && headerSearchSelectRef.value.blur()
   options.value = []
   show.value = false
 }
+
 function change(val) {
   const path = val.path;
   const query = val.query;
@@ -52,7 +56,7 @@ function change(val) {
     window.open(path.substr(pindex, path.length), "_blank");
   } else {
     if (query) {
-      router.push({ path: path, query: JSON.parse(query) });
+      router.push({path: path, query: JSON.parse(query)});
     } else {
       router.push(path)
     }
@@ -64,6 +68,7 @@ function change(val) {
     show.value = false
   })
 }
+
 function initFuse(list) {
   fuse.value = new Fuse(list, {
     shouldSort: true,
@@ -80,6 +85,7 @@ function initFuse(list) {
     }]
   })
 }
+
 // Filter out the routes that can be displayed in the sidebar
 // And generate the internationalized title
 function generateRoutes(routes, basePath = '', prefixTitle = [], query = {}) {
@@ -87,7 +93,9 @@ function generateRoutes(routes, basePath = '', prefixTitle = [], query = {}) {
 
   for (const r of routes) {
     // skip hidden router
-    if (r.hidden) { continue }
+    if (r.hidden) {
+      continue
+    }
     const p = r.path.length > 0 && r.path[0] === '/' ? r.path : '/' + r.path;
     const data = {
       path: !isHttp(r.path) ? getNormalPath(basePath + p) : r.path,
@@ -118,6 +126,7 @@ function generateRoutes(routes, basePath = '', prefixTitle = [], query = {}) {
   }
   return res
 }
+
 function querySearch(query) {
   if (query !== '') {
     options.value = fuse.value.search(query)
@@ -150,11 +159,14 @@ watch(searchPool, (list) => {
 <style lang='scss' scoped>
 .header-search {
   font-size: 0 !important;
+  margin: auto 0;
+
 
   .search-icon {
     cursor: pointer;
     font-size: 18px;
     vertical-align: middle;
+    margin: auto;
   }
 
   .header-search-select {
@@ -165,7 +177,7 @@ watch(searchPool, (list) => {
     background: transparent;
     border-radius: 0;
     display: inline-block;
-    vertical-align: middle;
+    vertical-align: center;
 
     :deep(.el-input__inner) {
       border-radius: 0;
@@ -180,8 +192,8 @@ watch(searchPool, (list) => {
 
   &.show {
     .header-search-select {
-      width: 210px;
-      margin-left: 10px;
+      width: 180px;
+      margin-right: 10px;
     }
   }
 }

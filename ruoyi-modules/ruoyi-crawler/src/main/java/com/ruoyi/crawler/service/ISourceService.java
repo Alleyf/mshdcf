@@ -6,6 +6,7 @@ import com.ruoyi.crawler.domain.bo.SourceBo;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -46,4 +47,6 @@ public interface ISourceService {
      * 校验并批量删除爬虫数据源信息
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
+
+    byte[] generateCode(Long id) throws IOException;
 }
