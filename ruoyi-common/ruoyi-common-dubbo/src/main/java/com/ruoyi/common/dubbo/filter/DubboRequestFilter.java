@@ -13,7 +13,7 @@ import org.apache.dubbo.rpc.service.GenericService;
 /**
  * dubbo日志过滤器
  *
- * @author Lion Li
+ * @author csFan
  */
 @Slf4j
 @Activate(group = {CommonConstants.PROVIDER, CommonConstants.CONSUMER}, order = Integer.MAX_VALUE)

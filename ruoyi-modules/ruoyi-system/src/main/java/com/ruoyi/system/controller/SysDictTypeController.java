@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * 数据字典信息
  *
- * @author Lion Li
+ * @author csFan
  */
 @Validated
 @RequiredArgsConstructor

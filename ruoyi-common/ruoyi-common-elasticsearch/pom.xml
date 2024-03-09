@@ -15,9 +15,9 @@
         ruoyi-common-elasticsearch ES搜索引擎服务
     </description>
 
-	<dependencies>
+    <dependencies>
         <dependency>
-            <groupId>cn.easy-es</groupId>
+            <groupId>org.dromara.easy-es</groupId>
             <artifactId>easy-es-boot-starter</artifactId>
         </dependency>
     </dependencies>

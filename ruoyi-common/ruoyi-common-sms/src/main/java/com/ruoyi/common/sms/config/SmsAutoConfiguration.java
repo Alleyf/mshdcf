@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 /**
  * 短信配置类
  *
- * @author Lion Li
+ * @author csFan
  * @version 4.2.0
  */
 @AutoConfiguration

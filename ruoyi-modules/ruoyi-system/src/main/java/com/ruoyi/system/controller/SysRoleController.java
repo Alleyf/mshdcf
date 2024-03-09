@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * 角色信息
  *
- * @author Lion Li
+ * @author csFan
  */
 @Validated
 @RequiredArgsConstructor

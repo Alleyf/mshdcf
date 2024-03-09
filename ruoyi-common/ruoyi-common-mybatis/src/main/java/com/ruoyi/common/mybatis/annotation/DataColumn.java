@@ -4,10 +4,10 @@ import java.lang.annotation.*;
 
 /**
  * 数据权限
- *
+ * <p>
  * 一个注解只能对应一个模板
  *
- * @author Lion Li
+ * @author csFan
  * @version 3.5.0
  */
 @Target(ElementType.METHOD)

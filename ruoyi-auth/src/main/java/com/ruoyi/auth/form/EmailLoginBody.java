@@ -8,7 +8,7 @@ import javax.validation.constraints.NotBlank;
 /**
  * 邮件登录对象
  *
- * @author Lion Li
+ * @author csFan
  */
 
 @Data

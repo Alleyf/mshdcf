@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 /**
  * 测试国际化
  *
- * @author Lion Li
+ * @author csFan
  */
 @Validated
 @RestController

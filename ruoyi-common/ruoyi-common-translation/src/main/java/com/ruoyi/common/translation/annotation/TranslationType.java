@@ -5,7 +5,7 @@ import java.lang.annotation.*;
 /**
  * 翻译类型注解 (标注到{@link com.ruoyi.common.translation.core.TranslationInterface} 的实现类)
  *
- * @author Lion Li
+ * @author csFan
  */
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)

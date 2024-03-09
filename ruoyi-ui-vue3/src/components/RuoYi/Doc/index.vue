@@ -1,11 +1,11 @@
 <template>
   <div>
-    <svg-icon icon-class="question" @click="goto" />
+    <svg-icon icon-class="question" @click="goto"/>
   </div>
 </template>
 
 <script setup>
-const url = ref('https://gitee.com/JavaLionLi/RuoYi-Cloud-Plus/wikis');
+const url = ref('https://alleyf.github.io/FeapderLawCrawler/');
 
 function goto() {
   window.open(url.value)

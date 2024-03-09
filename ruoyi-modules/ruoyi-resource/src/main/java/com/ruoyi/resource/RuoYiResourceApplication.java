@@ -9,7 +9,7 @@ import org.springframework.boot.context.metrics.buffering.BufferingApplicationSt
 /**
  * 资源服务
  *
- * @author Lion Li
+ * @author csFan
  */
 @EnableDubbo
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})

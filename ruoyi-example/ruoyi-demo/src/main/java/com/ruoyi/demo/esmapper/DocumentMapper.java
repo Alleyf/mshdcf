@@ -1,7 +1,8 @@
 package com.ruoyi.demo.esmapper;
 
-import cn.easyes.core.conditions.interfaces.BaseEsMapper;
+
 import com.ruoyi.demo.domain.Document;
+import org.dromara.easyes.core.core.BaseEsMapper;
 
 public interface DocumentMapper extends BaseEsMapper<Document> {
 }

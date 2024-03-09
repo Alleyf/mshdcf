@@ -11,7 +11,7 @@ package com.ruoyi.common.core.constant;
  * <p>
  * 例子: test#60s、test#0#60s、test#0#1m#1000、test#1h#0#500
  *
- * @author Lion Li
+ * @author csFan
  */
 public interface CacheNames {
 

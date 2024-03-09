@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 /**
  * Sa-Token 配置
  *
- * @author Lion Li
+ * @author csFan
  */
 @AutoConfiguration
 public class SaTokenConfiguration {

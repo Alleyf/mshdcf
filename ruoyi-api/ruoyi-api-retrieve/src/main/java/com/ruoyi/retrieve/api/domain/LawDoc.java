@@ -1,9 +1,9 @@
 package com.ruoyi.retrieve.api.domain;
 
-import cn.easyes.annotation.*;
-import cn.easyes.annotation.rely.Analyzer;
-import cn.easyes.annotation.rely.FieldType;
-import cn.easyes.annotation.rely.IdType;
+import org.dromara.easyes.annotation.*;
+import org.dromara.easyes.annotation.rely.Analyzer;
+import org.dromara.easyes.annotation.rely.FieldType;
+import org.dromara.easyes.annotation.rely.IdType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 

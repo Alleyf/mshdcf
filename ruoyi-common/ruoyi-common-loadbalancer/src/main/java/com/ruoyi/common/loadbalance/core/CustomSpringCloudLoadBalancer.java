@@ -21,7 +21,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * 自定义 SpringCloud 负载均衡算法
  *
- * @author Lion Li
+ * @author csFan
  */
 @Slf4j
 @AllArgsConstructor

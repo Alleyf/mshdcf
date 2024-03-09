@@ -3,7 +3,7 @@ package com.ruoyi.common.translation.core;
 /**
  * 翻译接口 (实现类需标注 {@link com.ruoyi.common.translation.annotation.TranslationType} 注解标明翻译类型)
  *
- * @author Lion Li
+ * @author csFan
  */
 public interface TranslationInterface<T> {
 

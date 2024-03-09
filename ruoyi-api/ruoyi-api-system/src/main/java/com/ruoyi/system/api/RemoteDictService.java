@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * 字典服务
  *
- * @author Lion Li
+ * @author csFan
  */
 public interface RemoteDictService {
 

@@ -10,7 +10,7 @@ import org.apache.dubbo.config.annotation.DubboReference;
 /**
  * OSS翻译实现
  *
- * @author Lion Li
+ * @author csFan
  */
 @AllArgsConstructor
 @TranslationType(type = TransConstant.OSS_ID_TO_URL)

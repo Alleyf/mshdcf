@@ -1,7 +1,7 @@
 package com.ruoyi.retrieve.esmapper;
 
-import cn.easyes.core.core.BaseEsMapper;
-import cn.easyes.starter.register.EsMapperScan;
+import org.dromara.easyes.core.core.BaseEsMapper;
+import org.dromara.easyes.starter.register.EsMapperScan;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
 import org.apache.ibatis.annotations.Mapper;
 

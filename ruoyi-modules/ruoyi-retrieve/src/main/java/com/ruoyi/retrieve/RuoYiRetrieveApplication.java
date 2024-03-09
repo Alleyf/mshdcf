@@ -1,6 +1,6 @@
 package com.ruoyi.retrieve;
 
-import cn.easyes.starter.register.EsMapperScan;
+import org.dromara.easyes.starter.register.EsMapperScan;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

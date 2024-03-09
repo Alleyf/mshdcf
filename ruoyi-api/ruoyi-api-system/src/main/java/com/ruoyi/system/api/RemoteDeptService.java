@@ -3,7 +3,7 @@ package com.ruoyi.system.api;
 /**
  * 部门服务
  *
- * @author Lion Li
+ * @author csFan
  */
 public interface RemoteDeptService {
 

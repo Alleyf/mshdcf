@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Redis 发布订阅 演示案例
  *
- * @author Lion Li
+ * @author csFan
  */
 @RequiredArgsConstructor
 @RestController
@@ -20,7 +20,7 @@ public class RedisPubSubController {
     /**
      * 发布消息
      *
-     * @param key 通道Key
+     * @param key   通道Key
      * @param value 发送内容
      */
     @GetMapping("/pub")

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * 自定义gateway参数配置
  *
- * @author Lion Li
+ * @author csFan
  */
 @Data
 @Configuration

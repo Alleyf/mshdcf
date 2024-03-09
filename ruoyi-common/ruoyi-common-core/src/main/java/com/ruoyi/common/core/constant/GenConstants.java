@@ -3,7 +3,7 @@ package com.ruoyi.common.core.constant;
 /**
  * 代码生成通用常量
  *
- * @author Lion Li
+ * @author csFan
  */
 public interface GenConstants {
     /**
@@ -65,7 +65,7 @@ public interface GenConstants {
      * 数据库数字类型
      */
     String[] COLUMNTYPE_NUMBER = {"tinyint", "smallint", "mediumint", "int", "number", "integer",
-            "bigint", "float", "double", "decimal"};
+        "bigint", "float", "double", "decimal"};
 
     /**
      * BO对象 不需要添加字段

@@ -97,15 +97,15 @@ easy-es:
   # 是否开启EE自动配置
   enable: true
   # es连接地址+端口 格式必须为ip:port,如果是集群则可用逗号隔开
-  address: 8.130.88.159:9200
+  address: @es.address@
   # 默认为http
   schema: http
   banner: false
   # 注意ES建议使用账号认证 不使用会报警告日志
   #如果无账号密码则可不配置此行
-  username: elastic
+  #  username: elastic
   #如果无账号密码则可不配置此行
-  password: alleyfelasticsearch
+  #  password: alleyfelasticsearch
   # 心跳策略时间 单位:ms
   keep-alive-millis: 18000
   # 连接超时时间 单位:ms

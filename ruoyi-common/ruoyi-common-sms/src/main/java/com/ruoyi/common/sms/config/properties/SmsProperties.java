@@ -7,7 +7,7 @@
 ///**
 // * SMS短信 配置属性
 // *
-// * @author Lion Li
+// * @author csFan
 // * @version 4.2.0
 // */
 //@Data

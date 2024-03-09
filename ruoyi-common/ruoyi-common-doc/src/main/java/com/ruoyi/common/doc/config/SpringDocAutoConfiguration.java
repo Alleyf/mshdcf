@@ -26,7 +26,7 @@ import java.util.*;
 /**
  * Swagger 文档配置
  *
- * @author Lion Li
+ * @author csFan
  */
 @RequiredArgsConstructor
 @AutoConfiguration(before = SpringDocConfiguration.class)
@@ -113,7 +113,7 @@ public class SpringDocAutoConfiguration {
                 return;
             }
             PlusPaths newPaths = new PlusPaths();
-            oldPaths.forEach((k,v) -> newPaths.addPathItem(finalContextPath + k, v));
+            oldPaths.forEach((k, v) -> newPaths.addPathItem(finalContextPath + k, v));
             openApi.setPaths(newPaths);
         };
     }

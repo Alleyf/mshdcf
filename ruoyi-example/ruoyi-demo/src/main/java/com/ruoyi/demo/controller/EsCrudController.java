@@ -1,10 +1,14 @@
 package com.ruoyi.demo.controller;
 
-import cn.easyes.core.conditions.LambdaEsQueryWrapper;
+//import org.dromara.easyes.core.conditions.LambdaEsQueryWrapper;
+
+//import cn.easyes.core.conditions.select.LambdaEsQueryWrapper;
+
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.demo.domain.Document;
 import com.ruoyi.demo.esmapper.DocumentMapper;
 import lombok.RequiredArgsConstructor;
+import org.dromara.easyes.core.conditions.select.LambdaEsQueryWrapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +17,7 @@ import java.util.List;
 /**
  * 搜索引擎 crud 演示案例
  *
- * @author Lion Li
+ * @author csFan
  */
 @ConditionalOnProperty(value = "easy-es.enable", havingValue = "true")
 @RequiredArgsConstructor

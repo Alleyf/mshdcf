@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 /**
  * 测试单表对象 test_demo
  *
- * @author Lion Li
+ * @author csFan
  * @date 2021-07-26
  */
 @Data
