@@ -38,6 +38,7 @@ public class MoonShotBo implements Serializable {
         List<MoonShotBo.Message> messageList = new ArrayList<>();
         messageList.add(new MoonShotBo.Message("system", prompt));
         messageList.add(new MoonShotBo.Message("user", text));
+        this.messages = messageList;
     }
 
     // 用户消息对应的实体类

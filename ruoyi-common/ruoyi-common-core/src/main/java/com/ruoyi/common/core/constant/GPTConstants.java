@@ -36,4 +36,14 @@ public interface GPTConstants {
      * Coze-GPT请求密钥
      */
     String COZE_API_SECRET = "coze123456";
+
+    /**
+     * MoonShot-GPT请求地址
+     */
+    String MoonShot_API_URL = "https://api.moonshot.cn/v1/chat/completions";
+
+    /**
+     * MoonShot-GPT请求密钥
+     */
+    String MoonShot_API_SECRET = "Bearer sk-3vLlnvvSjZweyMPvhtMZkt5UsLFJ5N1qN7pNpcF94z9ve2Ee";
 }

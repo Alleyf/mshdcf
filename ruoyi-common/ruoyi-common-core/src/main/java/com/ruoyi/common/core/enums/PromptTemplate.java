@@ -65,7 +65,7 @@ public enum PromptTemplate {
             "\"note\": \"审判员陈典二〇二三年三月二十三日书记员丁宇婕\"\n" +
             "}\n" +
             "将下述目标文本（司法案例文书正文内容）根据上述字段说明进行提取、修正，对为空字段值的按照理解生成补充对应内容，如果不知道则为空字符串，最后严格按照上述参考示例，最终返回不带代码格式的json的纯文本（除json字符串外无多余文字）" +
-            "\n" + "目标文本： " + "\n"),
+            "\n" + "目标文本： " + "\n","你是一名专业的数据智能分析处理专家"),
 
     /**
      * 法律法规信息挖掘模板
@@ -97,22 +97,24 @@ public enum PromptTemplate {
             "按照上述参考示例对以下法条正文，获取内容包含：所属领域[交通，教育，环境，金融，体育，文化，公共安全，医疗等领域之一]\n" +
             "、类型[法律，行政法规，地方性法规，司法解释，部门规章和其他 这6种之一]、颁布组织、发布及实施日期[yyyy-mm-dd]\n" +
             "、适用范围、法条依据[json数组]、主要内容[json数组]和摘要总结（不少于100字），保证参考示例中的所有字段必须有且是法条正文中提取或生成的不能为示例原本内容，对于确实无法提取得到的json字段则令其值为null，最终返回不带markdown代码格式的json字符串纯文本（除json字符串外无多余文字）\n" +
-            "法条正文：" + "\n"),
+            "法条正文：" + "\n","你是一名专业的数据智能分析处理专家"),
 
     /**
      * 案例正文修正模板
      */
-    CASEREVISE("caseRevise", "修正下述司法案例正文的格式并纠正可能存在的错误，检查标点符号语法等正确后返回不带markdown格式的纯文本:\n"),
+    CASEREVISE("caseRevise", "修正下述司法案例正文的格式并纠正可能存在的错误，检查标点符号语法等正确后返回不带markdown格式的纯文本:\n","你是一名专业的数据智能分析处理专家"),
     /**
      * 法条正文修正模板
      */
-    LAWREVISE("lawRevision", "修正下述法条正文的格式并纠正可能存在的错误，如果正文含有章、条则按照分章、条以换行符\\n分段，检查标点符号语法等正确后返回纯文本（不带markdown格式、不加粗、没有多于换行）:\n");
+    LAWREVISE("lawRevision", "修正下述法条正文的格式并纠正可能存在的错误，如果正文含有章、条则按照分章、条以换行符\\n分段，检查标点符号语法等正确后返回纯文本（不带markdown格式、不加粗、没有多于换行）:\n","你是一名专业的数据智能分析处理专家");
 
     private final String name;
     private final String template;
+    private final String prompt;
 
-    PromptTemplate(String name, String template) {
+    PromptTemplate(String name, String template,String prompt) {
         this.name = name;
         this.template = template;
+        this.prompt = prompt;
     }
 }
