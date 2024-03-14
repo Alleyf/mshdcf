@@ -85,6 +85,11 @@
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-api-resource</artifactId>
         </dependency>
+        <!--        gpt-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.ruoyi</groupId>-->
+        <!--            <artifactId>ruoyi-common-gpt</artifactId>-->
+        <!--        </dependency>-->
 
     </dependencies>
 

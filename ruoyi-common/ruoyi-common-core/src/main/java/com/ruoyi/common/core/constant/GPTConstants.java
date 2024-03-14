@@ -18,7 +18,7 @@ public interface GPTConstants {
     /**
      * 官方代理Gemini-Pro请求地址
      */
-    String GEMINI_API_URL = "https://gemini.gxnas.eu.org/api/generate";
+    String GEMINI_API_URL = "https://gepro.csfan.fun/api/generate";
     /**
      * 虾壳Gemini-Pro请求地址
      */

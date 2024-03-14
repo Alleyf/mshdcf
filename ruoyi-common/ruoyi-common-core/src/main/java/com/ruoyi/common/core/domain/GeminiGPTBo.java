@@ -2,6 +2,7 @@ package com.ruoyi.common.core.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import okhttp3.internal.ws.RealWebSocket;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -38,15 +38,12 @@ spring:
       - optional:nacos:datasource.yml
       - optional:nacos:${spring.application.name}.yml
 
-
-
-
 --- # rabbitmq 配置
 spring:
   rabbitmq:
     host: localhost
     port: 5672
-    virtual-host: /mshdcf
+    virtual-host: /
     username: admin
     password: admin
   cloud:

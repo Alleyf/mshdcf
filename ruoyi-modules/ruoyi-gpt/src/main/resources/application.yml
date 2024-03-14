@@ -1,0 +1,37 @@
+# Tomcat
+server:
+  port: 9120
+
+# Spring
+spring:
+  application:
+    # 应用名称
+    name: ruoyi-gpt
+  profiles:
+    # 环境配置
+    active: @profiles.active@
+  ai:
+    ollama:
+      embedding:
+        model: gemma:2b
+      chat:
+        model: gemma:2b
+--- # nacos 配置
+spring:
+  cloud:
+    nacos:
+      # nacos 服务地址
+      server-addr: @nacos.server@
+      discovery:
+        # 注册组
+        group: @nacos.discovery.group@
+        namespace: ${spring.profiles.active}
+      config:
+        # 配置组
+        group: @nacos.config.group@
+        namespace: ${spring.profiles.active}
+  config:
+    import:
+      #      - optional:nacos:application-common.yml
+      - optional:nacos:${spring.application.name}.yml
+
