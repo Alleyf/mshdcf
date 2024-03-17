@@ -1,6 +1,7 @@
 package com.ruoyi.manage.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.common.core.constant.CacheNames;
 import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.LawRegulation;
 import com.ruoyi.manage.domain.vo.DocCaseVo;
@@ -9,6 +10,7 @@ import com.ruoyi.manage.mapper.DocCaseMapper;
 import com.ruoyi.manage.mapper.LawRegulationMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -136,6 +138,7 @@ public class StatisticAnalyseService {
      *
      * @return Map<String, Integer>-全国各省案件数量
      */
+    @Cacheable(cacheNames = CacheNames.PROVINCE_NUMBER)
     public Map<String, Integer> countCasesByProvince() {
         List<DocCase> docCases = docCaseMapper.selectList();
         String[] caseNumbers = docCases.stream().map(DocCase::getNumber).toArray(String[]::new);
@@ -154,6 +157,7 @@ public class StatisticAnalyseService {
      *
      * @return Map<String, Integer>-各文书类型数量
      */
+    @Cacheable(cacheNames = CacheNames.CASE_TYPE)
     public Map<String, Long> countCasesByType() {
         List<Map<String, Object>> typeCases = docCaseMapper.countByType();
         Map<String, Long> types = new HashMap<>(6);
@@ -178,6 +182,7 @@ public class StatisticAnalyseService {
      *
      * @return Map<String, Integer>-各法条类型数量
      */
+    @Cacheable(cacheNames = CacheNames.LAW_TYPE)
     public Map<String, Long> countLawsByType() {
         List<Map<String, Object>> typeLaws = lawRegulationMapper.countByType();
         Map<String, Long> types = new HashMap<>(6);
@@ -196,7 +201,8 @@ public class StatisticAnalyseService {
      *
      * @return Map<String, Integer>-各根案由类型数量
      */
-    public Map<String, Integer> countCasesByRootCase() {
+    @Cacheable(cacheNames = CacheNames.CASE_CAUSE)
+    public Map<String, Integer> countCasesByRootCause() {
         List<DocCase> docCases = docCaseMapper.selectList();
         String[] rootCauses = docCases.stream().map(DocCase::getCause).toArray(String[]::new);
         Map<String, Integer> rootCauseCases = new HashMap<>(5);
@@ -211,6 +217,7 @@ public class StatisticAnalyseService {
      *
      * @return Map<String, Integer>-各审判程序类型数量
      */
+    @Cacheable(cacheNames = CacheNames.CASE_PROCESS)
     public Map<String, Integer> countCasesByProcess() {
         List<DocCase> docCases = docCaseMapper.selectList();
         String[] processes = docCases.stream().map(DocCase::getProcess).toArray(String[]::new);
@@ -272,6 +279,12 @@ public class StatisticAnalyseService {
         return lawRegulationMapper.selectCount(lqw);
     }
 
+    /**
+     * 获取平台最新10条案件
+     *
+     * @return List<DocCaseVo>-最新10条案件
+     */
+    @Cacheable(cacheNames = CacheNames.NEW_CASES)
     public List<DocCaseVo> selectNewTenCases() {
         LambdaQueryWrapper<DocCase> lqw = new LambdaQueryWrapper<>();
         lqw.orderByDesc(DocCase::getCreateTime);
@@ -280,6 +293,12 @@ public class StatisticAnalyseService {
         return docCaseMapper.selectVoList(lqw);
     }
 
+    /**
+     * 获取平台最新10条法律法规
+     *
+     * @return List<LawRegulationVo>-最新10条法律法规
+     */
+    @Cacheable(cacheNames = CacheNames.NEW_LAWS)
     public List<LawRegulationVo> selectNewTenLaws() {
         LambdaQueryWrapper<LawRegulation> lqw = new LambdaQueryWrapper<>();
         lqw.orderByDesc(LawRegulation::getCreateTime);

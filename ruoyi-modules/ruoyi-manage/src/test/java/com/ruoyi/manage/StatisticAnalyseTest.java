@@ -50,7 +50,7 @@ public class StatisticAnalyseTest {
 
     @Test
     public void testCountCasesByRootCase() {
-        System.out.println(statisticAnalyseService.countCasesByRootCase());
+        System.out.println(statisticAnalyseService.countCasesByRootCause());
     }
 
     @Test

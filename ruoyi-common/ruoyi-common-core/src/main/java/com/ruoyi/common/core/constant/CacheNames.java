@@ -55,4 +55,24 @@ public interface CacheNames {
      */
     String ONLINE_TOKEN = "online_tokens";
 
+    // 省份编号常量
+    String PROVINCE_NUMBER = "province_number";
+
+    // 案件类型常量
+    String CASE_TYPE = "case_type";
+
+    // 适用法律类型常量
+    String LAW_TYPE = "law_type";
+
+    // 案件起因常量
+    String CASE_CAUSE = "case_cause";
+
+    // 案件处理过程常量
+    String CASE_PROCESS = "case_process";
+
+    // 新增案件数量常量
+    String NEW_CASES = "new_cases";
+
+    // 新增法律条文常量
+    String NEW_LAWS = "new_laws";
 }
