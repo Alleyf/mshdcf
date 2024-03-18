@@ -1,49 +1,48 @@
 ![](https://picsum.photos/800/250)
 
-# 数据采集
+## 数据采集
 
-## 数据源
+### 数据源
 
-- **开源数据集：** 查看已经存在的开源司法数据集，例如 Caselaw Access Project、Free Law Project 等。这些数据集可能包含大量的法律文本和相关元数据。
-- **法院网站和数据库：** 许多法院都提供了在线访问法律文本和案例的平台。你可以使用网络爬虫工具，例如 Scrapy 或
-  BeautifulSoup，来抓取这些数据。
+> **开源数据集：** 查看已经存在的开源司法数据集，例如 Caselaw Access Project、Free Law Project 等。这些数据集可能包含大量的法律文本和相关元数据。
+> **法院网站和数据库：** 许多法院都提供了在线访问法律文本和案例的平台。你可以使用网络爬虫工具，例如 Scrapy 或
+> BeautifulSoup，来抓取这些数据。
 
-    1. `司法案例`
-        - 裁判文书网（selenium 无法登录）： https:/wenshu.court.gov.cn/
-        - openlaw（需登录，添加了图形验证码，基本已实现）： https://openlaw.cn/
-        - [12309中国检察网（案例信息字段较少，无需登录）](https://www.12309.gov.cn/12309/zjxflws/index.shtml)
-        - [中国法律服务网（无需登录，案例基本信息较少，但含有简介、争议焦点、裁决结果和解读，是否可以构成数据集？）](http://www.12348.gov.cn/#/publicies/sfks/sfks)
-        -
-       把手案例（首先登录，然后按照大的[案由类型（树形结构）](https://www.lawsdata.com/sweet/compass-instrument/instrument/dict/tree/dictReason)
-       调用 api 得到 json 获取普通案例列表，通过案例 id 调用案件详细信息得到 json
-       数据提取详细信息）： https://www.lawsdata.com/#/searchList
-    2. `法律法规`
-        - openlaw（需登录，基本已实现）： https://openlaw.cn/
-        - 国家法律法规网（api 获取案例列表 json 数据，正文无法直接获取，需下载 pdf 再进行提取正文，文件名为
-          lid）： https://flk.npc.gov.cn/fl.html
-        - [国家行政法规库（无需登录，根据列表页直接进入详细页、内容均直接返回）](http://xzfg.moj.gov.cn/search2.html)
-        - 把手案例（首先登录，然后按照大的法规类型调用 api 得到 json 获取法条列表，通过法条 id 调用法条详细信息得到 json
-          数据提取详细信息）： https://www.lawsdata.com/#/searchList
+1. `司法案例`
+    - 裁判文书网（selenium 无法登录）： https:/wenshu.court.gov.cn/
+    - openlaw（需登录，添加了图形验证码，基本已实现）： https://openlaw.cn/
+    - [12309中国检察网（案例信息字段较少，无需登录）](https://www.12309.gov.cn/12309/zjxflws/index.shtml)
+    - [中国法律服务网（无需登录，案例基本信息较少，但含有简介、争议焦点、裁决结果和解读，是否可以构成数据集？）](http://www.12348.gov.cn/#/publicies/sfks/sfks)
+    - 把手案例
+      （首先登录，然后按照大的[案由类型（树形结构）](https://www.lawsdata.com/sweet/compass-instrument/instrument/dict/tree/dictReason)
+      调用 api 得到 json 获取普通案例列表，通过案例 id 调用案件详细信息得到 json
+      数据提取详细信息）： https://www.lawsdata.com/#/searchList
+
+2. `法律法规`
+    - openlaw（需登录，基本已实现）： https://openlaw.cn/
+    - 国家法律法规网（api 获取案例列表 json 数据，正文无法直接获取，需下载 pdf 再进行提取正文，文件名为
+      lid）： https://flk.npc.gov.cn/fl.html
+    - 国家行政法规库（无需登录，根据列表页直接进入详细页、内容均直接返回)：http://xzfg.moj.gov.cn/search2.html
+    - 把手案例（首先登录，然后按照大的法规类型调用 api 得到 json 获取法条列表，通过法条 id 调用法条详细信息得到 json
+      数据提取详细信息）： https://www.lawsdata.com/#/searchList
 
 ---
 
-## 采集技术
+### 采集技术
 
-[简介及安装 - feapder官方文档|feapder-document](https://feapder.com/#/README) feapder 是一款上手简单，功能强大的 Python
-爬虫框架
+- [feapder](https://feapder.com/#/README)：是一款上手简单，功能强大的 Python
+  爬虫框架
 
 - WebMagic：它是一个基于 Java 的开源爬虫框架，它提供了一个灵活且易于使用的
   API，可以帮助开发人员快速开发爬虫程序。它支持多线程、分布式爬取，并且可以方便地进行网页解析和数据存储。首先，你需要导入
   WebMagic 库。你可以从 WebMagic 的官方网站上下载最新的 jar 包，并将其添加到你的项目中。然后，你可以创建一个 Spider
   对象，并定义爬取的起始 URL 和解析的规则。接下来，你可以使用 Pipeline 接口将爬取的数据进行处理和存储。
-- Selenium:主要用于自动化测试。但也可以用于爬虫,通过模拟浏览器进行操作渲染出动态页面内容。
-- Scrapy:Python 语言的强大爬虫框架,也有 Java 版本 scrapy-java-core。功能强大,支持分布式。
+- Selenium：主要用于自动化测试。但也可以用于爬虫,通过模拟浏览器进行操作渲染出动态页面内容。
+- Scrapy：Python 语言的强大爬虫框架,也有 Java 版本 scrapy-java-core。功能强大,支持分布式。
 
----
+## 需求分析
 
-# 需求分析
-
-## 背景介绍
+### 背景介绍
 
 互联网上存在着**大量多样化的数据源，这些数据往往分散在不同的平台**，而且不同来源的数据格式、结构、标准可能不同。通过*
 *汇聚融合这些数据**，可以获得更全面、准确和有洞察力的信息。因此有必要构建**互联网数据汇聚和融合平台**
@@ -51,7 +50,7 @@
 因此，本毕业设计主要研究基于 Web 前后端开发技术，实现数据汇聚融合系统的设计与实现。为了有效汇聚和融合并管理数据，需*
 *研究不同数据源的数据模型和结构，并选择合适的数据存储方案，实现数据的持久化**。同时需要研究系统架构设计和设计模式，以便用户能够方便地查询、分析和理解融合的数据。
 
-## 具体要求
+### 具体要求
 
 * 查阅相关文献资料 **15 篇以上（其中近 5 年外文文献不少于 3 篇）**，了解并总结选题对社会、健康、安全、成本以及环境等的影响，完成开题报告；
 * 要求学生基于 Web 前后端技术对数据汇聚融合系统进行开发，其设计任务包括：
@@ -62,7 +61,7 @@
 * 在正文中应包含不少于 **12 幅图（包括：服务架构设计图、流程图、程序框图等、类图等）** 的描绘或设计。
 * 完成不低于 `5000 汉字（20000 英文印刷符）`的教师指定的相关文献的英译汉翻译。
 
-## 任务节点
+### 任务节点
 
 * 第 1－3 周：查阅相关文献资料，明确研究内容，了解研究所需理论基础。确定方案，完成开题报告。
 * 第 4－5周：熟悉掌握基本理论，熟悉相关工具软件的使用。论文开题；（至少完成 1 次阶段性报告）
@@ -71,7 +70,7 @@
 * 第 13－15 周：完成英文资料的翻译，完成并修改毕业论文，准备论文答辩。
 * 第 16 周：论文答辩。
 
-## 参考文献
+### 参考文献
 
 [1] [美]克雷格•沃斯（Craig Walls）著. 丁雪丰译. SpringBoot 实战(第 4 版)[M]. 人民邮电出版社, 2016 年 9 月.
 
@@ -88,13 +87,13 @@ Interdisciplinary Reviews: Data Mining and Knowledge Discovery, 7(6), e1218.
 
 [7] Apache Dubbo 官方文档[EB/OL]. 2022-11-01. https://dubbo.apache.org/zh/.
 
-## 综合概述
+### 综合概述
 
 [毕业设计概述 - 飞书云文档](https://yv7s0nk4c8z.feishu.cn/docx/LoBgdILtlo130QxEFBycD8pXnEh?from=from_copylink)
 
 ---
 
-# 工作进展
+## 工作进展
 
 |                   日期                   | 进展                               |
 |:--------------------------------------:|----------------------------------|
@@ -102,6 +101,6 @@ Interdisciplinary Reviews: Data Mining and Knowledge Discovery, 7(6), e1218.
 
 ---
 
-# 参考案例
+## 参考案例
 
 1. [绿色主题开源小说系统，原创/爬虫双模式\_哔哩哔哩\_bilibili](https://www.bilibili.com/video/BV18e41197xs/?p=5&spm_id_from=pageDriver)
