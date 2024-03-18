@@ -163,7 +163,7 @@
   </div>
 </template>
 
-<script name="Cache" setup>
+<script setup>
 import {getCache} from '@/api/monitor/cache';
 import * as echarts from 'echarts';
 import {getCurrentInstance, onBeforeUnmount, onMounted, ref} from "vue";

@@ -16,7 +16,7 @@ import java.util.Map;
  *
  * @author csFan
  * @version 1.0
- * @description: redis信息监控
+ * @description redis信息监控
  * @date 2024/3/18 11:18
  */
 @Slf4j
