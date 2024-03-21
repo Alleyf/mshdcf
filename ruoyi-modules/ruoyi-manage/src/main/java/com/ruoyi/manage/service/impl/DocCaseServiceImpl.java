@@ -228,6 +228,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
                 if (checkMininged(docCase)) {
                     docCase.setIsMining(MiningStatus.MININGED);
                 }
+                docCase.setContent(docCase.getStripContent());
                 boolean sqlFlag = baseMapper.updateById(docCase) > 0;
                 if (sqlFlag) {
                     //            更新es索引
@@ -322,6 +323,20 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
      * @return boolean
      */
     boolean checkMininged(DocCase docCase) {
-        return !StringUtils.isBlank(docCase.getExtra());
+        String originExtra = "{" + "\"keyword\": \"\"," +
+            "    \"summary\": \"\",\n" +
+            "    \"plea\": \"\",\n" +
+            "    \"label\": \"\",\n" +
+            "    \"plai\": \"\",\n" +
+            "    \"defe\": \"\",\n" +
+            "    \"article\": \"xx\",\n" +
+            "    \"party\": {\n" +
+            "        \"plaintiff\": \"\",\n" +
+            "        \"defendant\": \"\"\n" +
+            "    },\n" +
+            "    \"fact\": \"\",\n" +
+            "    \"note\": \"\"\n" +
+            "}";
+        return !StringUtils.isBlank(docCase.getExtra()) && !docCase.getExtra().equals(originExtra);
     }
 }

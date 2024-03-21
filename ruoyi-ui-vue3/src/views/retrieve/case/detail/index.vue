@@ -71,6 +71,7 @@ onMounted(() => {
     proxy.$modal.msgSuccess(`获取数据成功`);
     text.value = caseItem.value.stripContent !== undefined ? caseItem.value.stripContent : caseItem.value.content;
     textLs.value = text.value.split("\n")
+    console.log(textLs.value)
     // caseItem.value.sourceId = 1;
     // 获取来源
     const targetSource = crawler_source.value.filter(item => item.value === caseItem.value.sourceId.toString());

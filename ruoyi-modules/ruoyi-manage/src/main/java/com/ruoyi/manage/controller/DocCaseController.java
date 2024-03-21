@@ -197,16 +197,16 @@ public class DocCaseController extends BaseController {
         return toAjax(docCaseService.deleteWithValidByIds(Arrays.asList(ids), true));
     }
 
-    /**
-     * 测试mq-websocket
-     *
-     * @param msg      消息
-     * @param clientId 客户端id
-     * @return R<Void>
-     */
-    @GetMapping("/testmq")
-    public R<Void> testmq(String msg, String clientId) {
-        websocketProducer.sendMsg("testmq", SocketMsgType.NORMAL.getType(), msg, LoginHelper.getLoginId(), 0L);
-        return R.ok("test mq send websocket msg");
-    }
+//    /**
+//     * 测试mq-websocket
+//     *
+//     * @param msg      消息
+//     * @param clientId 客户端id
+//     * @return R<Void>
+//     */
+//    @GetMapping("/testmq")
+//    public R<Void> testmq(String msg, String clientId) {
+//        websocketProducer.sendMsg("testmq", SocketMsgType.NORMAL.getType(), msg, LoginHelper.getLoginId(), 0L);
+//        return R.ok("test mq send websocket msg");
+//    }
 }

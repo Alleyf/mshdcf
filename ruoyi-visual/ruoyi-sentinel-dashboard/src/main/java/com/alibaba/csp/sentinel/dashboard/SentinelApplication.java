@@ -26,15 +26,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Carpenter Lee
  */
 @SpringBootApplication
-public class DashboardApplication {
+public class SentinelApplication {
 
     public static void main(String[] args) {
         triggerSentinelInit();
-        SpringApplication.run(DashboardApplication.class, args);
+        SpringApplication.run(SentinelApplication.class, args);
         System.out.println("(♥◠‿◠)ﾉﾞ  服务熔断降级模块启动成功   ლ(´ڡ`ლ)ﾞ  ");
     }
 
     private static void triggerSentinelInit() {
-        new Thread(() -> InitExecutor.doInit()).start();
+        new Thread(InitExecutor::doInit).start();
     }
 }

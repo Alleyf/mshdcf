@@ -1,5 +1,5 @@
 <template>
-  <div class=" home mt-0.5">
+  <div class="app-container home mt-0.5">
     <div class="container mx-auto my-8">
       <el-row :gutter="20" class="flex justify-between items-center">
         <!-- 装饰元素 -->
@@ -399,7 +399,7 @@ const getProvince = () => {
       total += resData[province] || 0;
     })
     barData.value.forEach((province) => (
-        lineData.value.push((province * 100 / totalDocs.value).toFixed(1))
+      lineData.value.push((province * 100 / totalDocs.value).toFixed(1))
     ))
     // console.log(caseTotal.value, barData.value, lineData.value)
   })
@@ -464,6 +464,8 @@ onMounted(() => {
 .app-container {
   background-color: #f5f5f5; /* 设置背景颜色 */
   color: #333; /* 设置文本颜色 */
+  //background-image: url("../assets/images/bg2.png");
+  //background-size: cover;
 }
 
 
@@ -474,7 +476,7 @@ onMounted(() => {
   border-radius: 4px; /* 添加圆角 */
   overflow: hidden;
   text-overflow: ellipsis; /* 超出部分显示省略号 */
-
+  opacity: 0.6;
 }
 
 .gradient-text {
@@ -498,13 +500,9 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   transform-origin: left top;
-  background-color: pink;
+  //background-color: pink;
 }
 
-.chart {
-  width: 100%;
-  height: 375px; /* 你可以根据需要调整高度 */
-}
 
 .scroll-list-item {
   white-space: nowrap; /* 文本不换行 */

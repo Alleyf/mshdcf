@@ -213,7 +213,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
                 if (checkMininged(law)) {
                     law.setIsMining(MiningStatus.MININGED);
                 }
-
+                law.setContent(law.getStripContent());
                 boolean sqlFlag = baseMapper.updateById(law) > 0;
                 if (sqlFlag) {
                     //            更新es索引
@@ -308,6 +308,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
      * @return boolean
      */
     boolean checkMininged(LawRegulation law) {
-        return !StringUtils.isBlank(law.getExtra());
+        String originExtra = "{\"keyword\":\"\",\"field\":\"\",\"type\":\"\",\"organization\":\"\",\"release\":\"\",\"execute\":\"\",\"basis\":[],\"scope\":\"\",\"main\":[],\"abstract\":\"\"}";
+        return !StringUtils.isBlank(law.getExtra()) && !law.getExtra().equals(originExtra);
     }
 }

@@ -162,36 +162,50 @@ const dialogForm = ref(null)
 //案例数据清洗挖掘
 const handleProcess = () => {
   // 浅拷贝
+  // todo 第二次打开extra为空
   processData.value = []
-  console.log(processData.value)
-  const toAdd = []
-  const tempList = caseListOrigin.value
+  processDataStage.value = []
+  let toAdd
+  let tempList;
+  getList()
   if (defaultListTab.value === 1) {
-    tempList.value = caseListOrigin.value
+    tempList = caseListOrigin.value
   } else if (defaultListTab.value === 2) {
-    tempList.value = caseListStriped.value
+    tempList = caseListStriped.value
   } else {
-    tempList.value = caseList.value
+    tempList = caseList.value
   }
-  tempList.value.forEach(item => {
-    const exist = processData.value.findIndex(data => item.id === data.id) !== -1
-    if (ids.value.includes(item.id) && !exist) {
-      // 判断extra是否是非空字符串，是则需要解析，否则无需解析
-      if ((item.extra !== "" || item.extra !== null) && typeof item.extra === 'string') {
-        // 解析json字符串
-        item.extra = JSON.parse(item.extra);
-      } else {
-        item.extra = extra.value
-      }
-      toAdd.push(item); // 将元素添加到新数组中
-      // 将解析后的json对象还原为json字符串
-      // item.extra = JSON.stringify(item.extra);
+  // console.log(tempList)
+  toAdd = tempList.filter(item => ids.value.includes(item.id)).map(item => {
+    if ((item.extra !== "" || item.extra !== null) && typeof item.extra === 'string') {
+      // 解析json字符串
+      item.extra = JSON.parse(item.extra);
+    } else {
+      item.extra = extra.value
     }
+    return item;
   })
+  // tempList.value.forEach(item => {
+  //   const existIndex = processData.value.findIndex(data => item.id === data.id)
+  //   const exist = existIndex !== -1
+  //
+  //   // alert(JSON.stringify(item.extra))
+  //   // 判断extra是否是非空字符串，是则需要解析，否则无需解析
+  //   if ((item.extra !== "" || item.extra !== null) && typeof item.extra === 'string') {
+  //     // 解析json字符串
+  //     item.extra = JSON.parse(item.extra);
+  //   } else {
+  //     item.extra = extra.value
+  //   }
+  //   // 更新已存在于ProcessData的extra 字段
+  //   if (ids.value.includes(item.id)) {
+  //     toAdd.push(item); // 将元素添加到新数组中
+  //     // 将解析后的json对象还原为json字符串
+  //     // item.extra = JSON.stringify(item.extra);
+  //   }
+  // })
   processData.value = processData.value.concat(toAdd);
   processDialog.value = true
-  // processData.value = caseListCopy
-  // console.log(ids.value, processData.value)
 }
 
 const handleProcessStage = (data) => {
@@ -264,10 +278,12 @@ const handleRemoveTab = (targetName) => {
 
 const handleProcessStrip = (data) => {
   // todo 调用数据清洗接口，并将结果更新到processData中
+  proxy.$modal.loading('数据清洗中，请稍后...')
   console.log(data)
   reviseCase(data.id).then(res => {
     if (res.code === 200) {
       // 数据更新重新获取
+      proxy?.$modal.closeLoading();
       data.stripContent = res.data.stripContent
       ElMessage.success(res.msg)
     } else {
@@ -278,10 +294,12 @@ const handleProcessStrip = (data) => {
 
 const handleProcessMining = (data) => {
   // todo 调用数据挖掘接口，并将结果更新到processData中
+  proxy.$modal.loading('数据挖掘中，请稍后...')
   console.log(data)
   miningCase(data.id).then(res => {
     if (res.code === 200) {
       // 数据更新重新获取
+      proxy?.$modal.closeLoading();
       data.extra = JSON.parse(res.data.extra)
       ElMessage.success(res.msg)
     } else {
@@ -388,7 +406,9 @@ const handleSelectionChange = selection => {
   ids.value = selection.map(item => item.id)
   single.value = selection.length !== 1
   multiple.value = !selection.length
-  proxy.$modal.msgSuccess("已选中" + selection.length + "条数据");
+  if (ids.value.length !== 0) {
+    proxy.$modal.msgSuccess("已选中" + selection.length + "条数据");
+  }
 }
 
 const resetForm = () => {
@@ -1356,11 +1376,11 @@ onMounted(() => {
               <div class="flex justify-end items-end mt-3"> <!-- 添加 justify-end 和 items-end 类 -->
                 <el-button @click="cancelDialog">取 消</el-button>
                 <el-button :plain="true" type="primary" @click="resetProcess(data)">还原</el-button>
-                <el-button :disabled="processStep <= 0" :loading="buttonLoading" type="primary"
+                <el-button :disabled="processStep <= 0" type="primary"
                            @click="handleProcessPrev">
                   上一步
                 </el-button>
-                <el-button :disabled="processStep >= 1" :loading="buttonLoading" type="primary"
+                <el-button :disabled="processStep >= 1" type="primary"
                            @click="handleProcessNext">
                   下一步
                 </el-button>
@@ -1372,11 +1392,13 @@ onMounted(() => {
                            @click="handleProcessMining(data)">
                   开始挖掘
                 </el-button>
-                <el-button :disabled="processStep !== 1" :loading="buttonLoading" type="success"
+                <!--                <el-button :disabled="processStep !== 1" type="success"-->
+                <!--                           @click="handleProcessStage(data)">               -->
+                <el-button type="success"
                            @click="handleProcessStage(data)">
                   暂 存
                 </el-button>
-                <el-button :disabled="processDataStage.length===0" :loading="buttonLoading" type="warning"
+                <el-button :disabled="processDataStage.length===0" type="warning"
                            @click="handleProcessSubmit">
                   提 交
                 </el-button>

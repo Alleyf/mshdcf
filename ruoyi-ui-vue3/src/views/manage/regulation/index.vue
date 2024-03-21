@@ -118,19 +118,21 @@ const dialogForm = ref(null)
 const handleProcess = () => {
   // 浅拷贝
   processData.value = []
-  console.log(processData.value)
+  processDataStage.value = []
+  // console.log(processData.value)
   const toAdd = []
-  const tempList = regulationListOrigin.value
+  let tempList
+  getList()
   if (defaultListTab.value === 1) {
-    tempList.value = regulationListOrigin.value
+    tempList = regulationListOrigin.value
   } else if (defaultListTab.value === 2) {
-    tempList.value = regulationListStriped.value
+    tempList = regulationListStriped.value
   } else {
-    tempList.value = regulationList.value
+    tempList = regulationList.value
   }
-  tempList.value.forEach(item => {
-    const exist = processData.value.findIndex(data => item.id === data.id) !== -1
-    if (ids.value.includes(item.id) && !exist) {
+  tempList.forEach(item => {
+    // const exist = processData.value.findIndex(data => item.id === data.id) !== -1
+    if (ids.value.includes(item.id)) {
       // 判断extra是否是非空字符串，是则需要解析，否则无需解析
       if ((item.extra !== "" || item.extra !== null) && typeof item.extra === 'string') {
         // 解析json字符串
@@ -221,11 +223,13 @@ const handleRemoveTab = (targetName) => {
 
 const handleProcessStrip = (data) => {
   // todo 调用数据清洗接口，并将结果更新到processData中
+  proxy.$modal.loading('数据清洗中，请稍后...')
   console.log(data)
   loading.value = true
   reviseLaw(data.id).then(res => {
     if (res.code === 200) {
       // 数据更新重新获取
+      proxy.$modal.closeLoading()
       data.stripContent = res.data.stripContent
       ElMessage.success(res.msg)
     } else {
@@ -237,11 +241,13 @@ const handleProcessStrip = (data) => {
 
 const handleProcessMining = (data) => {
   // todo 调用数据挖掘接口，并将结果更新到processData中
+  proxy.$modal.loading('数据挖掘中，请稍后...')
   console.log(data)
   loading.value = true
   miningLaw(data.id).then(res => {
     if (res.code === 200) {
       // 数据更新重新获取
+      proxy.$modal.closeLoading()
       data.extra = JSON.parse(res.data.extra)
       console.log(data.extra, res.data.extra)
       ElMessage.success(res.msg)
@@ -331,7 +337,9 @@ const handleSelectionChange = selection => {
   ids.value = selection.map(item => item.id)
   single.value = selection.length !== 1
   multiple.value = !selection.length
-  proxy.$modal.msgSuccess("已选中" + selection.length + "条数据")
+  if (ids.value.length !== 0) {
+    proxy.$modal.msgSuccess("已选中" + selection.length + "条数据");
+  }
 }
 
 const resetForm = () => {
@@ -995,11 +1003,11 @@ onMounted(() => {
               <div class="flex justify-end items-end mt-3"> <!-- 添加 justify-end 和 items-end 类 -->
                 <el-button @click="cancelDialog">取 消</el-button>
                 <el-button :plain="true" type="primary" @click="resetProcess(data)">还原</el-button>
-                <el-button :disabled="processStep <= 0" :loading="buttonLoading" type="primary"
+                <el-button :disabled="processStep <= 0" type="primary"
                            @click="handleProcessPrev">
                   上一步
                 </el-button>
-                <el-button :disabled="processStep >= 1" :loading="buttonLoading" type="primary"
+                <el-button :disabled="processStep >= 1" type="primary"
                            @click="handleProcessNext">
                   下一步
                 </el-button>
@@ -1011,11 +1019,11 @@ onMounted(() => {
                            @click="handleProcessMining(data)">
                   开始挖掘
                 </el-button>
-                <el-button :disabled="processStep !== 1" :loading="buttonLoading" type="success"
+                <el-button type="success"
                            @click="handleProcessStage(data)">
                   暂 存
                 </el-button>
-                <el-button :disabled="processDataStage.length===0" :loading="buttonLoading" type="warning"
+                <el-button :disabled="processDataStage.length===0" type="warning"
                            @click="handleProcessSubmit">
                   提 交
                 </el-button>

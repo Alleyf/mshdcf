@@ -55,24 +55,24 @@ public interface CacheNames {
      */
     String ONLINE_TOKEN = "online_tokens";
 
-    // 省份编号常量
-    String PROVINCE_NUMBER = "province_number";
+    // 省份编号常量（缓存15分钟）
+    String PROVINCE_NUMBER = "statistical_analysis:province_number#15m";
 
     // 案件类型常量
-    String CASE_TYPE = "case_type";
+    String CASE_TYPE = "statistical_analysis:case_type#15m";
 
     // 适用法律类型常量
-    String LAW_TYPE = "law_type";
+    String LAW_TYPE = "statistical_analysis:law_type#15m";
 
     // 案件起因常量
-    String CASE_CAUSE = "case_cause";
+    String CASE_CAUSE = "statistical_analysis:case_cause#15m";
 
     // 案件处理过程常量
-    String CASE_PROCESS = "case_process";
+    String CASE_PROCESS = "statistical_analysis:case_process#15m";
 
     // 新增案件数量常量
-    String NEW_CASES = "new_cases";
+    String NEW_CASES = "statistical_analysis:new_cases#15m";
 
     // 新增法律条文常量
-    String NEW_LAWS = "new_laws";
+    String NEW_LAWS = "statistical_analysis:new_laws#15m";
 }
