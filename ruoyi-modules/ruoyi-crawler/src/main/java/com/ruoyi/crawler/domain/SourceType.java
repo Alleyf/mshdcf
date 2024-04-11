@@ -4,10 +4,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.common.core.web.domain.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
-import java.util.Date;
-import java.io.Serializable;
 
 /**
  * 数据源类型表(SourceType)实体类

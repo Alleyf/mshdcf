@@ -6,13 +6,12 @@ import {
   addRegulation,
   updateRegulation, saveProcessRegulation, syncAllRegulation,
 } from '@/api/manage/regulation'
-import {download} from '@/utils/request'
 import {getCurrentInstance, onMounted, reactive, ref, toRefs} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {parseTime} from "@/utils/ruoyi";
-import {saveProcessCase} from "@/api/manage/case";
-import {miningCase, miningLaw, reviseCase, reviseLaw} from "@/api/manage/process";
-import {Edit, Switch, UploadFilled, UserFilled} from "@element-plus/icons-vue";
+import {miningLaw, reviseLaw} from "@/api/manage/process";
+import {Edit, Switch, UploadFilled} from "@element-plus/icons-vue";
+import {getToken} from "@/utils/auth";
 
 const {proxy} = getCurrentInstance();
 
@@ -32,6 +31,22 @@ const ids = ref([])
 const single = ref(true)
 const multiple = ref(true)
 const showSearch = ref(true)
+
+/*** 法条导入参数 */
+const upload = reactive({
+  // 是否显示弹出层（案例导入）
+  open: false,
+  // 弹出层标题（案例导入）
+  title: "",
+  // 是否禁用上传
+  isUploading: false,
+  // 是否更新已经存在的案例数据
+  updateSupport: 0,
+  // 设置上传的请求头部
+  headers: {Authorization: "Bearer " + getToken()},
+  // 上传的地址
+  url: import.meta.env.VITE_APP_BASE_API + "/manage/regulation/importData"
+});
 
 const data = reactive({
   form: {},
@@ -359,6 +374,7 @@ const resetForm = () => {
     structure: undefined,
     reviseNum: undefined,
     status: undefined,
+    isMining: undefined,
     createBy: undefined,
     createTime: undefined,
     updateBy: undefined,
@@ -389,11 +405,24 @@ const handleUpdate = row => {
   })
 }
 
+const MiningStatusMap = {
+  'ORIGIN': 0,
+  'STRIPED': 1,
+  'MININGED': 2
+}
+
+const reviseForm = () => {
+  form.value.isMining = MiningStatusMap[form.value.isMining]
+}
+
 const submitForm = () => {
   dialogForm.value.validate(valid => {
     if (valid) {
       buttonLoading.value = true
       if (form.value.id != null) {
+        // 挖掘状态转换
+        reviseForm()
+        console.log(form.value)
         updateRegulation(form.value).then(response => {
           ElMessage.success("修改成功")
           open.value = false
@@ -427,6 +456,34 @@ const handleDelete = row => {
   }).finally(() => {
     loading.value = false
   })
+}
+
+/** 导入按钮操作 */
+const handleImport = () => {
+  upload.title = "案例导入";
+  upload.open = true;
+};
+
+/** 下载模板操作 */
+const importTemplate = () => {
+  proxy.download("manage/regulation/importTemplate", {}, `law_template_${new Date().getTime()}.xlsx`);
+};
+/**文件上传中处理 */
+const handleFileUploadProgress = (event, file, fileList) => {
+  upload.isUploading = true;
+};
+/** 文件上传成功处理 */
+const handleFileSuccess = (response, file, fileList) => {
+  upload.open = false;
+  upload.isUploading = false;
+  proxy.$refs["uploadRef"].handleRemove(file);
+  proxy.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", {dangerouslyUseHTMLString: true});
+  getList();
+};
+
+/** 提交上传文件 */
+function submitFileForm() {
+  proxy.$refs["uploadRef"].submit();
 }
 
 const handleExport = () => {
@@ -514,6 +571,12 @@ onMounted(() => {
           <el-button v-hasPermi="['manage:regulation:remove']" :disabled="multiple" icon="Delete" plain
                      size="default" type="danger"
                      @click="handleDelete">删除
+          </el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
+            v-hasPermi="['manage:regulation:import']" icon="Upload" plain type="info" @click="handleImport"
+          >导入
           </el-button>
         </el-col>
         <el-col :span="1.5">
@@ -929,7 +992,44 @@ onMounted(() => {
           <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
         </template>
       </el-dialog>
-
+      <!-- 法条导入对话框 -->
+      <el-dialog v-model="upload.open" :title="upload.title" append-to-body width="400px">
+        <el-upload
+          ref="uploadRef"
+          :action="upload.url + '?updateSupport=' + upload.updateSupport"
+          :auto-upload="false"
+          :disabled="upload.isUploading"
+          :headers="upload.headers"
+          :limit="1"
+          :on-progress="handleFileUploadProgress"
+          :on-success="handleFileSuccess"
+          accept=".xlsx, .xls"
+          drag
+        >
+          <el-icon class="el-icon--upload">
+            <upload-filled/>
+          </el-icon>
+          <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+          <template #tip>
+            <div class="el-upload__tip text-center">
+              <div class="el-upload__tip">
+                <el-checkbox v-model="upload.updateSupport"/>
+                是否更新已经存在的法律法规数据
+              </div>
+              <span>仅允许导入xls、xlsx格式文件。</span>
+              <el-link :underline="false" style="font-size:12px;vertical-align: baseline;" type="primary"
+                       @click="importTemplate">下载模板
+              </el-link>
+            </div>
+          </template>
+        </el-upload>
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button type="primary" @click="submitFileForm">确 定</el-button>
+            <el-button @click="upload.open = false">取 消</el-button>
+          </div>
+        </template>
+      </el-dialog>
       <!-- 清洗挖掘对话框 -->
       <el-dialog v-model="processDialog" :fullscreen="true" title="法律法规数据清洗挖掘" width="100%">
         <el-steps :active="processStep" align-center class="mb-10" finish-status="success">

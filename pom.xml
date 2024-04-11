@@ -49,11 +49,12 @@
         <!-- OSS 配置 -->
         <aws-java-sdk-s3.version>1.12.540</aws-java-sdk-s3.version>
         <okhttp.version>4.10.0</okhttp.version>
-
+        <hanlp.version>0.0.15</hanlp.version>
         <!-- SMS 配置 -->
         <sms4j.version>2.2.0</sms4j.version>
         <!--        spring-ai-->
         <spring-ai.version>0.8.1</spring-ai.version>
+        <mybatis-plus-ext.version>3.5.5-EXT621</mybatis-plus-ext.version>
     </properties>
 
     <profiles>
@@ -242,6 +243,14 @@
                 <version>${velocity.version}</version>
             </dependency>
 
+            <!--        HanLP-->
+            <dependency>
+                <groupId>com.hankcs.hanlp.restful</groupId>
+                <artifactId>hanlp-restful</artifactId>
+                <version>${hanlp.version}</version>
+            </dependency>
+
+
             <!--redisson-->
             <dependency>
                 <groupId>org.redisson</groupId>
@@ -353,6 +362,12 @@
                 <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <!--            mybatis-plus-ext-->
+            <dependency>
+                <groupId>com.tangzc</groupId>
+                <artifactId>mybatis-plus-ext-spring-boot-starter</artifactId>
+                <version>${mybatis-plus-ext.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

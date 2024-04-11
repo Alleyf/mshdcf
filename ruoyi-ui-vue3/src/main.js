@@ -15,6 +15,12 @@ import router from './router'
 import directive from './directive' // directive
 import VueCharts from 'vue-echarts'
 
+// 引入vue-fullpage
+import VueFullPage from 'vue-fullpage.js';
+// import 'fullpage.js/vendors/scrolloverflow' // 如果需要使用scrollOverflow选项，需要引入此文件
+import 'fullpage.js/dist/fullpage.min.css' // 引入fullpage.js的样式文件
+
+
 // 注册指令
 import plugins from './plugins' // plugins
 import {download} from '@/utils/request'
@@ -94,15 +100,16 @@ app.use(router)
 app.use(store)
 app.use(plugins)
 app.use(elementIcons)
+app.use(VueFullPage)
 app.component('svg-icon', SvgIcon)
 
 directive(app)
 
 // 使用element-plus 并且设置全局的大小
 app.use(ElementPlus, {
-    locale: locale,
-    // 支持 large、default、small
-    size: Cookies.get('size') || 'default'
+  locale: locale,
+  // 支持 large、default、small
+  size: Cookies.get('size') || 'default'
 })
 
 // 修改 el-dialog 默认点击遮照为不关闭

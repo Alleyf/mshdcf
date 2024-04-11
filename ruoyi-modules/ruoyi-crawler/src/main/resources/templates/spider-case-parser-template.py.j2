@@ -1,226 +1,251 @@
+import datetime
+import json
+import traceback
+
+from feapder import Request, BaseParser
+from feapder.db.mysqldb import MysqlDB
+from feapder.utils.log import log
+from selenium import webdriver
+from scrapy.http import HtmlResponse
+from selenium.webdriver.common.by import By  #By模块
+from selenium.common.exceptions import TimeoutException, NoSuchElementException  #异常模块
+from selenium.webdriver.support.wait import WebDriverWait  #等待模块
+from selenium.webdriver.support import expected_conditions as EC  #顶期条件的模块
+from scrapy.spidermiddlewares.httperror import HttpError
+from twisted.internet.error import DNSLookupError
+from twisted.internet.error import TimeoutError, TCPTimedOutError
+
+from items.DocCaseItem import DocCaseItem
+from items.LawRegulationItem import LawRegulationItem
+from userPool import OpenLawUserPool
+from utils.decrypt import decrypt
+from utils.snowflake import MySnowFlake
+from utils.openLawUtil import OpenLaw
+from setting import DEFAULT_USERAGENT
+from utils.trimUnicode import clean_text
+
+
 class {{ alias }}DocCaseParser(BaseParser):
     """{{ source_name }}司法案例爬虫解析器"""
     db = MysqlDB()
-    current_page = 1
-    total_page = 1
-    current_item = 1
-    # 分类爬取不同案由类型的司法案例
+    start_pageLs = [1, 1, 1, 1, 1]  # 各案由爬取起始页
+    stop_page = 1  # 结束页
+    total_page = 100  # 总页数
+    is_limit = False  # 是否限制爬取页数
+    current_item = 1  # 当前爬取的案件数
     cause_url_prefix = "http://openlaw.cn/search/judgement/type?causeId="
-    case_causes = {
-        "criminal": cause_url_prefix + "8db904be581945ee91a031ff0ae03a85",
-        "civil": cause_url_prefix + "ef9ee00bc43b4280b519102b6b168d83",
-        "administrative": cause_url_prefix + "06cf4c5dc13949e39b7a679ebaf7cfc9",
-        "national_compensation": cause_url_prefix + "9607d4aab7b743d09930cc062b406104",
-        "execution": cause_url_prefix + "542cd000e01c452e9e848116669acde7"
-    }
     case_cause_chname = ["刑事案由", "国家赔偿案由", "民事案由", "执行案由", "行政案由"]
-    start_urls = [case_causes['criminal'],case_causes['national_compensation'],case_causes['civil'],case_causes['execution'],case_causes['administrative']]
+    max_page = [128193, 1892, 793699, 352047, 38308]  # 各案由最大页数
+    url_suffix = '&page='  # 页码后缀
+    case_causes = {
+        "criminal": cause_url_prefix + "8db904be581945ee91a031ff0ae03a85" + url_suffix + str(start_pageLs[0]),
+        "national_compensation": cause_url_prefix + "9607d4aab7b743d09930cc062b406104" + url_suffix + str(
+            start_pageLs[1]),
+        "civil": cause_url_prefix + "ef9ee00bc43b4280b519102b6b168d83" + url_suffix + str(start_pageLs[2]),
+        "execution": cause_url_prefix + "542cd000e01c452e9e848116669acde7" + url_suffix + str(start_pageLs[3]),
+        "administrative": cause_url_prefix + "06cf4c5dc13949e39b7a679ebaf7cfc9" + url_suffix + str(start_pageLs[4])
+    }
+    start_urls = [case_causes['criminal'], case_causes['national_compensation'], case_causes['civil'],
+                  case_causes['execution'], case_causes['administrative']]
     test_url = "{{ source_url }}"
 
-        # 自定义配置
+    # 自定义日志配置
     __custom_setting__ = dict(
         # 请求超时随请求数变化（一个请求默认20s，一页的请求个数为20个请求，乘以总页数得到总请求超时时间）
-        REQUEST_TIMEOUT = 20*20*total_page,
+        REQUEST_TIMEOUT=20 * 20 * total_page,
     )
 
     def __init__(self):
-        """初始化登录或携带cookie"""
-        # options = webdriver.FirefoxOptions() #设置无头浏览器
-        # # options = webdriver.ChromeOptions() #设置无头浏览器
-        # options.add_argument('--headless') #无头浏览器参数配置
-        # options.add_argument('User-Agent='+DEFAULT_USERAGENT)
-        # options.add_argument('--ignore-certificate-errors') #忽略证书错误
-        # options.add_argument('--ignore-ssl-errors') #忽略证书错误
-        # # options.add_argument('--proxy=%s'%self.proxy) #设置代理
-        # # options.add_argument('--proxy-type=http') #设置代理类型
-        # options.add_argument('--load-images=no') #禁止加载图片
-        # options.add_argument('--disk-cache=yes') #开启缓存
-        # self.driver = webdriver.Firefox(options=options) #实例化firefox浏览器
-        # # self.driver = webdriver.Chrome(options=options) #实例化chrome浏览器
-        # openlaw = OpenLaw(self.driver) #实例化openlaw类
-        # self.init_webdriver()
-        # openlaw = OpenLaw(self.driver) #实例化openlaw类
-        openlaw = OpenLaw() #实例化openlaw类
-        self.cookies_dict = openlaw.cookie_login() #获取cookie
-        # print(type(self.cookies_dict),self.cookies_dict)
-
-    # def set_cookies(self,cookie_ls):
-    #     """cookie有效期为28天，可以将登陆后的cookie存储于redis，首先从redis获取未获取到再登录"""
-    #     # cookie_jar = browsercookie.firefox() #共获取firefox浏刘览器中的cookie
-    #     self.cookies_dict = {}
-    #     cookie_need_list = ['Hm_lpvt_a105f5952beb915ade56722dc85adf05','Hm_lvt_a105f5952beb915ade56722dc85adf05','SESSION']
-    #     #遍历chrome中所有的cookie
-    #     for cookie in cookie_ls:
-    #         # print(cookie)
-    #         if cookie['domain'] in ['openlaw.cn','.openlaw.cn'] :
-    #             if cookie['name'] in cookie_need_list:
-    #                 self.cookies_dict[cookie['name']] = cookie['value']
-    #     print(self.cookies_dict)
-
+        self.openlaw = OpenLaw()  #实例化openlaw类
+        # self.cookies_dict = openlaw.cookie_login() #获取cookie
+        self.cookies_dict = self.openlaw.cookie_login()  #获取cookie
+        print(self.cookies_dict)
 
     def download_midware(self, request):
         """设置cookie将cookie添加到请求中"""
         request.cookies = self.cookies_dict
-        # request.cookies = {'Hm_lpvt_a105f5952beb915ade56722dc85adf05': '1705638508', 'Hm_lvt_a105f5952beb915ade56722dc85adf05': '1705638502', 'SESSION': 'NDhiYmQxOGItZmFlYS00NzZiLWE3YjMtNzkxMmQ4ZThjMDYz'}
         # log.info("对所有请求添加cookie")
         return request
 
     def start_requests(self):
-        """发起初始请求"""
-          index = 0
-          for url in self.start_urls:
-              yield Request(url=url, render=True, callback=self.parseLs, cause = self.case_cause_chname[index], errback=self.errback)
-              index += 1
-          # yield Request(url=self.start_urls[0], render=True, callback=self.parseLs)
-          # yield Request(url=self.test_url, render=True, callback=self.parseLs)
+        for startPage, url, cause_chname in zip(self.start_pageLs, self.start_urls, self.case_cause_chname):
+            #   self.start_page = startPage
+            yield Request(url=url, render=True, callback=self.parseLs, cause=cause_chname, start_page=startPage)
+        # yield Request(url=self.start_urls[0], render=True, callback=self.parseLs,cause = self.case_cause_chname[0], errback=self.errback)
+        # yield Request(url=self.test_url, render=True, callback=self.parseLs)
+
+    # pass
 
     def validate(self, request, response):
         """校验请求是否正常"""
-        if response.status_code != 200 or response.url != request.url or "login" in response.url:
+        # 重定向到登录界面则重新登陆
+        if "login" in response.url:
+            # log.info(f"返回内容为：{response.text}")
+            log.error(f"cookie失效,重新获取cookie,{request.url}->请求失败,抛弃该请求;实际请求为：{response.url}")
+            self.openlaw.clear_cookie()  #清除cookie
+            self.cookies_dict = self.openlaw.cookie_login()  #获取cookie
+            raise Exception("账户登录状态失效，请重新登录")  # 抛出异常则重试
+        # 状态码不为200则请求失败，抛弃该请求
+        if response.status_code != 200:
             log.info(f"返回内容为：{response.text}")
-            log.error(f"{request.url}->请求失败,抛弃该请求;实际请求为：{response.url}")
-            # raise Exception("response code not 200") # 抛出异常则重试
+            log.error(f"请求失败：{response.url}, 状态码：{response.status_code}, 被抛弃")
             return False
 
-
-
     def parseLs(self, request, response):
-        """列表解析页（获取密钥解密，获取基本信息和下一页地址），密钥key的值是动态变化的，在响应处使用js获取，需要中间件拦截请求获取cookie返回"""
-        print("--------------------------------开始请求<列表页>--------------------------------")
+        """密钥key的值是动态变化的，在响应处使用js获取，需要中间件拦截请求获取cookie返回"""
+        log.info("--------------------------------开始请求<列表页>--------------------------------")
         # print(response.text)
+        start_page = request.start_page
         self.key = response.browser.execute_script("return randomKey")
-        log.info("密钥为："+self.key)
+        log.info("密钥为：" + self.key)
         # 案由获取
-        # print(response.text)
-        article_ls = response.css("div#ht-kb > article")
-        # print(article_ls)
-        for article in article_ls:
-            crypt_case_id = article.css("h3 a::attr(onclick)").extract_first()
-            try:
-              crypt_case_id = crypt_case_id.split("'")[1]
-              # crypt_case_id = re.findall(r"\'\b\S+\b==",crypt_case_id)[0][1:]
-              # log.info("加密的案件id为:"+crypt_case_id)
-              case_id = decrypt(self.key,crypt_case_id).strip("\b")
-              # print("解密后的案件id为:"+case_id)
-              if case_id == None:
-                  continue
-            except:
-              continue
-            # print("解密后的案件id为:"+case_id)
-            detail_url = "http://openlaw.cn/judgement/"+case_id
-            yield Request(url=detail_url, cookies=self.cookies_dict, callback=self.parse_detail, cause=request.cause,errback=self.errback)
-        # 请求下一页
-        # next_rel_urlLs = response.css("div#ht-kb > nav.ht-pagination > ul.page-numbers > a.next.page-numbers::attr(href)").extract_first().split('&')
-        next_url = request.url.split("&")[0] + '&page=%d'%self.current_page #获取下一页的url
-        if next_url!= None and self.current_page < self.total_page:
-            self.current_page += 1 #当前页码自增
-            yield Request(url=next_url, cookies=self.cookies_dict, callback=self.parseLs, cause=request.cause,errback=self.errback)
+        try:
+            # print(response.text)
+            article_ls = response.css("div#ht-kb > article")
+            # print(article_ls)
+            for article in article_ls:
+                crypt_case_id = article.css("h3 a::attr(onclick)").extract_first()
+                try:
+                    crypt_case_id = crypt_case_id.split("'")[1]
+                    # crypt_case_id = re.findall(r"\'\b\S+\b==",crypt_case_id)[0][1:]
+                    # log.info("加密的案件id为:"+crypt_case_id)
+                    case_id = decrypt(self.key, crypt_case_id).strip("\b")
+                    # print("解密后的案件id为:"+case_id)
+                    if case_id == None:
+                        continue
+                except:
+                    continue
+                # print("解密后的案件id为:"+case_id)
+                detail_url = "http://openlaw.cn/judgement/" + case_id
+                yield Request(url=detail_url, cookies=self.cookies_dict, callback=self.parse_detail,
+                              cause=request.cause)
+            # 请求下一页
+            # 获取总数据条数计算总页数
+            total_count = response.css(
+                "div#ht-kb nav.ht-pagination ul.page-numbers li:nth-last-child(1) label::text").extract_first()
+            self.total_page = int(total_count) // 20
+            if int(total_count) % 20 != 0:
+                self.total_page += 1
+            # 根据is_limit限制爬取页数
+            if self.is_limit:
+                self.total_page = min(self.total_page, self.stop_page)
+            log.info("爬取进度(" + request.cause + ")：" + str(start_page) + "/" + str(self.total_page))
+            # next_rel_urlLs = response.css("div#ht-kb > nav.ht-pagination > ul.page-numbers > a.next.page-numbers::attr(href)").extract_first().split('&')
+            next_url = request.url.split("&")[0] + '&page=%d' % start_page  #获取下一页的url
+            if next_url != None and start_page < self.total_page:
+                start_page += 1  #当前页码自增
+                yield Request(url=next_url, cookies=self.cookies_dict, callback=self.parseLs, start_page=start_page,
+                              cause=request.cause, render=True)
+        except Exception as e:
+            log.error(f"列表页面 {response.url} 解析失败：{e}")
+            traceback.print_exc()
+            raise Exception(f"列表页面 {response.url} 解析失败：{e}")  # 抛出异常则重试
+            # return None
 
-
-    def parse_detail(self, request ,response):
-        """详细页面解析页（根据规则获取案例信息）"""
-        print("--------------------------------开始请求<详细页>--------------------------------")
+    def parse_detail(self, request, response):
+        log.info("--------------------------------开始请求<详细页>--------------------------------")
         item = DocCaseItem()
         try:
-          item["id"] = MySnowFlake.create_id()
-          item["url"] = request.url
-          # 去除正文为空的响应
-          if isinstance(response.text,bytes):
-            log.debug(f"译码前的 {item['name']} 为{response.text}")
-            response.text = response.text.decode('utf-8')
-            log.debug(f"译码后的 {item['name']} 为{response.text}")
-          if len(response.text.strip())==0:
-              log.debug(f"{response.url} 被抛弃")
-              return False
-          article_selector = response.css("div#ht-kb > article")
-          item['name'] = article_selector.css("header h2.entry-title::text").extract_first()
-          item['judge_date'] = article_selector.css("header li.ht-kb-em-date::text").extract_first().strip()
-          item['court'] = article_selector.css("header li.ht-kb-em-author a::text").extract_first()
-          item['number'] = article_selector.css("header li.ht-kb-em-category::text").extract_first()
+            item["id"] = MySnowFlake.create_id()
+            item["url"] = request.url
+            # 去除正文为空的响应
+            if response.text.strip() == "" or len(response.text.strip()) == 0:
+                log.debug(f"请求失败：{response.url}, 正文为空：{response.text}, 被抛弃")
+                return False
+            if isinstance(response.text, bytes):
+                log.debug(f"译码前的 {item['name']} 为{response.text}")
+                response.text = response.text.decode('utf-8')
+                log.debug(f"译码后的 {item['name']} 为{response.text}")
+            article_selector = response.css("div#ht-kb > article")
+            item['name'] = article_selector.css("header h2.entry-title::text").extract_first()
+            item['judge_date'] = article_selector.css("header li.ht-kb-em-date::text").extract_first()
+            if item['judge_date'] != None:
+                item['judge_date'] = item['judge_date'].strip()
+            item['court'] = article_selector.css("header li.ht-kb-em-author a::text").extract_first()
+            item['number'] = article_selector.css("header li.ht-kb-em-category::text").extract_first()
 
-          contents_selector = article_selector.css("div#entry-cont") #一直为空？？？
-          # log.info(contents_selector)
-          item["legal_basis"] = "".join(contents_selector.css("* a::text").extract())
-          # item['party'] = other_selector.re_first(regex="上诉人：(.*?)<",replace_entities=False)
-          item['party'] = ",".join(contents_selector.re(regex="^原告：?(.*?)<$|^被告：?(.*?)<$|^被?上诉人：?(.*?)<$",replace_entities=False))
-          contentLs = contents_selector.css("*::text").extract()
-          # log.info(contentLs)
-          contents = []
-          for content in contentLs:
-              content = content.strip()
-              # content = content.replace("","")
-              content = trimUnicode(content)
-              if content !="" and content != None:
-                  contents.append(content)
-          item['content'] = "".join(contents) #该处格式可能有错误
-          # item['content'] = item['content'].replace("","") #该处格式可能有错误
-          # for content in contents_selector:
-          # log.info(item["content"])
-          # return None
-          other_selector = response.css("div.ht-container aside#sidebar section:nth-child(1) ul")
-          # 案由按照顶层类型分类根据caseId，标签存储具体细分案由
-          item['cause'] = request.cause
-          # 使用正则表达式提取，避免顺序错误
-          item['label'] = other_selector.re_first(regex="案由：(.*?)<",replace_entities=False)
-          # item['label'] = other_selector.css("li:nth-child(4)::text").extract_first()
-          # if item["label"]:
-          #     item["label"] = item["label"].split("：")[-1]
-          item['type'] = other_selector.re_first(regex="类型：(.*?)<",replace_entities=False)
-          # item['type'] = other_selector.css("li:nth-child(5)::text").extract_first()
-          # if item['type']:
-          #     item['type'] = item['type'].split("：")[-1]
-          item['process'] = other_selector.re_first(regex="程序：(.*?)<",replace_entities=False)
-          # item['process'] = other_selector.css("li:nth-last-child(1)::text").extract_first()
-          # if item['process']:
-          #     item['process'] = item['process'].split("：")[-1]
+            contents_selector = article_selector.css("div#entry-cont")  #一直为空？？？
+            # log.info(contents_selector)
+            item["legal_basis"] = "".join(contents_selector.css("* a::text").extract())
+            # item['party'] = other_selector.re_first(regex="上诉人：(.*?)<",replace_entities=False)
+            item['party'] = ",".join(
+                contents_selector.re(regex="^原告：?(.*?)<$|^被告：?(.*?)<$|^被?上诉人：?(.*?)<$", replace_entities=False))
+            contentLs = contents_selector.css("*::text").extract()
+            # log.info(contentLs)
+            contents = []
+            for content in contentLs:
+                if content == None:
+                    continue
+                content = content.strip()
+                content = clean_text(content)
+                if content != "" and content != None:
+                    contents.append(content)
+            item['content'] = "".join(contents)  #该处格式可能有错误
 
-          item['source_id'] = 1 #来源于openlaw
+            other_selector = response.css("div.ht-container aside#sidebar section:nth-child(1) ul")
+            # 案由按照顶层类型分类根据caseId，标签存储具体细分案由
+            item['cause'] = request.cause
+            # 使用正则表达式提取，避免顺序错误
+            item['label'] = other_selector.re_first(regex="案由：(.*?)<", replace_entities=False)
+            # item['label'] = other_selector.css("li:nth-child(4)::text").extract_first()
+            # if item["label"]:
+            #     item["label"] = item["label"].split("：")[-1]
+            item['type'] = other_selector.re_first(regex="类型：(.*?)<", replace_entities=False)
+            # item['type'] = other_selector.css("li:nth-child(5)::text").extract_first()
+            # if item['type']:
+            #     item['type'] = item['type'].split("：")[-1]
+            item['process'] = other_selector.re_first(regex="程序：(.*?)<", replace_entities=False)
+            # item['process'] = other_selector.css("li:nth-last-child(1)::text").extract_first()
+            # if item['process']:
+            #     item['process'] = item['process'].split("：")[-1]
 
-          # item['label'] = []
-          # labels = article_selector.css("div#ht-kb-rate-article div.tags a")
-          # if(labels):
-          #   for label in labels:
-          #     label = label.css("::text").extract_first().strip()
-          #     item['label'].append(label)
-          # item['label'] = "#".join(item['label'])
+            item['source_id'] = 1  #来源于openlaw
 
-          item["related_cases"] = []
-          rel_selector = response.css("div.ht-container > aside#sidebar > section:nth-last-child(2) > ul > li")
-          # print(type(rel_selector),len(rel_selector))
-          for rel_case in rel_selector:
-              case_url_prefix = "http://openlaw.cn/judgement/"
-              rel_case_url = case_url_prefix + rel_case.css("a::attr(href)").extract_first().split("/")[-1].strip() #获取相关案件地址编码
-              rel_case_name = rel_case.css("a::attr(title)").extract_first().strip() #相关案件名称
-              item["related_cases"].append({
-                  "url": rel_case_url,
-                  "name": rel_case_name
-              })
-              # item["related_cases"].append(rel_case_name + ":" + rel_case_url)
-          # item["related_cases"] = ";".join(item["related_cases"])
-          item["related_cases"] = json.dumps(item["related_cases"])
+            # item['label'] = []
+            # labels = article_selector.css("div#ht-kb-rate-article div.tags a")
+            # if(labels):
+            #   for label in labels:
+            #     label = label.css("::text").extract_first().strip()
+            #     item['label'].append(label)
+            # item['label'] = "#".join(item['label'])
 
-          yield item
+            item["related_cases"] = []
+            rel_selector = response.css("div.ht-container > aside#sidebar > section:nth-last-child(2) > ul > li")
+            # print(type(rel_selector),len(rel_selector))
+            if rel_selector:
+                for rel_case in rel_selector:
+                    case_url_prefix = "http://openlaw.cn/judgement/"
+                    rel_case_url = rel_case.css("a::attr(href)").extract_first()
+                    if rel_case_url != None:
+                        rel_case_url = case_url_prefix + rel_case_url.split("/")[-1].strip()  #获取相关案件地址编码
+                    rel_case_name = rel_case.css("a::attr(title)").extract_first().strip()  #相关案件名称
+                    item["related_cases"].append({
+                        "url": rel_case_url,
+                        "name": rel_case_name
+                    })
+                    # item["related_cases"].append(rel_case_name + ":" + rel_case_url)
+                # item["related_cases"] = ";".join(item["related_cases"])
+                item["related_cases"] = json.dumps(item["related_cases"])
+            yield item
 
         except Exception as e:
-          log.error(traceback.print_exc())
-          log.error(f"详细页面 {response.url} 解析失败：{e}")
-          raise Exception(f"详细页面 {response.url} 解析失败：{e}") # 抛出异常则重试
-          # return None
-
+            traceback.print_exc()
+            log.error(f"详细页面 {response.url} 解析失败：{e}")
+            raise Exception(f"详细页面 {response.url} 解析失败：{e}")  # 抛出异常则重试
+            # return None
 
     def errback(self, failure):
-      """请求异常回调函数"""
-      log.error(repr(failure))
+        log.error(repr(failure))
 
-      if failure.check(HttpError):
+        if failure.check(HttpError):
             response = failure.value.response
-            log.error("HttpError on %s", response.url)
+            log.error("HttpError on %s" % response.url)
 
-      elif failure.check(DNSLookupError):
+        elif failure.check(DNSLookupError):
             request = failure.request
-            log.error("DNSLookupError on %s", request.url)
+            log.error("DNSLookupError on %s" % request.url)
 
-      elif failure.check(TimeoutError, TCPTimedOutError):
+        elif failure.check(TimeoutError, TCPTimedOutError):
             request = failure.request
-            log.error("TimeoutError on %s", request.url)
-      return False
+            log.error("TimeoutError on %s" % request.url)
+        return False

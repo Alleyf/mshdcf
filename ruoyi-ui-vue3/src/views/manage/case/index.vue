@@ -463,11 +463,23 @@ const handleUpdate = row => {
   })
 }
 
+const MiningStatusMap = {
+  'ORIGIN': 0,
+  'STRIPED': 1,
+  'MININGED': 2
+}
+
+const reviseForm = () => {
+  form.value.isMining = MiningStatusMap[form.value.isMining]
+}
+
 const submitForm = () => {
   dialogForm.value.validate(valid => {
     if (valid) {
       buttonLoading.value = true
       if (form.value.id != null) {
+        // 挖掘状态转换
+        reviseForm()
         updateCase(form.value).then(() => {
           ElMessage.success('修改成功')
           open.value = false
@@ -529,7 +541,7 @@ const handleFileSuccess = (response, file, fileList) => {
 /** 提交上传文件 */
 function submitFileForm() {
   proxy.$refs["uploadRef"].submit();
-};
+}
 
 const handleExport = () => {
   console.log({

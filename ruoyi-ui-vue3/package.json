@@ -5,6 +5,7 @@
   "author": "csFan",
   "license": "MIT",
   "scripts": {
+    "install": "npm install",
     "dev": "vite",
     "build:prod": "vite build",
     "preview": "vite preview"
@@ -30,6 +31,7 @@
     "vue": "3.2.45",
     "vue-cropper": "1.0.3",
     "vue-echarts": "^6.6.8",
+    "vue-fullpage.js": "^0.2.17",
     "vue-router": "4.1.4"
   },
   "devDependencies": {

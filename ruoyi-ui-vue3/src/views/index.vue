@@ -462,7 +462,7 @@ onMounted(() => {
 
 /* 为页面容器添加一些样式 */
 .app-container {
-  background-color: #f5f5f5; /* 设置背景颜色 */
+  //background-color: #f5f5f5; /* 设置背景颜色 */
   color: #333; /* 设置文本颜色 */
   //background-image: url("../assets/images/bg2.png");
   //background-size: cover;
@@ -476,7 +476,7 @@ onMounted(() => {
   border-radius: 4px; /* 添加圆角 */
   overflow: hidden;
   text-overflow: ellipsis; /* 超出部分显示省略号 */
-  opacity: 0.6;
+  //opacity: 0.6;
 }
 
 .gradient-text {

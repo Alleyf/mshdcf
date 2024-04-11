@@ -1,4 +1,4 @@
-package com.ruoyi.crawler.crawlab;
+package com.ruoyi.crawler.manager;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.crawler.domain.bo.CrawlerNodeBo;

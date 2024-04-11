@@ -135,7 +135,7 @@ const handleTabClick = (pane, ev) => {
 
 <template>
   <div class="app-container">
-
+    <el-backtop :bottom="100" target=".app-container"/>
     <el-row :gutter="20" :justify="'space-between'">
       <el-col :span="12" class="contentWrapper">
         <el-link :href="caseItem.url" :icon="Link" :type="'success'" class="bold" target="_blank">{{
@@ -163,7 +163,7 @@ const handleTabClick = (pane, ev) => {
             <!--            <span v-for="str in handleContent(item)" v-html="str"/>-->
             <!--          <p v-html="displayedText"/>-->
             <!--          </div>-->
-            <!--            <p v-for="(text, index) in textLs" :key="index" style="padding: 10px;"/>-->
+            <!--            <p v-for="(text, index) in textLs" :key="index" style="padding: 10px;" v-html="text"/>-->
           </div>
         </el-card>
       </el-col>
@@ -342,7 +342,7 @@ const handleTabClick = (pane, ev) => {
       </el-col>
 
     </el-row>
-    <el-backtop :bottom="100" :right="100"/>
+
   </div>
 </template>
 

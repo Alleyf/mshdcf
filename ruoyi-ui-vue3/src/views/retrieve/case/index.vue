@@ -2,15 +2,15 @@
   <el-container style="height: 80vh;display: flex">
     <el-header v-show="headerShow" class="search">
       <el-input
-          v-model="advancedForm.name"
-          class="input-with-select keyword"
-          clearable
-          maxlength="20"
-          placeholder="请输入关键词进行搜索..."
-          prefix-icon="Document"
-          show-word-limit
-          suffix-icon="Search"
-          @keydown.enter.native="handleSearch()"
+        v-model="advancedForm.name"
+        class="input-with-select keyword"
+        clearable
+        maxlength="20"
+        placeholder="请输入关键词进行搜索..."
+        prefix-icon="Document"
+        show-word-limit
+        suffix-icon="Search"
+        @keydown.enter.native="handleSearch()"
       >
         <template #prepend>
           <el-select v-model="selectAdvance" placeholder="请选择检索类型">
@@ -23,13 +23,13 @@
     <right-toolbar v-model:showSearch="headerShow" class="toolbar" @queryTable="handleSearch()"></right-toolbar>
     <el-main v-show="!headerShow" style="margin-top: 10%">
       <el-carousel
-          v-show="caseList.length > 0"
-          :interval="5000"
-          arrow="hover"
-          autoplay
-          direction="horizontal"
-          indicator-position="none"
-          type="card"
+        v-show="caseList.length > 0"
+        :interval="5000"
+        arrow="hover"
+        autoplay
+        direction="horizontal"
+        indicator-position="none"
+        type="card"
       >
         <el-carousel-item v-for="(item,index) in caseList" :key="item.id">
           <el-card class="box-card" shadow="always">
@@ -63,11 +63,16 @@
                       </el-tooltip>
                     </el-tab-pane>
                     <el-tab-pane label="关联案件">
-                      <el-container v-if="item.relatedCases!==''" class="text-muted hidden content">
-                        {{ item.relatedCases }}
+                      <el-container v-if="item.relatedCases.length>0"
+                                    class="text-muted hidden">
+                        <el-link v-for="(item,index) in item.relatedCases" :key="index" :href="item.url"
+                                 :icon="Notebook"
+                                 class="relatedCase" target="_blank">
+                          {{ item.name }}
+                        </el-link>
                       </el-container>
                       <el-container v-else>
-                        <strong class="text-center" style="color: coral">暂无相关案件</strong>
+                        <strong class="text-center text-xl" style="color: coral">暂无相关案件</strong>
                       </el-container>
                     </el-tab-pane>
                   </el-tabs>
@@ -86,28 +91,28 @@
         </el-carousel-item>
       </el-carousel>
       <pagination
-          v-show="total>0"
-          v-model:limit="advancedForm.pageSize"
-          v-model:page="advancedForm.pageNum"
-          :total="total"
-          @pagination="handleSearch"
+        v-show="total>0"
+        v-model:limit="advancedForm.pageSize"
+        v-model:page="advancedForm.pageNum"
+        :total="total"
+        @pagination="handleSearch"
       />
     </el-main>
     <!--  高级检索条件选择对话框-->
     <el-dialog
-        v-model="dialogVisible"
-        align-center
-        draggable
-        title="检索条件"
-        width="30%"
+      v-model="dialogVisible"
+      align-center
+      draggable
+      title="检索条件"
+      width="30%"
     >
       <el-form
-          ref="advancedFormRef"
-          :inline="true"
-          :label-width="formLabelWidth"
-          :model="advancedForm"
-          class="form-inline"
-          label-position="top"
+        ref="advancedFormRef"
+        :inline="true"
+        :label-width="formLabelWidth"
+        :model="advancedForm"
+        class="form-inline"
+        label-position="top"
       >
         <el-row :gutter="10">
           <el-col :span="12">
@@ -126,10 +131,10 @@
             <el-form-item label="文书类型" label-width="80" prop="type">
               <el-select v-model="advancedForm.type">
                 <el-option
-                    v-for="item in doc_case_type"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
+                  v-for="item in doc_case_type"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
                 />
               </el-select>
             </el-form-item>
@@ -138,10 +143,10 @@
             <el-form-item label="案由" label-width="80" prop="cause">
               <el-select v-model="advancedForm.cause">
                 <el-option
-                    v-for="item in doc_case_cause"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
+                  v-for="item in doc_case_cause"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
                 />
               </el-select>
             </el-form-item>
@@ -164,36 +169,36 @@
           <el-col :span="12">
             <el-form-item label="判决日期" prop="judgeDate">
               <el-date-picker
-                  v-model="advancedForm.judgeDate"
-                  placeholder="选择日期"
-                  type="date"
-                  value-format="YYYY-MM-DD"
+                v-model="advancedForm.judgeDate"
+                placeholder="选择日期"
+                type="date"
+                value-format="YYYY-MM-DD"
               />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="公开日期" prop="pubDate">
               <el-date-picker
-                  v-model="advancedForm.pubDate"
-                  placeholder="选择日期"
-                  type="date"
-                  value-format="YYYY-MM-DD"
+                v-model="advancedForm.pubDate"
+                placeholder="选择日期"
+                type="date"
+                value-format="YYYY-MM-DD"
               />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row :gutter="10">
-          <el-col :span="12">
-            <el-form-item label="法律依据" prop="legalBasis">
-              <el-input v-model="advancedForm.legalBasis"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="当事人" prop="party">
-              <el-input v-model="advancedForm.party"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
+        <!--        <el-row :gutter="10">-->
+        <!--          <el-col :span="12">-->
+        <!--            <el-form-item label="法律依据" prop="legalBasis">-->
+        <!--              <el-input v-model="advancedForm.legalBasis"></el-input>-->
+        <!--            </el-form-item>-->
+        <!--          </el-col>-->
+        <!--          <el-col :span="12">-->
+        <!--            <el-form-item label="当事人" prop="party">-->
+        <!--              <el-input v-model="advancedForm.party"></el-input>-->
+        <!--            </el-form-item>-->
+        <!--          </el-col>-->
+        <!--        </el-row>-->
       </el-form>
       <template #footer>
       <span class="dialog-footer">
@@ -213,6 +218,7 @@
 import {getCurrentInstance, reactive, ref, toRefs} from 'vue';
 import {pageCase, getCase, listCase} from "@/api/retrieve/case";
 import {ElInput, ElHeader, ElMain, ElFooter} from 'element-plus';
+import {Edit, Notebook} from "@element-plus/icons-vue";
 
 const {proxy} = getCurrentInstance();
 
@@ -275,8 +281,12 @@ const handleSearch = () => {
   dialogVisible.value = false;
   console.log(advancedForm.value)
   pageCase(advancedForm.value).then(res => {
+    res.rows.forEach(item => {
+      item.relatedCases = JSON.parse(item.relatedCases);
+    })
     caseList.value = res.rows
     total.value = res.total
+    // alert(JSON.stringify(caseList.value))
     if (res.total === 0) {
       proxy.$message.warning("未检索到相关数据");
     } else {
@@ -407,5 +417,10 @@ const handleDetail = (item) => {
 .content {
   text-shadow: #ebeee8 1px 10px 1px;
   text-indent: 2em;
+}
+
+.relatedCase {
+  display: block;
+  margin-top: 10px;
 }
 </style>

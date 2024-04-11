@@ -17,7 +17,7 @@ import javax.annotation.Resource;
  * @since 2024-02-21 20:39:05
  */
 @Service("sourceTypeService")
-public class ISourceTypeServiceImpl implements ISourceTypeService {
+public class SourceTypeServiceImpl implements ISourceTypeService {
     @Resource
     private SourceTypeMapper sourceTypeMapper;
 

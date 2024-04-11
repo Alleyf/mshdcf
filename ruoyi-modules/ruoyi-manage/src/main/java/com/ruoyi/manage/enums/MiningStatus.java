@@ -23,7 +23,7 @@ public enum MiningStatus {
      * 挖掘状态码
      */
     @EnumValue
-    private final int code;
+    private final Integer code;
 
     /**
      * 挖掘状态描述

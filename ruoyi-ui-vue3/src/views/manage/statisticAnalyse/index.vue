@@ -250,7 +250,6 @@ const allDocsBarLine = ref({
   backgroundColor: "#ffffff",
   tooltip: {
     trigger: 'axis',
-
     axisPointer: {
       type: 'cross',
       // type: 'shadow',
@@ -277,12 +276,8 @@ const allDocsBarLine = ref({
   dataZoom: [{
     type: 'inside',
     start: 0,
-    end: 100
-  }, {
-    start: 0,
-    end: 100,
-    handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V2'
-  }],
+    end: 500
+  },],
   grid: {
     top: '8%',
     left: '1%',
@@ -327,7 +322,7 @@ const allDocsBarLine = ref({
   yAxis: [{
     type: 'value',
     min: 0,
-    // max: 140,
+    max: 500,
     splitNumber: 10,
     splitLine: {
       show: true,
@@ -489,12 +484,14 @@ const getDocsData = async () => {
   ]);
   // 将获取到的数据赋值给相应的变量
   totalDocs.value = totalCaseRes.data + totalLawRes.data;
+  // allDocsBarLine.value.yAxis.max = totalCaseRes.data;
 }
 const getProvince = () => {
   let resData = {};
   let total = 0;
   countProvinceCase().then((res) => {
     resData = res.data; // 存储返回的数据
+    // console.log(resData)
     allProvinces.forEach((province) => {
       barData.value.push(resData[province] || 0);
       total += resData[province] || 0;

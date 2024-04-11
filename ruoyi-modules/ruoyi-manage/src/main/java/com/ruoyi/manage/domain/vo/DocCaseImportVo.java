@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.excel.annotation.ExcelDictFormat;
+import com.ruoyi.common.excel.annotation.ExcelEnumFormat;
 import com.ruoyi.common.excel.convert.ExcelDictConvert;
 import com.ruoyi.manage.enums.MiningStatus;
 import lombok.Data;
@@ -124,8 +125,8 @@ public class DocCaseImportVo implements Serializable {
     /**
      * 修正后的案件正文
      */
-    @ExcelProperty(value = "修正正文")
-    private String stripContent;
+//    @ExcelProperty(value = "修正正文")
+//    private String stripContent;
 
     /**
      * 附加语义信息（json格式）
@@ -143,6 +144,7 @@ public class DocCaseImportVo implements Serializable {
     /**
      * 挖掘状态
      */
-    @ExcelProperty(value = "挖掘状态")
-    private MiningStatus isMining;
+    @ExcelProperty(value = "挖掘状态", converter = ExcelDictConvert.class)
+    @ExcelEnumFormat(enumClass = MiningStatus.class, textField = "message")
+    private Integer isMining;
 }

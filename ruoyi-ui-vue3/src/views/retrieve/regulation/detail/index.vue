@@ -133,6 +133,7 @@ const handleTabClick = (pane, ev) => {
 
 <template>
   <div class="app-container">
+    <el-backtop :bottom="100" target=".app-container"/>
 
     <el-row :gutter="20" :justify="'space-between'">
       <el-col :span="12" class="contentWrapper">
@@ -162,7 +163,7 @@ const handleTabClick = (pane, ev) => {
             <!--            <span v-for="str in handleContent(item)" v-html="str"/>-->
             <!--          <p v-html="displayedText"/>-->
             <!--          </div>-->
-            <!--            <p v-for="(text, index) in textLs" :key="index" style="padding: 10px;"/>-->
+            <!--            <p v-for="(text, index) in textLs" :key="index" style="padding: 10px;" v-html="text"/>-->
           </div>
           <!--          <p style="padding: 10px;" v-html="displayedText"/>-->
         </el-card>
@@ -241,13 +242,13 @@ const handleTabClick = (pane, ev) => {
                     <el-col v-if="lawItem.extra.type"><span class="font-black">法条类型：</span>{{ lawItem.extra.type }}
                     </el-col>
                     <el-col v-if="lawItem.extra.organization"><span
-                        class="font-black">颁布组织：</span>{{ lawItem.extra.organization }}
+                      class="font-black">颁布组织：</span>{{ lawItem.extra.organization }}
                     </el-col>
                     <el-col v-if="lawItem.extra.release"><span
-                        class="font-black">发行日期：</span>{{ lawItem.extra.release }}
+                      class="font-black">发行日期：</span>{{ lawItem.extra.release }}
                     </el-col>
                     <el-col v-if="lawItem.extra.execute"><span
-                        class="font-black">实施日期：</span>{{ lawItem.extra.execute }}
+                      class="font-black">实施日期：</span>{{ lawItem.extra.execute }}
                     </el-col>
                     <el-col v-if="lawItem.extra.scope"><span class="font-black">作用范围：</span>{{
                         lawItem.extra.scope
@@ -302,7 +303,6 @@ const handleTabClick = (pane, ev) => {
       </el-col>
 
     </el-row>
-    <el-backtop :bottom="100" :right="100"/>
   </div>
 </template>
 
@@ -311,6 +311,7 @@ const handleTabClick = (pane, ev) => {
 $primary-color: #7a6df0;
 $secondary-color: #e1c199;
 // ... 其他颜色变量
+
 
 .el-col[v-if*="lawItem."] {
   color: var(--color-primary); // 使用CSS变量替代直接写入的颜色值

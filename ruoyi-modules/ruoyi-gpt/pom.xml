@@ -57,21 +57,19 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--        日志todo 引入会报错-->
         <!--        <dependency>-->
         <!--            <groupId>com.ruoyi</groupId>-->
         <!--            <artifactId>ruoyi-common-log</artifactId>-->
         <!--        </dependency>-->
 
 
-        <!--        <dependency>-->
-        <!--            <groupId>com.ruoyi</groupId>-->
-        <!--            <artifactId>ruoyi-common-security</artifactId>-->
-        <!--        </dependency>-->
         <!--        gpt-api-->
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-api-gpt</artifactId>
         </dependency>
+
         <!--        dubbo-->
         <dependency>
             <groupId>com.ruoyi</groupId>

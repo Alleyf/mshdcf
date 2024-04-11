@@ -52,6 +52,12 @@ public class DocCaseVo implements Serializable {
     private String number;
 
     /**
+     * 案件省份
+     */
+    @ExcelProperty(value = "案件省份")
+    private String province;
+
+    /**
      * 原始链接
      */
     @ExcelProperty(value = "原始链接")

@@ -1,5 +1,6 @@
 package com.ruoyi.common.gpt;
 
+import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -15,6 +16,6 @@ public class RuoyiGptApplication {
     public static void main(String[] args) {
         SpringApplication springApplication = new SpringApplication(RuoyiGptApplication.class);
         springApplication.run(args);
-        System.out.println("GPT服务启动成功");
+        System.out.println("AI服务启动成功");
     }
 }

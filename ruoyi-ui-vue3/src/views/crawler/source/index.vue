@@ -12,7 +12,7 @@ const single = ref(true);
 const multiple = ref(true);
 const showSearch = ref(true);
 
-let queryParams = reactive({
+let queryParams = ref({
   pageNum: 1,
   pageSize: 10,
   sourceName: null,
@@ -21,7 +21,7 @@ let queryParams = reactive({
   status: null,
 });
 
-let form = reactive({
+let form = ref({
   id: null,
   sourceName: null,
   alias: null,
@@ -29,6 +29,7 @@ let form = reactive({
   sourceTypeId: null,
   remark: null,
   status: null,
+  authorize: null
 });
 
 const rules = reactive({
@@ -127,7 +128,8 @@ const handleUpdate = (row) => {
   const id = row.id || ids.value;
   getSource(id).then(response => {
     loading.value = false;
-    form = response.data;
+    form.value = response.data;
+    console.log(form.value)
     open.value = true;
     title.value = "修改爬虫数据源";
   });
@@ -138,8 +140,8 @@ const submitForm = () => {
   dialogForm.value.validate(valid => {
     if (valid) {
       buttonLoading.value = true;
-      if (form.id != null) {
-        updateSource(form).then(response => {
+      if (form.value.id != null) {
+        updateSource(form.value).then(response => {
           ElMessage.success("修改成功");
           open.value = false;
           getList();
@@ -147,7 +149,7 @@ const submitForm = () => {
           buttonLoading.value = false;
         });
       } else {
-        addSource(form).then(response => {
+        addSource(form.value).then(response => {
           ElMessage.success("新增成功");
           open.value = false;
           getList();
@@ -363,6 +365,21 @@ onMounted(() => {
             ></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="数据源授权" prop="authorize">
+          <el-radio-group v-model="form.authorize">
+            <el-radio
+              :key="0"
+              :label="0"
+            >无需登录
+            </el-radio>
+            <el-radio
+              :key="1"
+              :label="1"
+            >需要登录
+            </el-radio>
+          </el-radio-group>
+        </el-form-item>
+
         <el-form-item label="数据源备注说明" prop="remark">
           <el-input v-model="form.remark" placeholder="请输入数据源备注说明"/>
         </el-form-item>

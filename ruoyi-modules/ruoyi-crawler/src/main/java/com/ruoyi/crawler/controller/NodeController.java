@@ -3,7 +3,7 @@ package com.ruoyi.crawler.controller;
 import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
-import com.ruoyi.crawler.crawlab.CrawlabManager;
+import com.ruoyi.crawler.manager.CrawlabManager;
 import com.ruoyi.crawler.domain.vo.CrawlerNodeVo;
 import com.ruoyi.crawler.domain.bo.CrawlerNodeBo;
 import org.springframework.beans.factory.annotation.Value;

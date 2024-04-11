@@ -1,17 +1,17 @@
 import router from './router'
-import { ElMessage } from 'element-plus'
+import {ElMessage} from 'element-plus'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
-import { getToken } from '@/utils/auth'
-import { isHttp } from '@/utils/validate'
-import { isRelogin } from '@/utils/request'
+import {getToken} from '@/utils/auth'
+import {isHttp} from '@/utils/validate'
+import {isRelogin} from '@/utils/request'
 import useUserStore from '@/store/modules/user'
 import useSettingsStore from '@/store/modules/settings'
 import usePermissionStore from '@/store/modules/permission'
 
-NProgress.configure({ showSpinner: false });
+NProgress.configure({showSpinner: false});
 
-const whiteList = ['/login', '/register'];
+const whiteList = ['/login', '/register', '/dashboard'];
 
 router.beforeEach((to, from, next) => {
   NProgress.start()
@@ -19,7 +19,7 @@ router.beforeEach((to, from, next) => {
     to.meta.title && useSettingsStore().setTitle(to.meta.title)
     /* has token*/
     if (to.path === '/login') {
-      next({ path: '/' })
+      next({path: '/'})
       NProgress.done()
     } else {
       if (useUserStore().roles.length === 0) {
@@ -34,12 +34,12 @@ router.beforeEach((to, from, next) => {
                 router.addRoute(route) // 动态添加可访问路由表
               }
             })
-            next({ ...to, replace: true }) // hack方法 确保addRoutes已完成
+            next({...to, replace: true}) // hack方法 确保addRoutes已完成
           })
         }).catch(err => {
           useUserStore().logOut().then(() => {
             ElMessage.error(err)
-            next({ path: '/' })
+            next({path: '/'})
           })
         })
       } else {

@@ -78,7 +78,7 @@ public class StatisticAnalyseController extends BaseController {
      * @return R<Map < String, Integer>> 案件按省份统计
      */
     @GetMapping("/case/count/province")
-    public R<Map<String, Integer>> countCasesByProvince() {
+    public R<Map<String, Long>> countCasesByProvince() {
         return R.ok(statisticAnalyseService.countCasesByProvince());
     }
 
@@ -98,7 +98,7 @@ public class StatisticAnalyseController extends BaseController {
      * @return R<Map < String, Integer>> 案件按审判进程统计
      */
     @GetMapping("/case/count/process")
-    public R<Map<String, Integer>> countCasesByProcess() {
+    public R<Map<String, Long>> countCasesByProcess() {
         return R.ok(statisticAnalyseService.countCasesByProcess());
     }
 
@@ -108,7 +108,7 @@ public class StatisticAnalyseController extends BaseController {
      * @return R<Map < String, Integer>> 案件按案由统计
      */
     @GetMapping("/case/count/cause")
-    public R<Map<String, Integer>> countCasesByRootCause() {
+    public R<Map<String, Long>> countCasesByRootCause() {
         return R.ok(statisticAnalyseService.countCasesByRootCause());
     }
 

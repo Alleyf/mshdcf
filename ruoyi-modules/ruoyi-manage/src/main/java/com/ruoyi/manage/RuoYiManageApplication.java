@@ -23,7 +23,6 @@ public class RuoYiManageApplication {
 
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(RuoYiManageApplication.class);
-//        application.setApplicationStartup(new BufferingApplicationStartup(2048));
         ConfigurableApplicationContext applicationContext = application.run(args);
         DubboAdapterGlobalConfig.setConsumerFallback(new RetrieveDubboFallback());
         System.out.println("(♥◠‿◠)ﾉﾞ  分析管理服务模块启动成功   ლ(´ڡ`ლ)ﾞ  ");
