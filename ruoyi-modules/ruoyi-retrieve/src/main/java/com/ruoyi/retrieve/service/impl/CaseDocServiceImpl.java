@@ -1,5 +1,6 @@
 package com.ruoyi.retrieve.service.impl;
 
+import com.ruoyi.retrieve.api.domain.LawDoc;
 import org.dromara.easyes.core.biz.EsPageInfo;
 import org.dromara.easyes.core.biz.SAPageInfo;
 import org.dromara.easyes.core.conditions.select.LambdaEsQueryChainWrapper;
@@ -241,7 +242,7 @@ public class CaseDocServiceImpl implements ICaseDocService {
         SAPageInfo<CaseDoc> saPageInfo = caseDocMapper.searchAfterPage(lqw, null, pageQuery.getPageSize());
         List<CaseDoc> result = saPageInfo.getList();
 //        去除unicode异常字符
-        result = result.stream().peek(doc -> doc.setContent(doc.getContent().replaceAll("\\\\ue[0-9a-fA-F]{3}", "|\n"))).collect(Collectors.toList());
+//        result = result.stream().peek(doc -> doc.setContent(doc.getContent().replaceAll("\\\\ue[0-9a-fA-F]{3}", "|\n"))).collect(Collectors.toList());
         long total = saPageInfo.getTotal();
         for (int i = 0; i < pageQuery.getPageNum() - 1; i++) {
             // 获取下一页
@@ -290,11 +291,13 @@ public class CaseDocServiceImpl implements ICaseDocService {
             .like(StringUtils.isNotEmpty(bo.getNumber()), CaseDoc::getNumber, bo.getNumber())
             .eq(StringUtils.isNotEmpty(bo.getCause()), CaseDoc::getCause, bo.getCause())
             .eq(StringUtils.isNotEmpty(bo.getType()), CaseDoc::getType, bo.getType())
+            .eq(ObjectUtil.isNotEmpty(bo.getSourceId()), CaseDoc::getSourceId, bo.getSourceId())
             .like(StringUtils.isNotEmpty(bo.getProcess()), CaseDoc::getProcess, bo.getProcess())
             .ge(StringUtils.isNotEmpty(bo.getJudgeDate()), CaseDoc::getJudgeDate, bo.getJudgeDate())
             .le(StringUtils.isNotEmpty(bo.getPubDate()), CaseDoc::getPubDate, bo.getPubDate())
             .like(StringUtils.isNotEmpty(bo.getLegalBasis()), CaseDoc::getLegalBasis, bo.getLegalBasis())
-            .like(StringUtils.isNotEmpty(bo.getParty()), CaseDoc::getParty, bo.getParty())
+//            .like(StringUtils.isNotEmpty(bo.getParty()), CaseDoc::getParty, bo.getParty())
+            .notSelect(CaseDoc::getHighlightName, CaseDoc::getHighlightContent, CaseDoc::getHighlightStripContent, CaseDoc::getMysqlId, CaseDoc::getExtra)
             .sortByScore(SortOrder.DESC);
         return lqw;
     }

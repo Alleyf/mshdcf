@@ -41,7 +41,6 @@ public class LawDoc implements Serializable {
      */
     @HighLight(mappingField = "highlightName", preTag = "<text style='color:red'>", postTag = "</text>")
     @IndexField(fieldType = FieldType.KEYWORD_TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
-//    @NotBlank(message = "标题不能为空")
     private String name;
     /**
      * 所属领域

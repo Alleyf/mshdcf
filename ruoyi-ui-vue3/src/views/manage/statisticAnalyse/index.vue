@@ -190,7 +190,7 @@ const caseCausePie = ref({
 const lawTypePie = ref({
   animation: true,
   title: {
-    text: "法条类型",
+    text: "法律法规",
     subtext: "种类",
     x: "center",
     y: "center",

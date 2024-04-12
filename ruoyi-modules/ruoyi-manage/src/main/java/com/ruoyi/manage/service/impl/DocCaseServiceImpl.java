@@ -127,41 +127,55 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         return flag;
     }
 
+    /**
+     * 批量添加司法案例到es
+     */
     @Override
     public Integer insertBatch(String clientId) {
-//        String clientId = LoginHelper.getLoginId();
+        // 验证clientId的合法性
+        Assert.notNull(clientId, "clientId不能为空");
+
         List<DocCase> allCase = baseMapper.selectList();
-        List<CaseDoc> all = BeanCopyUtils.copyList(allCase, CaseDoc.class);
+        // 当查询结果为空时，直接返回0或抛出异常，避免后续逻辑执行
+        if (allCase.isEmpty()) {
+            return 0;
+        }
+
+        List<CaseDoc> caseDocs = BeanCopyUtils.copyList(allCase, CaseDoc.class);
         int allCaseSize = allCase.size();
-//        设置mysqlId
-        Assert.notNull(all, "数据库暂无案例数据，请先新增数据");
-        all = all.stream().peek(caseDoc -> caseDoc.setMysqlId(caseDoc.getId())).collect(Collectors.toList());
-//      分块同步
-        int successNum = 0, insertNum = 100;
+
+        // 设置mysqlId
+        caseDocs.forEach(caseDoc -> caseDoc.setMysqlId(caseDoc.getId()));
+
+        int insertNum = 100; // 批量插入数
+        int successNum = 0;
+
+        // 分块同步
         if (allCaseSize <= insertNum) {
-            successNum = remoteCaseRetrieveService.insertBatch(all);
-//            发送同步进展消息
-            WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.CASE.getType(), "全量同步司法案例", "同步进度：" + successNum + "/" + allCaseSize, clientId);
-            WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
+            successNum = remoteCaseRetrieveService.insertBatch(caseDocs);
+            sendMessage(clientId, successNum, allCaseSize);
         } else {
-//            判断是否为300的整数倍
-            boolean remain = all.size() % insertNum != 0;
-//            查询批量插入总批次
-            int epoch = remain ? all.size() / insertNum + 1 : all.size() / insertNum;
-            for (int i = 0; i < epoch; i += 1) {
-                List<CaseDoc> subList;
-                if (remain && i == epoch - 1) {
-                    subList = all.subList(i * insertNum, all.size());
-                } else {
-                    subList = all.subList(i * insertNum, (i + 1) * insertNum);
-                }
+            int epoch = allCaseSize / insertNum + (allCaseSize % insertNum != 0 ? 1 : 0);
+            for (int i = 0; i < epoch; i++) {
+                List<CaseDoc> subList = (i == epoch - 1) ?
+                    caseDocs.subList(i * insertNum, allCaseSize) :
+                    caseDocs.subList(i * insertNum, (i + 1) * insertNum);
                 successNum += remoteCaseRetrieveService.insertBatch(subList);
-                //            发送同步进展消息
-                WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.CASE.getType(), "全量同步司法案例", "同步进度：" + successNum + "/" + allCaseSize, clientId);
-                WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
+                sendMessage(clientId, successNum, allCaseSize);
             }
         }
         return successNum;
+    }
+
+//    todo 添加增量同步（查询es所有数据和mysql所有数据，遍历mysql数据借助布隆过滤器判断是否存在于es中，不存在则添加到es：问题在于速度肯定很慢）
+
+    /**
+     * 发送同步进度消息
+     */
+    private void sendMessage(String clientId, int successNum, int allCaseSize) {
+        WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.CASE.getType(),
+            "全量同步司法案例", "同步进度：" + successNum + "/" + allCaseSize, clientId);
+        WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
     }
 
     /**

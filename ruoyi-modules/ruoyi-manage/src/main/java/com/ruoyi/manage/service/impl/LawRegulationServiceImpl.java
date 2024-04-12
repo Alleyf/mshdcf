@@ -24,6 +24,7 @@ import com.ruoyi.manage.mapper.LawRegulationMapper;
 import com.ruoyi.manage.mq.WebscoketMessage;
 import com.ruoyi.retrieve.api.RemoteLawDocRetrieveService;
 import com.ruoyi.retrieve.api.RemoteRetrieveService;
+import com.ruoyi.retrieve.api.domain.CaseDoc;
 import com.ruoyi.retrieve.api.domain.LawDoc;
 import com.ruoyi.retrieve.api.domain.LawDoc;
 import lombok.RequiredArgsConstructor;
@@ -119,40 +120,92 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
     /**
      * 批量新增
      */
+//    @Override
+//    public Integer insertBatch(String clientId) {
+////        String clientId = LoginHelper.getLoginId();
+//        List<LawRegulation> allLaw = baseMapper.selectList();
+//        List<LawDoc> all = BeanCopyUtils.copyList(allLaw, LawDoc.class);
+//        int allLawSize = allLaw.size();
+//        //        设置mysqlId
+//        Assert.notNull(all, "数据库暂无案例数据，请先新增数据");
+//        all = all.stream().peek(lawDoc -> lawDoc.setMysqlId(lawDoc.getId())).collect(Collectors.toList());
+//        int successNum = 0, insertNum = 100;
+//        if (allLawSize <= insertNum) {
+//            successNum = remoteLawRetrieveService.insertBatch(all);
+//            //            发送同步进展消息
+//            WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.LAW.getType(), "全量同步法律法规", successNum + "/" + allLawSize, clientId);
+//            WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
+//        } else {
+////            判断是否为300的整数倍
+//            boolean remain = all.size() % insertNum != 0;
+////            查询批量插入总批次
+//            int epoch = remain ? all.size() / insertNum + 1 : all.size() / insertNum;
+//            for (int i = 0; i < epoch; i += 1) {
+//                List<LawDoc> subList;
+//                if (remain && i == epoch - 1) {
+//                    subList = all.subList(i * insertNum, all.size());
+//                } else {
+//                    subList = all.subList(i * insertNum, (i + 1) * insertNum);
+//                }
+//                successNum += remoteLawRetrieveService.insertBatch(subList);
+//                //            发送同步进展消息
+//                WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.LAW.getType(), "全量同步法律法规", successNum + "/" + allLawSize, clientId);
+//                WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
+//            }
+//        }
+//        return successNum;
+//    }
+
+    /**
+     * 批量添加法律法规到es
+     */
     @Override
     public Integer insertBatch(String clientId) {
-//        String clientId = LoginHelper.getLoginId();
-        List<LawRegulation> allLaw = baseMapper.selectList();
-        List<LawDoc> all = BeanCopyUtils.copyList(allLaw, LawDoc.class);
-        int allLawSize = allLaw.size();
-        //        设置mysqlId
-        Assert.notNull(all, "数据库暂无案例数据，请先新增数据");
-        all = all.stream().peek(lawDoc -> lawDoc.setMysqlId(lawDoc.getId())).collect(Collectors.toList());
-        int successNum = 0, insertNum = 100;
+        // 验证clientId的合法性
+        Assert.notNull(clientId, "clientId不能为空");
+
+        List<LawRegulation> lawRegulations = baseMapper.selectList();
+        // 当查询结果为空时，直接返回0或抛出异常，避免后续逻辑执行
+        if (lawRegulations.isEmpty()) {
+            return 0;
+        }
+
+        List<LawDoc> lawDocs = BeanCopyUtils.copyList(lawRegulations, LawDoc.class);
+        int allLawSize = lawRegulations.size();
+
+        // 设置mysqlId
+        lawDocs.forEach(lawDoc -> lawDoc.setMysqlId(lawDoc.getId()));
+
+        int insertNum = 300; // 批量插入数
+        int successNum = 0;
+
+        // 分块同步
         if (allLawSize <= insertNum) {
-            successNum = remoteLawRetrieveService.insertBatch(all);
-            //            发送同步进展消息
-            WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.LAW.getType(), "全量同步法律法规", successNum + "/" + allLawSize, clientId);
-            WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
+            successNum = remoteLawRetrieveService.insertBatch(lawDocs);
+            sendMessage(clientId, successNum, allLawSize);
         } else {
-//            判断是否为300的整数倍
-            boolean remain = all.size() % insertNum != 0;
-//            查询批量插入总批次
-            int epoch = remain ? all.size() / insertNum + 1 : all.size() / insertNum;
-            for (int i = 0; i < epoch; i += 1) {
-                List<LawDoc> subList;
-                if (remain && i == epoch - 1) {
-                    subList = all.subList(i * insertNum, all.size());
-                } else {
-                    subList = all.subList(i * insertNum, (i + 1) * insertNum);
-                }
+            int epoch = allLawSize / insertNum + (allLawSize % insertNum != 0 ? 1 : 0);
+            for (int i = 0; i < epoch; i++) {
+                List<LawDoc> subList = (i == epoch - 1) ?
+                    lawDocs.subList(i * insertNum, allLawSize) :
+                    lawDocs.subList(i * insertNum, (i + 1) * insertNum);
                 successNum += remoteLawRetrieveService.insertBatch(subList);
-                //            发送同步进展消息 todo 没有token鉴权失败
-                WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.LAW.getType(), "全量同步法律法规", successNum + "/" + allLawSize, clientId);
-                WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
+                sendMessage(clientId, successNum, allLawSize);
             }
         }
         return successNum;
+    }
+
+//    todo 添加增量同步（查询es所有数据和mysql所有数据，遍历mysql数据借助布隆过滤器判断是否存在于es中，不存在则添加到es：问题在于速度肯定很慢）
+    
+
+    /**
+     * 发送同步进度消息
+     */
+    private void sendMessage(String clientId, int successNum, int allLawSize) {
+        WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.LAW.getType(),
+            "全量同步法律法规", "同步进度：" + successNum + "/" + allLawSize, clientId);
+        WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
     }
 
     /**

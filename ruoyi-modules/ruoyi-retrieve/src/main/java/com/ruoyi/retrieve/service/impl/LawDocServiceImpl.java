@@ -226,7 +226,7 @@ public class LawDocServiceImpl implements ILawDocService {
         SAPageInfo<LawDoc> saPageInfo = lawDocMapper.searchAfterPage(lqw, null, pageQuery.getPageSize());
         List<LawDoc> result = saPageInfo.getList();
 //        去除unicode异常字符
-        result = result.stream().peek(doc -> doc.setContent(doc.getContent().replaceAll("\\\\u\\e[0-9a-fA-F]{3}", "|\n"))).collect(Collectors.toList());
+//        result = result.stream().peek(doc -> doc.setContent(doc.getContent().replaceAll("\\\\u\\e[0-9a-fA-F]{3}", "|\n"))).collect(Collectors.toList());
         long total = saPageInfo.getTotal();
         for (int i = 0; i < pageQuery.getPageNum() - 1; i++) {
             // 获取下一页
@@ -263,10 +263,13 @@ public class LawDocServiceImpl implements ILawDocService {
             .like(StringUtils.isNotEmpty(bo.getField()), LawDoc::getField, bo.getField())
             .eq(StringUtils.isNotEmpty(bo.getReviseNum()), LawDoc::getReviseNum, bo.getReviseNum())
             .eq(StringUtils.isNotEmpty(bo.getType()), LawDoc::getType, bo.getType())
+            .eq(ObjectUtil.isNotEmpty(bo.getSourceId()), LawDoc::getSourceId, bo.getSourceId())
+            .eq(ObjectUtil.isNotEmpty(bo.getIsValidity()), LawDoc::getIsValidity, bo.getIsValidity())
             .like(StringUtils.isNotEmpty(bo.getStructure()), LawDoc::getStructure, bo.toString())
             .ge(ObjectUtil.isNotNull(bo.getReleaseDate()), LawDoc::getReleaseDate, bo.getReleaseDate())
             .le(ObjectUtil.isNotNull(bo.getExecuteDate()), LawDoc::getExecuteDate, bo.getExecuteDate())
             .like(StringUtils.isNotEmpty(bo.getReleaseOrganization()), LawDoc::getReleaseOrganization, bo.getReleaseOrganization())
+            .notSelect(LawDoc::getHighlightName, LawDoc::getHighlightContent, LawDoc::getHighlightStripContent, LawDoc::getMysqlId, LawDoc::getExtra)
             .sortByScore(SortOrder.DESC);
         return lqw;
     }

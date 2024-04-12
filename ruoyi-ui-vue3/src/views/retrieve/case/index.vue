@@ -63,7 +63,7 @@
                       </el-tooltip>
                     </el-tab-pane>
                     <el-tab-pane label="关联案件">
-                      <el-container v-if="item.relatedCases.length>0"
+                      <el-container v-if="item.relatedCases!=null&&item.relatedCases.length>0"
                                     class="text-muted hidden">
                         <el-link v-for="(item,index) in item.relatedCases" :key="index" :href="item.url"
                                  :icon="Notebook"
@@ -77,7 +77,7 @@
                     </el-tab-pane>
                   </el-tabs>
                 </el-col>
-                <el-col :span="8" class="" style="text-align: left">
+                <el-col :span="8" class="">
                   <el-tag v-if="item.court" size="large" type="success">法院：{{ item.court }}</el-tag>
                   <el-tag v-if="item.number" size="large">案号：{{ item.number }}</el-tag>
                   <el-tag v-if="item.type" size="large" type="danger">类型：{{ item.type }}</el-tag>
@@ -240,6 +240,7 @@ const advancedForm = ref({
   number: null,
   cause: null,
   type: null,
+  sourceId: null,
   process: null,
   judgeDate: null,
   pubDate: null,
@@ -279,7 +280,11 @@ const handleSearch = () => {
   proxy?.$modal.loading("正在检索数据，请稍后...");
   headerShow.value = false;
   dialogVisible.value = false;
-  console.log(advancedForm.value)
+  // sourceId 字符串转整数
+  if (advancedForm.value.sourceId) {
+    advancedForm.value.sourceId = parseInt(advancedForm.value.sourceId);
+  }
+  console.log(advancedForm.value.sourceId)
   pageCase(advancedForm.value).then(res => {
     res.rows.forEach(item => {
       item.relatedCases = JSON.parse(item.relatedCases);
