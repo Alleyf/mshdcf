@@ -20,6 +20,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum DataScopeType {
+    /**
+     * 权限sql模板里的user为当前登录用户LoginUser
+     */
 
     /**
      * 全部数据权限

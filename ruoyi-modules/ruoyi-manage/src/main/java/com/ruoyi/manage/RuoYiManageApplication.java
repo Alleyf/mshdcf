@@ -1,16 +1,11 @@
 package com.ruoyi.manage;
 
 import com.alibaba.csp.sentinel.adapter.dubbo3.config.DubboAdapterGlobalConfig;
-import com.ruoyi.common.websocket.websocket.WebSocketService;
 import com.ruoyi.manage.dubbo.RetrieveDubboFallback;
 import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
 /**
  * @author fcs

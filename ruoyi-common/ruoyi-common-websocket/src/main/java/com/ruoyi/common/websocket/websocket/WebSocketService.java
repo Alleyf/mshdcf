@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 @ServerEndpoint(value = "/websocket/{clientId}")
-@Component
+//@Component
 public class WebSocketService implements Serializable {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketService.class);
@@ -124,9 +124,7 @@ public class WebSocketService implements Serializable {
      */
     @OnClose
     public void onClose(@PathParam("clientId") String clientId) {
-        if (webSocketMap.containsKey(clientId)) {
-            webSocketMap.remove(clientId);
-        }
+        webSocketMap.remove(clientId);
         log.info(clientId + "用户退出,当前在线人数为:" + webSocketMap.size());
     }
 

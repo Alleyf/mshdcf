@@ -64,11 +64,11 @@ const showDetailsModal = ref(false);
 // const suffix = "?Authorization=Bearer " + getToken();
 
 // console.log(suffix)
-const websocket = new WebSocket('ws://localhost:8080/manage/websocket/' + loginId)
+const websocket = new WebSocket('ws://localhost:8080/websocket/websocket/' + loginId)
 
 const connect = () => {
   websocket.onopen = () => {
-    console.log('WebSocket connected');
+    console.log(loginId + '：WebSocket connected');
   };
 
 

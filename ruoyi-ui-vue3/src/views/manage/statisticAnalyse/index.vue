@@ -556,21 +556,21 @@ import chinaMap from "@/views/chinaMap";
           </el-row>
         </el-card>
       </el-tab-pane>
-      <el-tab-pane :name="2" label="案例面板">
+      <el-tab-pane :name="2" label="案例看板">
         <IFrame
           allowtransparency
           class="htmlClass"
           frameborder="0"
-          src="http://localhost:11210/public/dashboard/b0fa7c8b-4ac6-4869-b25c-daefde544cd4"
+          src="http://localhost:11210/public/dashboard/c9a2e5d0-1728-45e1-a104-cc13c188e6fa"
           width="100%"
         />
       </el-tab-pane>
-      <el-tab-pane :name="3" label="法条面板">
+      <el-tab-pane :name="3" label="法条看板">
         <IFrame
           allowtransparency
           class="htmlClass"
           frameborder="0"
-          src="http://localhost:11210/public/dashboard/c0f926b5-2675-447e-bcd8-f307c127e948"
+          src="http://localhost:11210/public/dashboard/ec934840-aa7f-4764-922c-50856c451a0a"
           width="100%"
         />
       </el-tab-pane>

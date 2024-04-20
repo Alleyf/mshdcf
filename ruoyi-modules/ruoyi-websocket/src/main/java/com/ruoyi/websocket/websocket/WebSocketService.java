@@ -1,4 +1,4 @@
-package com.ruoyi.websocket.websocket.websocket;
+package com.ruoyi.websocket.websocket;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import org.apache.commons.lang.StringUtils;
@@ -124,9 +124,7 @@ public class WebSocketService implements Serializable {
      */
     @OnClose
     public void onClose(@PathParam("clientId") String clientId) {
-        if (webSocketMap.containsKey(clientId)) {
-            webSocketMap.remove(clientId);
-        }
+        webSocketMap.remove(clientId);
         log.info(clientId + "用户退出,当前在线人数为:" + webSocketMap.size());
     }
 

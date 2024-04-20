@@ -1,6 +1,6 @@
 package com.ruoyi.manage.mq.producer;
 
-import com.ruoyi.manage.mq.WebscoketMessage;
+import com.ruoyi.websocket.domain.WebscoketMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;

@@ -2,17 +2,17 @@ package com.ruoyi.manage.mq.consumer;
 
 
 import com.alibaba.fastjson2.JSONObject;
-import com.ruoyi.common.websocket.websocket.WebSocketService;
 import com.ruoyi.manage.enums.SocketMsgType;
-import com.ruoyi.manage.mq.WebscoketMessage;
 import com.ruoyi.manage.service.IDocCaseService;
 import com.ruoyi.manage.service.ILawRegulationService;
+import com.ruoyi.websocket.api.RemoteWebSocketService;
+import com.ruoyi.websocket.domain.WebscoketMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.function.Consumer;
 
 /**
@@ -26,6 +26,8 @@ import java.util.function.Consumer;
 public class WebsocketConsumer {
     private final IDocCaseService docCaseService;
     private final ILawRegulationService lawRegulationService;
+    @DubboReference
+    private RemoteWebSocketService remoteWebSocketService;
 
 
     @Bean
@@ -34,7 +36,7 @@ public class WebsocketConsumer {
         return obj -> {
             String jsonMsg = JSONObject.toJSONString(obj);
             log.info("消息接收成功：" + jsonMsg);
-            WebSocketService.sendMessage(obj.getClientId(), jsonMsg);
+            remoteWebSocketService.sendToOne(obj.getClientId(), jsonMsg);
             if (obj.getMsgType().equals(SocketMsgType.CASE.getType())) {
                 docCaseService.insertBatch(obj.getClientId());
             } else if (obj.getMsgType().equals(SocketMsgType.LAW.getType())) {

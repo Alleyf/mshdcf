@@ -10,7 +10,18 @@ import {getCurrentInstance, onMounted, reactive, ref, toRefs} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {parseTime} from "@/utils/ruoyi";
 import {miningLaw, reviseLaw} from "@/api/manage/process";
-import {Edit, Switch, UploadFilled} from "@element-plus/icons-vue";
+import {
+  Back,
+  Brush, Check,
+  CirclePlus,
+  Close,
+  Edit,
+  HelpFilled,
+  Refresh,
+  Right,
+  Switch,
+  UploadFilled
+} from "@element-plus/icons-vue";
 import {getToken} from "@/utils/auth";
 
 const {proxy} = getCurrentInstance();
@@ -307,7 +318,7 @@ const getList = () => {
 
 const handleTabClick = (pane, ev) => {
   // todo 数据清洗挖掘tab页切换回调函数
-  console.log(pane.props.name)
+  // console.log(pane.props.name)
   if (pane.props.name === 1) {
     // 设置分页的总页数为ORIGIN的总页数
     queryParams.value.isMining = 0
@@ -521,8 +532,8 @@ onMounted(() => {
           <el-input v-model="queryParams.name" clearable placeholder="请输入法规名称" @keyup.enter="handleQuery"/>
         </el-form-item>
         <el-form-item label="法规类型" prop="type">
-          <el-select v-model="queryParams.type"
-                     clearable placeholder="请选择法规类型">
+          <el-select v-model="queryParams.type" clearable
+                     placeholder="请选择法规类型" @change="handleQuery">
             <el-option v-for="dict in law_type" :key="dict.value" :label="dict.label" :value="dict.value"/>
           </el-select>
         </el-form-item>
@@ -538,13 +549,13 @@ onMounted(() => {
                     @keyup.enter="handleQuery"/>
         </el-form-item>
         <el-form-item label="法规来源" prop="sourceId">
-          <el-select v-model="queryParams.sourceId" clearable placeholder="请选择法规来源">
+          <el-select v-model="queryParams.sourceId" clearable placeholder="请选择法规来源" @change="handleQuery">
             <el-option v-for="dict in crawler_source" :key="dict.value" :label="dict.label"
                        :value="dict.value"/>
           </el-select>
         </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-select v-model="queryParams.status" clearable placeholder="请选择状态">
+          <el-select v-model="queryParams.status" clearable placeholder="请选择状态" @change="handleQuery">
             <el-option v-for="dict in crawl_common_status" :key="dict.value" :label="dict.label"
                        :value="dict.value"/>
           </el-select>
@@ -637,7 +648,8 @@ onMounted(() => {
             <!--      <el-table-column align="center" label="领域类别" prop="field"/>-->
             <el-table-column align="center" label="法规类型" prop="type" width="180">
               <template #default="scope">
-                <dict-tag v-if="scope.row.type!==null" :options="law_type" :value="scope.row.type" width="180"/>
+                <dict-tag v-if="!!scope.row.type && scope.row.type !== ''" :options="law_type" :value="scope.row.type"
+                          width="180"/>
               </template>
             </el-table-column>
             <el-table-column align="center" label="原始链接" prop="url" width="120">
@@ -924,7 +936,7 @@ onMounted(() => {
       </el-tabs>
 
       <!-- 添加或修改法律法规对话框 -->
-      <el-dialog v-model="open" :title="title" align-center width="50%">
+      <el-dialog v-model="open" :title="title" align-center draggable width="50%">
         <el-form ref="dialogForm" :model="form" :rules="rules" label-width="120px">
           <el-form-item label="法规名称" prop="name">
             <el-input v-model="form.name" placeholder="请输入法规名称"/>
@@ -993,7 +1005,7 @@ onMounted(() => {
         </template>
       </el-dialog>
       <!-- 法条导入对话框 -->
-      <el-dialog v-model="upload.open" :title="upload.title" append-to-body width="400px">
+      <el-dialog v-model="upload.open" :title="upload.title" append-to-body draggable width="400px">
         <el-upload
           ref="uploadRef"
           :action="upload.url + '?updateSupport=' + upload.updateSupport"
@@ -1031,7 +1043,7 @@ onMounted(() => {
         </template>
       </el-dialog>
       <!-- 清洗挖掘对话框 -->
-      <el-dialog v-model="processDialog" :fullscreen="true" title="法律法规数据清洗挖掘" width="100%">
+      <el-dialog v-model="processDialog" :fullscreen="true" draggable title="法律法规数据清洗挖掘" width="100%">
         <el-steps :active="processStep" align-center class="mb-10" finish-status="success">
           <el-step :icon="Edit" description="对数据格式进行格式化并去除异常字符" title="Step 1：数据清洗"/>
           <el-step :icon="UploadFilled" :status="'finish'" description="对数据进行挖掘分析提取潜在信息"
@@ -1100,35 +1112,67 @@ onMounted(() => {
                   </div>
                 </el-col>
               </el-form>
+              <!--              <div class="flex justify-end items-end mt-3"> &lt;!&ndash; 添加 justify-end 和 items-end 类 &ndash;&gt;-->
+              <!--                <el-button @click="cancelDialog">取 消</el-button>-->
+              <!--                <el-button :plain="true" type="primary" @click="resetProcess(data)">还原</el-button>-->
+              <!--                <el-button :disabled="processStep <= 0" type="primary"-->
+              <!--                           @click="handleProcessPrev">-->
+              <!--                  上一步-->
+              <!--                </el-button>-->
+              <!--                <el-button :disabled="processStep >= 1" type="primary"-->
+              <!--                           @click="handleProcessNext">-->
+              <!--                  下一步-->
+              <!--                </el-button>-->
+              <!--                <el-button :disabled="processStep !== 0" :loading="buttonLoading" type="warning"-->
+              <!--                           @click="handleProcessStrip(data)">-->
+              <!--                  开始清洗-->
+              <!--                </el-button>-->
+              <!--                <el-button :disabled="processStep !== 1" :loading="buttonLoading" type="warning"-->
+              <!--                           @click="handleProcessMining(data)">-->
+              <!--                  开始挖掘-->
+              <!--                </el-button>-->
+              <!--                <el-button type="success"-->
+              <!--                           @click="handleProcessStage(data)">-->
+              <!--                  暂 存-->
+              <!--                </el-button>-->
+              <!--                <el-button :disabled="processDataStage.length===0" type="warning"-->
+              <!--                           @click="handleProcessSubmit">-->
+              <!--                  提 交-->
+              <!--                </el-button>-->
+
+              <!--              </div>-->
               <div class="flex justify-end items-end mt-3"> <!-- 添加 justify-end 和 items-end 类 -->
-                <el-button @click="cancelDialog">取 消</el-button>
-                <el-button :plain="true" type="primary" @click="resetProcess(data)">还原</el-button>
-                <el-button :disabled="processStep <= 0" type="primary"
+                <el-button :icon="Close" @click="cancelDialog">取 消</el-button>
+                <el-button :icon="Refresh" :plain="true" type="primary" @click="resetProcess(data)">还原</el-button>
+                <el-button :disabled="processStep <= 0" :icon="Back" type="primary"
                            @click="handleProcessPrev">
                   上一步
                 </el-button>
-                <el-button :disabled="processStep >= 1" type="primary"
+                <el-button :disabled="processStep >= 1" :icon="Right" type="primary"
                            @click="handleProcessNext">
                   下一步
                 </el-button>
-                <el-button :disabled="processStep !== 0" :loading="buttonLoading" type="warning"
+                <el-button :disabled="processStep !== 0" :icon="Brush" :loading="buttonLoading" type="warning"
                            @click="handleProcessStrip(data)">
                   开始清洗
                 </el-button>
-                <el-button :disabled="processStep !== 1" :loading="buttonLoading" type="warning"
+                <el-button :disabled="processStep !== 1" :icon="HelpFilled" :loading="buttonLoading" type="warning"
                            @click="handleProcessMining(data)">
                   开始挖掘
                 </el-button>
-                <el-button type="success"
+                <!--                <el-button :disabled="processStep !== 1" type="success"-->
+                <!--                           @click="handleProcessStage(data)">               -->
+                <el-button :icon="CirclePlus" type="success"
                            @click="handleProcessStage(data)">
                   暂 存
                 </el-button>
-                <el-button :disabled="processDataStage.length===0" type="warning"
+                <el-button :disabled="processDataStage.length===0" :icon="Check" type="warning"
                            @click="handleProcessSubmit">
                   提 交
                 </el-button>
 
               </div>
+
             </el-tab-pane>
 
 

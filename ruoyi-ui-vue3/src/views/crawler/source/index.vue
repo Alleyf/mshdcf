@@ -65,7 +65,7 @@ const dialogForm = ref(null);
 
 const getList = () => {
   loading.value = true;
-  listSource(queryParams).then(response => {
+  listSource(queryParams.value).then(response => {
     sourceList.value = response.rows;
     total.value = response.total;
     loading.value = false;

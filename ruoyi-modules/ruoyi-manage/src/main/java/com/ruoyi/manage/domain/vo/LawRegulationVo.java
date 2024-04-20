@@ -5,7 +5,9 @@ import java.util.Date;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.ruoyi.common.excel.annotation.ExcelDictFormat;
+import com.ruoyi.common.excel.annotation.ExcelEnumFormat;
 import com.ruoyi.common.excel.convert.ExcelDictConvert;
+import com.ruoyi.common.excel.convert.ExcelEnumConvert;
 import com.ruoyi.manage.enums.MiningStatus;
 import lombok.Data;
 
@@ -47,7 +49,7 @@ public class LawRegulationVo implements Serializable {
     /**
      * 法规类型(1：法律 2：行政法规 3：地方性法规 4：司法解释 5：部门规章；6：其他)
      */
-    @ExcelProperty(value = "法规类型(1：法律 2：行政法规 3：地方性法规 4：司法解释 5：部门规章；6：其他)", converter = ExcelDictConvert.class)
+    @ExcelProperty(value = "法规类型", converter = ExcelDictConvert.class)
     @ExcelDictFormat(dictType = "law_type")
     private String type;
 
@@ -61,7 +63,7 @@ public class LawRegulationVo implements Serializable {
      * 有效性（0：无效 1：有效）
      */
     @ExcelProperty(value = "有效性", converter = ExcelDictConvert.class)
-    @ExcelDictFormat(readConverterExp = "0=：无效,1=：有效")
+    @ExcelDictFormat(readConverterExp = "0=无效,1=有效")
     private Integer isValidity;
 
     /**
@@ -85,7 +87,7 @@ public class LawRegulationVo implements Serializable {
     /**
      * 法规正文
      */
-    @ExcelProperty(value = "正文")
+//    @ExcelProperty(value = "正文")
     private String content;
     /**
      * 修正后的法条正文
@@ -140,6 +142,7 @@ public class LawRegulationVo implements Serializable {
     /**
      * 挖掘状态
      */
-    @ExcelProperty(value = "挖掘状态")
+    @ExcelProperty(value = "挖掘状态", converter = ExcelEnumConvert.class)
+    @ExcelEnumFormat(enumClass = MiningStatus.class, textField = "message")
     private MiningStatus isMining;
 }

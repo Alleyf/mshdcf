@@ -32,6 +32,12 @@
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-common-sentinel</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-io</artifactId>
+                    <groupId>commons-io</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- RuoYi Common Log -->
@@ -84,6 +90,15 @@
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-api-resource</artifactId>
+        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.ruoyi</groupId>-->
+        <!--            <artifactId>ruoyi-common-websocket</artifactId>-->
+        <!--        </dependency>-->
+        <!--        ruoyi-api-websocket-->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-api-websocket</artifactId>
         </dependency>
         <!--        gpt-->
         <!--        <dependency>-->

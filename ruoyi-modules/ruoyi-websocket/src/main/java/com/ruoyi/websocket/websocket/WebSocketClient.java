@@ -1,4 +1,4 @@
-package com.ruoyi.websocket.websocket.websocket;
+package com.ruoyi.websocket.websocket;
 
 import lombok.Data;
 

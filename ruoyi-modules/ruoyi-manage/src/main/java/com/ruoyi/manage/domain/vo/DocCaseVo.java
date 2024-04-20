@@ -6,7 +6,9 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.excel.annotation.ExcelDictFormat;
+import com.ruoyi.common.excel.annotation.ExcelEnumFormat;
 import com.ruoyi.common.excel.convert.ExcelDictConvert;
+import com.ruoyi.common.excel.convert.ExcelEnumConvert;
 import com.ruoyi.manage.enums.MiningStatus;
 import lombok.Data;
 
@@ -54,8 +56,8 @@ public class DocCaseVo implements Serializable {
     /**
      * 案件省份
      */
-    @ExcelProperty(value = "案件省份")
-    private String province;
+//    @ExcelProperty(value = "案件省份")
+//    private String province;
 
     /**
      * 原始链接
@@ -119,13 +121,13 @@ public class DocCaseVo implements Serializable {
     /**
      * 当事人
      */
-    @ExcelProperty(value = "当事人")
-    private String party;
+//    @ExcelProperty(value = "当事人")
+//    private String party;
 
     /**
      * 案件正文
      */
-    @ExcelProperty(value = "正文")
+//    @ExcelProperty(value = "正文")
     private String content;
     /**
      * 修正后的案件正文
@@ -178,6 +180,7 @@ public class DocCaseVo implements Serializable {
     /**
      * 挖掘状态
      */
-    @ExcelProperty(value = "挖掘状态")
+    @ExcelProperty(value = "挖掘状态", converter = ExcelEnumConvert.class)
+    @ExcelEnumFormat(enumClass = MiningStatus.class, textField = "message")
     private MiningStatus isMining;
 }

@@ -1,6 +1,10 @@
 package com.ruoyi.system.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.log.annotation.Log;
@@ -9,9 +13,14 @@ import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
 import com.ruoyi.system.domain.SysNotice;
 import com.ruoyi.system.service.ISysNoticeService;
+import com.ruoyi.websocket.api.RemoteWebSocketService;
+import com.ruoyi.websocket.domain.WebscoketMessage;
 import lombok.RequiredArgsConstructor;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
 
 /**
  * 公告 信息操作处理
@@ -24,6 +33,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/notice")
 public class SysNoticeController extends BaseController {
 
+    @DubboReference
+    private final RemoteWebSocketService remoteWebSocketService;
     private final ISysNoticeService noticeService;
 
     /**
@@ -76,5 +87,22 @@ public class SysNoticeController extends BaseController {
     @DeleteMapping("/{noticeIds}")
     public R<Void> remove(@PathVariable Long[] noticeIds) {
         return toAjax(noticeService.deleteNoticeByIds(noticeIds));
+    }
+
+    /**
+     * 发送通知公告
+     *
+     * @param notice 通知
+     */
+    @SaCheckPermission("system:notice:query")
+    @PostMapping("/send")
+    public R<Void> send(@Validated @RequestBody SysNotice notice) {
+        Arrays.asList(notice.getTargetIds()).forEach(userId -> {
+            String targetUserId = "sys_user:" + Convert.toStr(userId);
+            String msgType = ObjectUtil.equal(notice.getNoticeType(), 1) ? "通知" : "公告";
+            WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), msgType, notice.getNoticeTitle(), notice.getNoticeContent(), targetUserId);
+            remoteWebSocketService.sendToOne(targetUserId, JSONObject.toJSONString(message));
+        });
+        return R.ok();
     }
 }

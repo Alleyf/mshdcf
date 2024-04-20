@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 @AutoConfiguration
 public class GeminiUtils {
 
-    @Value("${gpt.gemini.option:1}")
+    @Value("${gpt.gemini.option:2}")
 //    public static final int OPTION;
     public static final int OPTION = 2;
     @Value("${gpt.gemini.isProxy:false}")

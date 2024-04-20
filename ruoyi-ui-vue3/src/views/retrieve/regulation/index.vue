@@ -113,7 +113,7 @@
       >
         <el-row :gutter="10">
           <el-col :span="12">
-            <el-form-item label="法条名称" label-width="80" prop="name">
+            <el-form-item label="关键词" label-width="80" prop="name">
               <el-input v-model="advancedForm.name"></el-input>
             </el-form-item>
           </el-col>
@@ -311,7 +311,7 @@ const handleSearch = () => {
 const handleDetail = (item) => {
   // 打开遮罩层
   proxy?.$modal.loading("正在打开" + item.name + "法条文书，请稍后...");
-  proxy.$router.push("/retrieve/law/lawDetail/" + item.id + "?" + `keyword=${advancedForm.value.name}`)
+  proxy.$router.push("/retrieve/law-detail/law/" + item.id + "?" + `keyword=${advancedForm.value.name}`)
   // 关闭遮罩层
   proxy?.$modal.closeLoading();
 }

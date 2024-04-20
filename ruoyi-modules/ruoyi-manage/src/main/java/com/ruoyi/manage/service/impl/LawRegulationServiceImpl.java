@@ -5,45 +5,35 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson2.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.core.utils.BeanCopyUtils;
 import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.ruoyi.common.satoken.utils.LoginHelper;
-import com.ruoyi.common.websocket.websocket.WebSocketService;
-import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.LawRegulation;
+import com.ruoyi.manage.domain.bo.LawRegulationBo;
 import com.ruoyi.manage.domain.bo.ProcessBo;
+import com.ruoyi.manage.domain.vo.LawRegulationVo;
 import com.ruoyi.manage.enums.MiningStatus;
 import com.ruoyi.manage.enums.SocketMsgType;
 import com.ruoyi.manage.mapper.LawRegulationMapper;
-import com.ruoyi.manage.mq.WebscoketMessage;
+import com.ruoyi.manage.service.ILawRegulationService;
 import com.ruoyi.retrieve.api.RemoteLawDocRetrieveService;
-import com.ruoyi.retrieve.api.RemoteRetrieveService;
-import com.ruoyi.retrieve.api.domain.CaseDoc;
 import com.ruoyi.retrieve.api.domain.LawDoc;
-import com.ruoyi.retrieve.api.domain.LawDoc;
-import lombok.RequiredArgsConstructor;
+import com.ruoyi.websocket.api.RemoteWebSocketService;
+import com.ruoyi.websocket.domain.WebscoketMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
-import com.ruoyi.manage.domain.bo.LawRegulationBo;
-import com.ruoyi.manage.domain.vo.LawRegulationVo;
-import com.ruoyi.manage.domain.LawRegulation;
-import com.ruoyi.manage.mapper.LawRegulationMapper;
-import com.ruoyi.manage.service.ILawRegulationService;
-import org.springframework.util.SimpleIdGenerator;
 
 import javax.annotation.Resource;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * 法律法规Service业务层处理
@@ -57,6 +47,8 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
 
     @DubboReference(version = "1.0", group = "law", timeout = 200000)
     public RemoteLawDocRetrieveService remoteLawRetrieveService;
+    @DubboReference
+    private RemoteWebSocketService remoteWebSocketService;
     @Resource
     private LawRegulationMapper baseMapper;
 
@@ -97,6 +89,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         lqw.eq(StringUtils.isNotBlank(bo.getReleaseOrganization()), LawRegulation::getReleaseOrganization, bo.getReleaseOrganization());
         lqw.eq(bo.getSourceId() != null, LawRegulation::getSourceId, bo.getSourceId());
         lqw.eq(bo.getStatus() != null, LawRegulation::getStatus, bo.getStatus());
+        lqw.eq(bo.getIsMining() != null, LawRegulation::getIsMining, MiningStatus.getMiningStatus(bo.getIsMining()));
         return lqw;
     }
 
@@ -197,7 +190,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
     }
 
 //    todo 添加增量同步（查询es所有数据和mysql所有数据，遍历mysql数据借助布隆过滤器判断是否存在于es中，不存在则添加到es：问题在于速度肯定很慢）
-    
+
 
     /**
      * 发送同步进度消息
@@ -205,7 +198,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
     private void sendMessage(String clientId, int successNum, int allLawSize) {
         WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.LAW.getType(),
             "全量同步法律法规", "同步进度：" + successNum + "/" + allLawSize, clientId);
-        WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
+        remoteWebSocketService.sendToOne(clientId, JSONObject.toJSONString(message));
     }
 
     /**

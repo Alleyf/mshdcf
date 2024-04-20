@@ -21,5 +21,5 @@ public interface RemoteWebSocketService {
      * @param message  消息内容
      * @param clientId 客户端id
      */
-    void sendToOne(String message, String clientId);
+    void sendToOne(String clientId, String message);
 }

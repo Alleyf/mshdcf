@@ -18,7 +18,7 @@ public interface GPTConstants {
     /**
      * 官方代理Gemini-Pro请求地址
      */
-    String GEMINI_API_URL = "https://gepro.csfan.fun/api/generate";
+    String GEMINI_API_URL = "https://geminiprochat.com/api/generate";
     /**
      * 虾壳Gemini-Pro请求地址
      */
@@ -41,9 +41,11 @@ public interface GPTConstants {
      * MoonShot-GPT请求地址
      */
     String MoonShot_API_URL = "https://api.moonshot.cn/v1/chat/completions";
+    String Local_MoonShot_API_URL = "http://localhost:9210/v1/chat/completions";
 
     /**
      * MoonShot-GPT请求密钥
      */
     String MoonShot_API_SECRET = "Bearer sk-3vLlnvvSjZweyMPvhtMZkt5UsLFJ5N1qN7pNpcF94z9ve2Ee";
+    String Local_MoonShot_API_SECRET = "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTcxOTU2NDk5OSwiaWF0IjoxNzExNzg4OTk5LCJqdGkiOiJjbzN0N2h1Y3A3ZmN0MHF0djB1ZyIsInR5cCI6InJlZnJlc2giLCJzdWIiOiJjbmM3YzYybG5sOTU3N3VuaWRuMCIsInNwYWNlX2lkIjoiY25jN2M2MmxubDk1Nzd1bmlkbWciLCJhYnN0cmFjdF91c2VyX2lkIjoiY25jN2M2MmxubDk1Nzd1bmlkbTAifQ.AW4vuZ57gAHEp1SIvnhsgQFhccB90FERzn23xiABkV-GWxisam4kLF1VoHXPyHs6UcgyNO4gfjwNnjBJ6Ru4YQ";
 }

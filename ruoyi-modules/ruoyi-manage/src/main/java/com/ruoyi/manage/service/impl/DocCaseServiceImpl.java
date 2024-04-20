@@ -5,35 +5,36 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson2.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.core.utils.BeanCopyUtils;
 import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.ruoyi.common.satoken.utils.LoginHelper;
-import com.ruoyi.common.websocket.websocket.WebSocketService;
+import com.ruoyi.manage.domain.DocCase;
+import com.ruoyi.manage.domain.bo.DocCaseBo;
 import com.ruoyi.manage.domain.bo.ProcessBo;
+import com.ruoyi.manage.domain.vo.DocCaseVo;
 import com.ruoyi.manage.enums.MiningStatus;
 import com.ruoyi.manage.enums.SocketMsgType;
-import com.ruoyi.manage.mq.WebscoketMessage;
+import com.ruoyi.manage.mapper.DocCaseMapper;
+import com.ruoyi.manage.service.IDocCaseService;
 import com.ruoyi.retrieve.api.RemoteCaseDocRetrieveService;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
+import com.ruoyi.websocket.api.RemoteWebSocketService;
+import com.ruoyi.websocket.domain.WebscoketMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
-import com.ruoyi.manage.domain.bo.DocCaseBo;
-import com.ruoyi.manage.domain.vo.DocCaseVo;
-import com.ruoyi.manage.domain.DocCase;
-import com.ruoyi.manage.mapper.DocCaseMapper;
-import com.ruoyi.manage.service.IDocCaseService;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * 司法案例Service业务层处理
@@ -46,7 +47,9 @@ import java.util.stream.Collectors;
 public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> implements IDocCaseService {
 
     @DubboReference(version = "1.0", group = "case", timeout = 200000)
-    public RemoteCaseDocRetrieveService remoteCaseRetrieveService;
+    private RemoteCaseDocRetrieveService remoteCaseRetrieveService;
+    @DubboReference
+    private RemoteWebSocketService remoteWebSocketService;
     @Resource
     private DocCaseMapper baseMapper;
 
@@ -104,8 +107,8 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         lqw.ge(bo.getJudgeDate() != null, DocCase::getJudgeDate, bo.getJudgeDate());
         lqw.le(bo.getPubDate() != null, DocCase::getPubDate, bo.getPubDate());
         lqw.like(StringUtils.isNotBlank(bo.getLegalBasis()), DocCase::getLegalBasis, bo.getLegalBasis());
-        lqw.eq(StringUtils.isNotBlank(bo.getParty()), DocCase::getParty, bo.getParty());
         lqw.eq(bo.getStatus() != null, DocCase::getStatus, bo.getStatus());
+        lqw.eq(bo.getIsMining() != null, DocCase::getIsMining, MiningStatus.getMiningStatus(bo.getIsMining()));
         return lqw;
     }
 
@@ -175,7 +178,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     private void sendMessage(String clientId, int successNum, int allCaseSize) {
         WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.CASE.getType(),
             "全量同步司法案例", "同步进度：" + successNum + "/" + allCaseSize, clientId);
-        WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
+        remoteWebSocketService.sendToOne(clientId, JSONObject.toJSONString(message));
     }
 
     /**

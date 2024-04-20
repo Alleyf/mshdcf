@@ -39,13 +39,13 @@ public class MoonShotGPTUtils {
     public static OkHttpClient client = new OkHttpClient.Builder()
 //            设置代理
 //            .proxy(proxy)
-            // 设置读取超时时间为60秒
-            .readTimeout(60, TimeUnit.SECONDS)
-            // 设置写入超时时间为60秒
-            .writeTimeout(60, TimeUnit.SECONDS)
-            // 设置连接超时时间为60秒
-            .connectTimeout(60, TimeUnit.SECONDS)
-            .build();
+        // 设置读取超时时间为60秒
+        .readTimeout(60, TimeUnit.SECONDS)
+        // 设置写入超时时间为60秒
+        .writeTimeout(60, TimeUnit.SECONDS)
+        // 设置连接超时时间为60秒
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .build();
 
     /**
      * 同步请求
@@ -156,17 +156,17 @@ public class MoonShotGPTUtils {
         RequestBody body = RequestBody.create(jsonRequest.get("text"), MediaType.get("application/json; charset=utf-8"));
         // 创建Request
         return new Request.Builder()
-                .url(jsonRequest.get("url"))
-                .post(body)
-                .addHeader("Authorization", GPTConstants.MoonShot_API_SECRET)
-                .addHeader("Content-Type", "application/json")
-                .build();
+            .url(jsonRequest.get("url"))
+            .post(body)
+            .addHeader("Authorization", GPTConstants.Local_MoonShot_API_SECRET)
+            .addHeader("Content-Type", "application/json")
+            .build();
     }
 
     private static Map<String, String> getJsonRequest(String text) {
         return new HashMap<String, String>(2) {
             {
-                put("url", GPTConstants.MoonShot_API_URL);
+                put("url", GPTConstants.Local_MoonShot_API_URL);
                 put("text", moonShotRequest(text));
             }
         };

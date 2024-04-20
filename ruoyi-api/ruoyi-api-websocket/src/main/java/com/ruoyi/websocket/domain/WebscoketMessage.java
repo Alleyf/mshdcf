@@ -1,4 +1,4 @@
-package com.ruoyi.manage.mq;
+package com.ruoyi.websocket.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

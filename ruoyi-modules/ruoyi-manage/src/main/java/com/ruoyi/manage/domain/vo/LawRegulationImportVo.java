@@ -5,6 +5,7 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.ruoyi.common.excel.annotation.ExcelDictFormat;
 import com.ruoyi.common.excel.annotation.ExcelEnumFormat;
 import com.ruoyi.common.excel.convert.ExcelDictConvert;
+import com.ruoyi.common.excel.convert.ExcelEnumConvert;
 import com.ruoyi.manage.enums.MiningStatus;
 import lombok.Data;
 
@@ -125,7 +126,7 @@ public class LawRegulationImportVo implements Serializable {
     /**
      * 挖掘状态
      */
-    @ExcelProperty(value = "挖掘状态", converter = ExcelDictConvert.class)
+    @ExcelProperty(value = "挖掘状态", converter = ExcelEnumConvert.class)
     @ExcelEnumFormat(enumClass = MiningStatus.class, textField = "message")
-    private Integer isMining;
+    private MiningStatus isMining;
 }
