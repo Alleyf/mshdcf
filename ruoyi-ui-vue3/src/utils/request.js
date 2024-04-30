@@ -44,6 +44,7 @@ service.interceptors.request.use(config => {
       data: typeof config.data === 'object' ? JSON.stringify(config.data) : config.data,
       time: new Date().getTime()
     }
+    // console.log(JSON.stringify(requestObj))
     const sessionObj = cache.session.getJSON('sessionObj')
     if (sessionObj === undefined || sessionObj === null || sessionObj === '') {
       cache.session.setJSON('sessionObj', requestObj)
@@ -61,6 +62,7 @@ service.interceptors.request.use(config => {
       }
     }
   }
+
   return config
 }, error => {
   console.log(error)

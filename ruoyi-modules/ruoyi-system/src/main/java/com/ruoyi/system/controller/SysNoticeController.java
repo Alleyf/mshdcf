@@ -95,14 +95,21 @@ public class SysNoticeController extends BaseController {
      * @param notice 通知
      */
     @SaCheckPermission("system:notice:query")
-    @PostMapping("/send")
+    @PutMapping("/send")
     public R<Void> send(@Validated @RequestBody SysNotice notice) {
-        Arrays.asList(notice.getTargetIds()).forEach(userId -> {
-            String targetUserId = "sys_user:" + Convert.toStr(userId);
-            String msgType = ObjectUtil.equal(notice.getNoticeType(), 1) ? "通知" : "公告";
-            WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), msgType, notice.getNoticeTitle(), notice.getNoticeContent(), targetUserId);
-            remoteWebSocketService.sendToOne(targetUserId, JSONObject.toJSONString(message));
-        });
+        Long[] targetIds = notice.getTargetIds();
+        if (ObjectUtil.isNotEmpty(targetIds)) {
+            Arrays.asList(notice.getTargetIds()).forEach(userId -> {
+                String targetUserId = "sys_user:" + Convert.toStr(userId);
+                String msgType = ObjectUtil.equal(notice.getNoticeType(), "1") ? "通知" : "公告";
+                WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), msgType, notice.getNoticeTitle(), notice.getNoticeContent(), targetUserId);
+                remoteWebSocketService.sendToOne(targetUserId, JSONObject.toJSONString(message));
+            });
+        } else {
+            String msgType = ObjectUtil.equal(notice.getNoticeType(), "1") ? "通知" : "公告";
+            WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), msgType, notice.getNoticeTitle(), notice.getNoticeContent(), null);
+            remoteWebSocketService.sendToAll(JSONObject.toJSONString(message));
+        }
         return R.ok();
     }
 }

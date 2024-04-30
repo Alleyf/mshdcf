@@ -1,5 +1,6 @@
 package com.ruoyi.websocket;
 
+import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -9,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @site <a href="https://alleyf.github.io">getHelp</a>
  * @description
  */
-//@EnableDubbo
+@EnableDubbo
 @SpringBootApplication
 public class RuoyiWebSocketApplication {
     public static void main(String[] args) {

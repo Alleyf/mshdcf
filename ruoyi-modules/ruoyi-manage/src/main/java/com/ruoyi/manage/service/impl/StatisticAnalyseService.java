@@ -224,6 +224,7 @@ public class StatisticAnalyseService {
      *
      * @return Long-所有案件数量
      */
+    @Cacheable(cacheNames = CacheNames.CASE_TOTAL, sync = true)
     public Long caseTotal() {
         return docCaseMapper.selectCount(null);
     }
@@ -233,6 +234,7 @@ public class StatisticAnalyseService {
      *
      * @return Long-所有法律法规数量
      */
+    @Cacheable(cacheNames = CacheNames.LAW_TOTAL)
     public Long lawTotal() {
         return lawRegulationMapper.selectCount(null);
     }

@@ -104,9 +104,38 @@
           <el-button v-hasPermi="['system:notice:remove']" icon="Delete" link type="primary"
                      @click="handleDelete(scope.row)">删除
           </el-button>
-          <el-button v-hasPermi="['system:notice:query']" icon="Promotion" link type="primary"
-                     @click="handleSend(scope.row)">发送
-          </el-button>
+
+          <el-popover :width="300" placement="top-start" title="选择发送对象" trigger="contextmenu">
+            <template #reference>
+              <el-button v-hasPermi="['system:notice:query']" icon="Promotion" link type="primary"
+                         @click="handleSend(scope.row)">发送
+              </el-button>
+            </template>
+            <template #default>
+              <el-container>
+                <el-checkbox
+                  v-model="checkAll"
+                  :indeterminate="indeterminate"
+                  @change="handleCheckAll"
+                >
+                  All
+                </el-checkbox>
+                <el-select-v2
+                  v-model="targetIds"
+                  :max-collapse-tags="1"
+                  :options="options"
+                  clearable
+                  collapse-tags
+                  multiple
+                  placeholder="请选择目标对象"
+                  popper-class="custom-header"
+                  style="width: 240px"
+                >
+                </el-select-v2>
+              </el-container>
+
+            </template>
+          </el-popover>
         </template>
       </el-table-column>
     </el-table>
@@ -120,35 +149,12 @@
     />
 
     <!-- 添加或修改公告对话框 -->
-    <el-dialog v-model="open" :title="title" append-to-body width="780px">
+    <el-dialog v-model="open" :title="title" :width="'60%'" append-to-body>
       <el-form ref="noticeRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="24">
             <el-form-item label="公告标题" prop="noticeTitle">
               <el-input v-model="form.noticeTitle" placeholder="请输入公告标题"/>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item label="目标对象" prop="targetIds">
-              <el-checkbox
-                v-model="checkAll"
-                :indeterminate="indeterminate"
-                @change="handleCheckAll"
-              >
-                All
-              </el-checkbox>
-              <el-select-v2
-                v-model="form.targetIds"
-                :max-collapse-tags="1"
-                :options="options"
-                clearable
-                collapse-tags
-                multiple
-                placeholder="请选择目标对象"
-                popper-class="custom-header"
-                style="width: 240px"
-              >
-              </el-select-v2>
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -177,7 +183,8 @@
           </el-col>
           <el-col :span="24">
             <el-form-item label="内容">
-              <QEditor v-model="form.noticeContent" :min-height="192"/>
+              <!--                            <q-editor v-model="form.noticeContent" :min-height="192"/>-->
+              <v-editor v-if="open" v-model="form.noticeContent" :min-height="200" :width="'100%'"/>
             </el-form-item>
           </el-col>
         </el-row>
@@ -200,6 +207,7 @@ const {proxy} = getCurrentInstance();
 const {sys_notice_status, sys_notice_type} = proxy.useDict("sys_notice_status", "sys_notice_type");
 
 const noticeList = ref([]);
+const targetIds = ref([]);
 const open = ref(false);
 const loading = ref(true);
 const showSearch = ref(true);
@@ -240,9 +248,11 @@ watch(value, (val) => {
 const handleCheckAll = (val) => {
   indeterminate.value = false
   if (val) {
-    form.value.targetIds = options.value.map((_) => _.value)
+    targetIds.value = options.value.map((_) => _.value)
+    // form.value.targetIds = options.value.map((_) => _.value)
   } else {
-    form.value.targetIds = []
+    targetIds.value = []
+    // form.value.targetIds = []
   }
 }
 
@@ -369,9 +379,19 @@ function handleDelete(row) {
 }
 
 const handleSend = (row) => {
+  row.targetIds = targetIds.value
   console.log(row, form.value)
-  sendNotice(form.value).then(response => {
-    console.log(response)
+  if (!row.targetIds.length) {
+    proxy.$modal.msgWarning("请选择目标对象");
+    return
+  }
+  sendNotice(row).then(response => {
+    if (response.code === 200) {
+      targetIds.value = []
+      proxy.$modal.msgSuccess("发送成功");
+    } else {
+      proxy.$modal.msgError("发送失败");
+    }
   })
 }
 

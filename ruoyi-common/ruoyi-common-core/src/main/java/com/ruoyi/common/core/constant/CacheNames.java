@@ -75,4 +75,6 @@ public interface CacheNames {
 
     // 新增法律条文常量
     String NEW_LAWS = "statistical_analysis:new_laws#15m";
+    String CASE_TOTAL = "statistical_analysis:case_total#3m#10m#20";
+    String LAW_TOTAL = "statistical_analysis:case_total#3m#10m#20";
 }

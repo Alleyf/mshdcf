@@ -8,8 +8,10 @@
     <div class="right-menu mt-auto">
       <template v-if="appStore.device !== 'mobile'">
         <header-search id="header-search" class="hover-effect "/>
-        <!--  联系我-->
-        <notify id="notification" class="right-menu-item hover-effect mt-auto"/>
+        <!--  消息通知-->
+        <!--        <el-tooltip content="消息通知" effect="dark" placement="bottom">-->
+        <notify id="notification" class="right-menu-item hover-effect"/>
+        <!--        </el-tooltip>-->
 
         <!--        <Contact/>-->
         <el-tooltip content="源码地址" effect="dark" placement="bottom">

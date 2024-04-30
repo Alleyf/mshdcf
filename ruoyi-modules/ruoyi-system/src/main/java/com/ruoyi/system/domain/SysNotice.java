@@ -48,8 +48,8 @@ public class SysNotice extends BaseEntity {
      * 发送目标用户ID
      */
     @TableField(exist = false)
-    @NotEmpty(message = "发送目标用户ID不能为空")
-    @Size(min = 1, message = "至少有一个发送目标用户")
+//    @NotEmpty(message = "发送目标用户ID不能为空")
+//    @Size(min = 1, message = "至少有一个发送目标用户")
     private Long[] targetIds;
 
     /**

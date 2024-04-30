@@ -37,21 +37,52 @@
         </template>
       </el-popover>
     </el-badge>
+    <!--    通知抽屉-->
     <el-drawer v-if="detailsNotification" v-model="showDetailsModal" :size="'20%'" :with-header="true">
       <template #header>
         <h3 class="text-blue-500 text-xl text-center">{{ detailsNotification.msgTitle }}</h3>
       </template>
       <div class="notification-details-content text-zinc-500">
-        <p v-if="detailsNotification">{{ detailsNotification.msgText }}</p>
+        <!--        <p v-if="detailsNotification" v-html="detailsNotification.msgText"/>-->
+        <v-md-preview v-if="detailsNotification" :text="detailsNotification.msgText"></v-md-preview>
       </div>
     </el-drawer>
   </div>
+  <!--  公告对话框-->
+  <el-dialog
+    v-model="announceDialog.show"
+    :width=announceDialog.width
+    align-center
+    center
+    class="w-fit max-w-max"
+    destroy-on-close
+    draggable
+    title="平台公告"
+  >
+    <template #title>
+      <div class="text-center align-middle text-blue-500">
+        <span class="text-xl">{{ announceDialog.title }}</span>
+      </div>
+    </template>
+    <div>
+      <!--      <p class="break-words" v-html="announceDialog.message"/>-->
+      <v-md-preview :text="announceDialog.message"></v-md-preview>
+    </div>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="announceDialog.show = false">关闭</el-button>
+        <el-button type="primary" @click="announceDialog.show = false">确认</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 
 <script setup>
 import {onBeforeUnmount, onMounted, ref} from "vue";
 import useUserStore from "@/store/modules/user";
+import QEditor from "@/components/Editor/index.vue";
+import {QuillEditor} from "@vueup/vue-quill";
 // import {getToken} from "@/utils/auth";
 
 const userId = useUserStore().id
@@ -61,9 +92,14 @@ const unreadNum = ref(0)
 const notifications = ref([]);
 const detailsNotification = ref(null);
 const showDetailsModal = ref(false);
+const announceDialog = ref({
+  show: false,
+  title: undefined,
+  width: '40%',
+  message: undefined,
+});
 // const suffix = "?Authorization=Bearer " + getToken();
 
-// console.log(suffix)
 const websocket = new WebSocket('ws://localhost:8080/websocket/websocket/' + loginId)
 
 const connect = () => {
@@ -76,10 +112,16 @@ const connect = () => {
     const data = event.data;
     if (isJsonString(data)) {
       const notification = JSON.parse(data);
-      notification.unread = true;
-      notifications.value.push(notification);
-      unreadNum.value++;
       console.log('WebSocket received data:', notification)
+      if (notification.msgType === "公告") {
+        announceDialog.value.show = true;
+        announceDialog.value.title = notification.msgTitle;
+        announceDialog.value.message = notification.msgText;
+      } else {
+        notification.unread = true;
+        notifications.value.push(notification);
+        unreadNum.value++;
+      }
     } else {
       console.log('Received non-JSON data:', data);
     }

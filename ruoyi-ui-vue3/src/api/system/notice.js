@@ -43,11 +43,11 @@ export function delNotice(noticeId) {
   })
 }
 
-// 新增公告
+// 发送公告
 export function sendNotice(data) {
   return request({
     url: '/system/notice/send',
-    method: 'post',
+    method: 'put',
     data: data
   })
 }
