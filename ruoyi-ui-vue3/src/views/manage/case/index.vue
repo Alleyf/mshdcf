@@ -25,8 +25,8 @@ import {
 } from "@element-plus/icons-vue";
 import {Icon} from '@iconify/vue';
 import {miningCase, reviseCase} from "@/api/manage/process";
-import {getRegulation} from "@/api/manage/regulation";
-import {getCaseWorldCloud} from "@/api/retrieve/case";
+import FileUpload from "@/components/FileUpload/index.vue";
+
 
 const {proxy} = getCurrentInstance();
 const {
@@ -49,6 +49,19 @@ const single = ref(true);
 const multiple = ref(true);
 const showSearch = ref(true);
 const currentTab = ref(1);
+
+const uploadPdf = ref({
+  // 是否显示弹出层（PDF上传）
+  open: false,
+  // 弹出层标题（PDF上传）
+  title: "PDF文件上传",
+  // 是否禁用上传
+  isUploading: true,
+  // 设置上传的请求头部
+  headers: {Authorization: "Bearer " + getToken()},
+  // 上传的地址
+  url: import.meta.env.VITE_APP_BASE_API + "/manage/case/uploadPdf"
+})
 
 /*** 案例导入参数 */
 const upload = reactive({
@@ -594,6 +607,30 @@ const handleSync = () => {
   })
 }
 
+const handleUploadPdf = () => {
+  uploadPdf.value.open = true
+}
+const pdfContent = ref('')
+
+// function handlePdfFile(uploadFile) {
+//   console.log(uploadFile, pdfContent.value)
+//
+//   const url = uploadFile.url
+//   getDocument(url).promise.then((pdfDoc) => {
+//
+//     for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+//       pdfDoc.getPage(pageNum).then((page) => {
+//         page.getTextContent().then((textContent) => {
+//           pdfContent.value += textContent.items.map((item) => item.str).join(' ');
+//         });
+//       });
+//     }
+//
+//   });
+//
+//   // fileReader.readAsArrayBuffer(uploadFile);
+// }
+
 onMounted(() => {
   getList()
   // proxy.sendWebMessage("欢迎使用来到管理分析页面")
@@ -748,6 +785,16 @@ onMounted(() => {
           >导入
           </el-button>
         </el-col>
+        <!--        <el-col :span="1.5">-->
+        <!--          <el-button-->
+        <!--            v-hasPermi="['manage:case:import']"-->
+        <!--            icon="Upload"-->
+        <!--            plain-->
+        <!--            type="primary"-->
+        <!--            @click="handleUploadPdf"-->
+        <!--          >上传-->
+        <!--          </el-button>-->
+        <!--        </el-col>-->
         <el-col :span="1.5">
           <el-button
             v-hasPermi="['manage:case:export']"
@@ -1165,6 +1212,131 @@ onMounted(() => {
       </el-tabs>
       <!-- 添加或修改司法案例对话框 -->
       <el-dialog v-model="open" :title="title" align-center draggable>
+        <el-form ref="dialogForm" :model="form" :rules="rules" label-width="100px">
+          <el-form-item label="案件名称" prop="name">
+            <el-input v-model="form.name" placeholder="请输入案件名称"/>
+          </el-form-item>
+          <el-form-item label="审判法院" prop="court">
+            <el-input v-model="form.court" placeholder="请输入审判法院"/>
+          </el-form-item>
+          <el-form-item label="案号" prop="number">
+            <el-input v-model="form.number" placeholder="请输入案号"/>
+          </el-form-item>
+          <el-form-item label="原始链接" prop="url">
+            <el-input v-model="form.url" placeholder="请输入原始链接"/>
+          </el-form-item>
+          <el-form-item label="案由" prop="cause">
+            <el-select v-model="form.cause" placeholder="请选择案由">
+              <el-option
+                v-for="dict in doc_case_cause"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="文书类型" prop="type">
+            <el-select v-model="form.type" placeholder="请选择文书类型">
+              <el-option
+                v-for="dict in doc_case_type"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="审理程序" prop="process">
+            <el-input v-model="form.process" placeholder="请输入审理程序"/>
+          </el-form-item>
+          <el-form-item label="详细案由" prop="label">
+            <el-input v-model="form.label" placeholder="请输入详细案由"/>
+          </el-form-item>
+          <el-form-item label="案件正文" prop="content">
+            <el-link href="javascript:void(0);" type="primary" @click="handleOpenContent">进入案件正文</el-link>
+            <el-dialog v-model="openContent" draggable overflow title="输入案件正文">
+              <q-editor v-model="form.content" :min-height="400"/>
+            </el-dialog>
+          </el-form-item>
+          <el-form-item label="案件来源" prop="sourceId">
+            <el-select v-model="form.sourceId" placeholder="请选择案件来源">
+              <el-option
+                v-for="dict in crawler_source"
+                :key="dict.value"
+                :label="dict.label"
+                :value="parseInt(dict.value)"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="判决日期" prop="judgeDate">
+            <el-date-picker v-model="form.judgeDate"
+                            clearable
+                            placeholder="请选择判决日期"
+                            type="date"
+                            value-format="YYYY-MM-DD"
+            >
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="公开日期" prop="pubDate">
+            <el-date-picker v-model="form.pubDate"
+                            clearable
+                            placeholder="请选择公开日期"
+                            type="date"
+                            value-format="YYYY-MM-DD"
+            >
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="法律依据" prop="legalBasis">
+            <el-input v-model="form.legalBasis" placeholder="请输入法律依据"/>
+          </el-form-item>
+          <!--          <el-form-item label="当事人" prop="party">-->
+          <!--            <el-input v-model="form.party" placeholder="请输入当事人"/>-->
+          <!--          </el-form-item>-->
+          <!--          <el-form-item label="相关案件" prop="relatedCases">-->
+          <!--            <el-input v-model="form.relatedCases" placeholder="请输入内容" type="textarea"/>-->
+          <!--          </el-form-item>-->
+          <el-form-item label="状态" prop="status">
+            <el-select v-model="form.status" placeholder="请选择状态">
+              <el-option
+                v-for="dict in crawl_common_status"
+                :key="dict.value"
+                :label="dict.label"
+                :value="parseInt(dict.value)"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
+            <el-button @click="cancelDialog">取 消</el-button>
+          </span>
+        </template>
+      </el-dialog>
+
+      <!--      上传pdf对话框-->
+      <el-dialog v-model="uploadPdf.open" :title="upload.title" append-to-body draggable width="40%">
+        <file-upload
+          ref="uploadPdfRef"
+          :limit="1"
+          :modelValue="pdfContent"
+          accept=".pdf"
+          drag
+          @uploaded="handlePdfFile"
+        >
+          <el-icon class="el-icon--upload">
+            <upload-filled/>
+          </el-icon>
+          <div class="el-upload__text">
+            将文件拖到此处，或
+            <em>点击上传</em>
+          </div>
+          <template #tip>
+            <div class="el-upload__tip">
+              只能上传pdf文件，且不超过10M
+              {{ pdfContent }}
+            </div>
+          </template>
+        </file-upload>
         <el-form ref="dialogForm" :model="form" :rules="rules" label-width="100px">
           <el-form-item label="案件名称" prop="name">
             <el-input v-model="form.name" placeholder="请输入案件名称"/>

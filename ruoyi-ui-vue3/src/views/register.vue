@@ -2,6 +2,11 @@
   <div class="register">
     <el-form ref="registerRef" :model="registerForm" :rules="registerRules" class="register-form">
       <h3 class="title">多源异构司法数据汇聚融合平台</h3>
+      <el-form-item class="grid place-items-center" prop="avatar">
+        <div id="avatar" ref="avatar"
+             class="mx-auto my-auto"
+             style="max-width: 96px;"/>
+      </el-form-item>
       <el-form-item prop="username">
         <el-input
           v-model="registerForm.username"
@@ -71,8 +76,9 @@
           <span v-if="!loading">注 册</span>
           <span v-else>注 册 中...</span>
         </el-button>
-        <div style="float: right;">
+        <div class="flex justify-between  w-full" style="">
           <router-link :to="'/login'" class="link-type">使用已有账户登录</router-link>
+          <!--          <el-button color="#409EFF" type="text" @click="handleGenAvatar">生成头像</el-button>-->
         </div>
       </el-form-item>
     </el-form>
@@ -86,11 +92,15 @@
 <script setup>
 import {ElMessageBox} from "element-plus";
 import {getCodeImg, register} from "@/api/login";
+import {display, generate, faceToSvgString} from "facesjs";
+import {onMounted} from "vue";
+import FileUpload from "@/components/FileUpload/index.vue";
 
 const router = useRouter();
 const {proxy} = getCurrentInstance();
 
 const registerForm = ref({
+  avatar: "",
   username: "",
   password: "",
   confirmPassword: "",
@@ -160,7 +170,18 @@ function getCode() {
   });
 }
 
-getCode();
+const handleGenAvatar = () => {
+  const face = generate();
+  // console.log(face)
+  // registerForm.value.avatar = faceToSvgString(face);
+  // console.log(registerForm.value.avatar)
+  display("avatar", face);
+}
+
+onMounted(() => {
+  getCode();
+});
+
 </script>
 
 <style lang='scss' scoped>

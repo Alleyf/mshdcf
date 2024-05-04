@@ -12,6 +12,7 @@
         <settings ref="settingRef"/>
       </el-scrollbar>
     </div>
+    <assistant/>
   </div>
 </template>
 
@@ -76,6 +77,7 @@ onMounted(() => {
 onUnmounted(() => {
   // close()
 })
+
 
 </script>
 
