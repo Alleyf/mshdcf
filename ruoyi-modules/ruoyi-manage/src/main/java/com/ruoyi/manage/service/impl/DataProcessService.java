@@ -5,22 +5,23 @@ import com.ruoyi.common.core.utils.BeanCopyUtils;
 import com.ruoyi.common.core.utils.gpt.GeminiUtils;
 import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.LawRegulation;
+import com.ruoyi.manage.domain.bo.DocCaseBo;
 import com.ruoyi.manage.domain.vo.DocCaseVo;
 import com.ruoyi.manage.enums.MiningStatus;
 import com.ruoyi.manage.mapper.DocCaseMapper;
 import com.ruoyi.manage.mapper.LawRegulationMapper;
+import com.ruoyi.manage.service.IDocCaseService;
 import com.ruoyi.manage.utils.ProcessUtils;
 import com.ruoyi.retrieve.api.RemoteCaseDocRetrieveService;
 import com.ruoyi.retrieve.api.RemoteLawDocRetrieveService;
-import com.ruoyi.retrieve.api.domain.CaseDoc;
 import com.ruoyi.retrieve.api.domain.LawDoc;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -36,6 +37,7 @@ public class DataProcessService {
 
     private final DocCaseMapper docCaseMapper;
     private final LawRegulationMapper lawRegulationMapper;
+    private final IDocCaseService docCaseService;
 
     //dubbo传输对象类型参数必须实现serialable接口否则会报错
     @DubboReference(version = "1.0", group = "case", timeout = 200000)
@@ -44,10 +46,17 @@ public class DataProcessService {
     public RemoteLawDocRetrieveService remoteLawDocRetrieveService;
 
 
-    private int updateCaseEs(DocCase docCase) {
-        CaseDoc caseDoc = BeanCopyUtils.copy(docCase, CaseDoc.class);
-        return remoteCaseDocRetrieveService.update(caseDoc);
+    /**
+     * 保存(新增和修改)文档案例到MongoDB和Elasticsearch。
+     *
+     * @param docCase 包含要保存的文档数据的DocCase对象。
+     *                该方法通过调用docCaseService的saveMongoAndEs方法，实现将文档数据同时保存到MongoDB和Elasticsearch的功能。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void saveMongoAndEs(DocCase docCase) {
+        docCaseService.saveMongoAndEs(docCase);
     }
+
 
     private int updateLawEs(LawRegulation lawRegulation) {
         LawDoc lawDoc = BeanCopyUtils.copy(lawRegulation, LawDoc.class);
@@ -79,8 +88,10 @@ public class DataProcessService {
 //        首先使用Gemini提示模板进行挖掘，失败则通过设计的规则进行挖掘
         AtomicInteger success = new AtomicInteger(0);
         List<DocCase> docCases;
+        List<DocCaseVo> docCaseVos;
         if (ids != null) {
-            docCases = docCaseMapper.selectBatchIds(ids);
+            docCaseVos = docCaseService.queryListByIds(ids.toArray(new Long[0]));
+//            docCases = docCaseMapper.selectBatchIds(ids);
 //            DocCase docCase = docCaseMapper.selectById(id);
 ////            AI挖掘
 //            String extra = GeminiUtils.caseParse(docCase.getContent());
@@ -94,25 +105,27 @@ public class DataProcessService {
 //            log.info(String.valueOf(docCase.getExtra().getClass()));
 //            return updateCaseEs(docCase);
         } else {
-            docCases = docCaseMapper.selectList();
+            docCaseVos = docCaseService.queryList(new DocCaseBo());
+//            docCases = docCaseMapper.selectList();
         }
-        docCases.forEach(docCase -> {
+        docCases = BeanCopyUtils.copyList(docCaseVos, DocCase.class);
+        if (docCases != null) {
+            docCases.stream().forEach(docCase -> {
 //            清洗过的数据才能进行挖掘
-            if (docCase.getIsMining() == MiningStatus.STRIPED && existDataCaseIndex(docCase.getId())) {
-                String extra = GeminiUtils.caseParse(docCase.getStripContent());
-                if (extra == null) {
+                if (docCase.getIsMining() == MiningStatus.STRIPED && existDataCaseIndex(docCase.getId())) {
+                    String extra = GeminiUtils.caseParse(docCase.getStripContent());
+                    if (extra == null) {
 //                从原文or修正文？中提取信息
-                    extra = ProcessUtils.buildCaseExtra(docCase.getStripContent());
-                }
-                docCase.setExtra(extra);
-                docCase.setIsMining(MiningStatus.MININGED);
-                docCaseMapper.updateById(docCase);
-                int num = updateCaseEs(docCase);
-                if (num > 0) {
+                        extra = ProcessUtils.buildCaseExtra(docCase.getStripContent());
+                    }
+                    docCase.setExtra(extra);
+                    docCase.setIsMining(MiningStatus.MININGED);
+                    docCaseMapper.updateById(docCase);
+                    saveMongoAndEs(docCase);
                     success.getAndIncrement();
                 }
-            }
-        });
+            });
+        }
         return success.get();
     }
 
@@ -124,15 +137,18 @@ public class DataProcessService {
      */
     public DocCase caseInfoMining(Long id) {
 //        首先使用Gemini提示模板进行挖掘，失败则通过设计的规则进行挖掘
-        DocCase docCase = docCaseMapper.selectById(id);
-        Assert.notNull(docCase, "id为：" + id + "的数据不存在");
+        DocCaseVo docCaseVo = docCaseService.queryById(id);
+        DocCase docCase = BeanCopyUtils.copy(docCaseVo, DocCase.class);
+//        DocCase docCase = docCaseMapper.selectById(id);
+        if (docCase != null) {
 //            清洗过的数据才能进行挖掘
-        String extra = GeminiUtils.caseParse(docCase.getStripContent());
-        if (extra == null) {
+            String extra = GeminiUtils.caseParse(docCase.getStripContent());
+            if (extra == null) {
 //                从原文or修正文？中提取信息
-            extra = ProcessUtils.buildCaseExtra(docCase.getStripContent());
+                extra = ProcessUtils.buildCaseExtra(docCase.getStripContent());
+            }
+            docCase.setExtra(extra);
         }
-        docCase.setExtra(extra);
         return docCase;
     }
 
@@ -197,32 +213,31 @@ public class DataProcessService {
     public int stripCaseContent(List<Long> ids) {
         AtomicInteger success = new AtomicInteger(0);
         List<DocCase> docCases;
+        List<DocCaseVo> docCaseVos;
         if (ids != null) {
-            docCases = docCaseMapper.selectBatchIds(ids);
-//            DocCase docCase = docCaseMapper.selectById(id);
-//            String stripContent = ProcessUtils.stripCaseUnicode(docCase.getContent());
-//            docCase.setContent(stripContent);
-//            docCaseMapper.updateById(docCase);
-//            return updateCaseEs(docCase);
+            docCaseVos = docCaseService.queryListByIds(ids.toArray(new Long[0]));
+//            docCases = docCaseMapper.selectBatchIds(ids);
         } else {
-            docCases = docCaseMapper.selectList();
+            docCaseVos = docCaseService.queryList(new DocCaseBo());
+//            docCases = docCaseMapper.selectList();
         }
-        docCases.forEach(docCase -> {
-            if (existDataCaseIndex(docCase.getId())) {
-                String stripContent = ProcessUtils.stripCaseUnicode(docCase.getContent());
-                docCase.setStripContent(stripContent);
-                docCaseMapper.updateById(docCase);
-                int num = updateCaseEs(docCase);
-                if (num > 0) {
+        docCases = BeanCopyUtils.copyList(docCaseVos, DocCase.class);
+        if (docCases != null) {
+            docCases.forEach(docCase -> {
+                if (existDataCaseIndex(docCase.getId())) {
+                    String stripContent = ProcessUtils.stripCaseUnicode(docCase.getContent());
+                    docCase.setStripContent(stripContent);
+                    docCaseMapper.updateById(docCase);
+                    saveMongoAndEs(docCase);
                     success.getAndIncrement();
                 }
-            }
-        });
+            });
+        }
         return success.get();
     }
 
     /**
-     * 案例正文修正
+     * 批量案例正文修正
      *
      * @param ids 案例id
      * @return int 成功数
@@ -230,30 +245,29 @@ public class DataProcessService {
     public int reviseCaseContentSave(List<Long> ids) {
         AtomicInteger success = new AtomicInteger(0);
         List<DocCase> docCases;
+        List<DocCaseVo> docCaseVos;
         if (ids != null) {
-            docCases = docCaseMapper.selectBatchIds(ids);
-//            DocCase docCase = docCaseMapper.selectById(id);
-//            String reviseContent = GeminiUtils.caseRevise(docCase.getContent());
-//            docCase.setContent(reviseContent);
-//            docCase.setIsMining(MiningStatus.STRIPED);
-//            docCaseMapper.updateById(docCase);
-//            return updateCaseEs(docCase);
+            docCaseVos = docCaseService.queryListByIds(ids.toArray(new Long[0]));
+//            docCases = docCaseMapper.selectBatchIds(ids);
         } else {
-            docCases = docCaseMapper.selectList();
+            docCaseVos = docCaseService.queryList(new DocCaseBo());
+//            docCases = docCaseMapper.selectList();
         }
-        docCases.forEach(docCase -> {
-            //            原始数据才需要清洗
-            if (docCase.getIsMining() == MiningStatus.ORIGIN && existDataCaseIndex(docCase.getId())) {
-                String reviseContent = GeminiUtils.caseRevise(docCase.getStripContent());
-                docCase.setStripContent(reviseContent);
-                docCase.setIsMining(MiningStatus.STRIPED);
-                docCaseMapper.updateById(docCase);
-                int num = updateCaseEs(docCase);
-                if (num > 0) {
+        docCases = BeanCopyUtils.copyList(docCaseVos, DocCase.class);
+
+        if (docCases != null) {
+            docCases.forEach(docCase -> {
+                // 原始数据才需要清洗
+                if (docCase.getIsMining() == MiningStatus.ORIGIN && existDataCaseIndex(docCase.getId())) {
+                    String reviseContent = GeminiUtils.caseRevise(docCase.getStripContent());
+                    docCase.setStripContent(reviseContent);
+                    docCase.setIsMining(MiningStatus.STRIPED);
+                    docCaseMapper.updateById(docCase);
+                    saveMongoAndEs(docCase);
                     success.getAndIncrement();
                 }
-            }
-        });
+            });
+        }
         return success.get();
     }
 
@@ -265,12 +279,16 @@ public class DataProcessService {
      * @return 修正后的案例
      */
     public DocCase reviseCaseContent(Long id) {
-        DocCase docCase = docCaseMapper.selectById(id);
-        Assert.notNull(docCase, "id为：" + id + "的数据不存在");
+        DocCaseVo docCaseVo = docCaseService.queryById(id);
+//        DocCase docCase = docCaseMapper.selectById(id);
+        DocCase docCase = BeanCopyUtils.copy(docCaseVo, DocCase.class);
+//        Assert.notNull(docCase, "id为：" + id + "的数据不存在");
         //            原始数据才需要清洗
-        String content = ProcessUtils.stripCaseUnicode(docCase.getContent());
-        content = GeminiUtils.caseRevise(content);
-        docCase.setStripContent(content);
+        if (docCase != null) {
+            String content = ProcessUtils.stripCaseUnicode(docCase.getContent());
+            content = GeminiUtils.caseRevise(content);
+            docCase.setStripContent(content);
+        }
         return docCase;
     }
 
@@ -308,7 +326,7 @@ public class DataProcessService {
     }
 
     /**
-     * 法条正文修正
+     * 批量法条正文修正
      *
      * @param ids 法条id
      * @return int 成功数

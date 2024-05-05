@@ -5,6 +5,7 @@ import java.util.Date;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ruoyi.common.core.web.domain.BaseEntity;
 import com.ruoyi.common.excel.annotation.ExcelDictFormat;
 import com.ruoyi.common.excel.annotation.ExcelEnumFormat;
 import com.ruoyi.common.excel.convert.ExcelDictConvert;
@@ -31,8 +32,7 @@ public class DocCaseVo implements Serializable {
     /**
      * 案件主键id（雪花id）
      */
-//    @ExcelProperty(value = "案件主键id", converter = ExcelDictConvert.class)
-//    @ExcelDictFormat(readConverterExp = "雪花id")
+    @ExcelProperty(value = "编号")
     private Long id;
 
     /**

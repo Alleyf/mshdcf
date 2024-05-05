@@ -38,7 +38,7 @@ public class WebsocketConsumer {
             log.info("消息接收成功：" + jsonMsg);
             remoteWebSocketService.sendToOne(obj.getClientId(), jsonMsg);
             if (obj.getMsgType().equals(SocketMsgType.CASE.getType())) {
-                docCaseService.insertBatch(obj.getClientId());
+                docCaseService.syncAllCaseToEs(obj.getClientId());
             } else if (obj.getMsgType().equals(SocketMsgType.LAW.getType())) {
                 lawRegulationService.insertBatch(obj.getClientId());
             } else {

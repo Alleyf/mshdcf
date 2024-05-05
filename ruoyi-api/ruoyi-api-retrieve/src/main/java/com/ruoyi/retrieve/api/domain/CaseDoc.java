@@ -35,7 +35,8 @@ public class CaseDoc implements Serializable {
      * 案件名称
      */
     @HighLight(mappingField = "highlightName", preTag = "<text style='color:red'>", postTag = "</text>")
-    @IndexField(fieldType = FieldType.KEYWORD_TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
+//    @IndexField(fieldType = FieldType.KEYWORD_TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
+    @IndexField(fieldType = FieldType.KEYWORD)
     private String name;
     /**
      * 审判法院

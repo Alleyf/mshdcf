@@ -14,8 +14,10 @@ import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
 import com.ruoyi.manage.domain.LawRegulation;
+import com.ruoyi.manage.domain.bo.DocCaseBo;
 import com.ruoyi.manage.domain.bo.LawRegulationBo;
 import com.ruoyi.manage.domain.bo.ProcessBo;
+import com.ruoyi.manage.domain.vo.DocCaseVo;
 import com.ruoyi.manage.domain.vo.LawRegulationVo;
 import com.ruoyi.manage.enums.MiningStatus;
 import com.ruoyi.manage.enums.SocketMsgType;
@@ -157,7 +159,8 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         // 验证clientId的合法性
         Assert.notNull(clientId, "clientId不能为空");
 
-        List<LawRegulation> lawRegulations = baseMapper.selectList();
+        List<LawRegulationVo> lawRegulations = this.queryList(new LawRegulationBo());
+
         // 当查询结果为空时，直接返回0或抛出异常，避免后续逻辑执行
         if (lawRegulations.isEmpty()) {
             return 0;
@@ -167,7 +170,9 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         int allLawSize = lawRegulations.size();
 
         // 设置mysqlId
-        lawDocs.forEach(lawDoc -> lawDoc.setMysqlId(lawDoc.getId()));
+        if (lawDocs != null) {
+            lawDocs.forEach(lawDoc -> lawDoc.setMysqlId(lawDoc.getId()));
+        }
 
         int insertNum = 300; // 批量插入数
         int successNum = 0;
@@ -179,9 +184,12 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         } else {
             int epoch = allLawSize / insertNum + (allLawSize % insertNum != 0 ? 1 : 0);
             for (int i = 0; i < epoch; i++) {
-                List<LawDoc> subList = (i == epoch - 1) ?
-                    lawDocs.subList(i * insertNum, allLawSize) :
-                    lawDocs.subList(i * insertNum, (i + 1) * insertNum);
+                List<LawDoc> subList = null;
+                if (lawDocs != null) {
+                    subList = (i == epoch - 1) ?
+                        lawDocs.subList(i * insertNum, allLawSize) :
+                        lawDocs.subList(i * insertNum, (i + 1) * insertNum);
+                }
                 successNum += remoteLawRetrieveService.insertBatch(subList);
                 sendMessage(clientId, successNum, allLawSize);
             }
@@ -206,7 +214,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
      */
     @Override
     public Boolean updateByBo(LawRegulationBo bo) {
-        LawRegulation update = BeanUtil.toBean(bo, LawRegulation.class);
+        LawRegulation update = BeanCopyUtils.copy(bo, LawRegulation.class);
         validEntityBeforeSave(update);
         boolean flag = baseMapper.updateById(update) > 0;
         if (flag) {

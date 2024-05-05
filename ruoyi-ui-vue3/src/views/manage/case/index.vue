@@ -239,17 +239,21 @@ const handleProcessStage = (data) => {
     // 如果找到，更新数组中的元素
     processDataStage.value[existingIndex] = {
       id: data.id,
+      name: data.name,
       content: data.content,
       stripContent: data.stripContent,
       extra: JSON.stringify(data.extra),
+      relatedCases: JSON.stringify(data.relatedCases),
     };
   } else {
     // 如果没有找到，将新元素添加到数组中
     processDataStage.value.push({
       id: data.id,
+      name: data.name,
       content: data.content,
       stripContent: data.stripContent,
       extra: JSON.stringify(data.extra),
+      relatedCases: JSON.stringify(data.relatedCases),
     });
   }
   console.log(processDataStage.value)

@@ -34,6 +34,11 @@ spring:
       - optional:nacos:application-common.yml
       - optional:nacos:datasource.yml
       - optional:nacos:${spring.application.name}.yml
+#  data:
+#    mongodb:
+#      host: @mongodb.host@
+#      port: @mongodb.port@
+#      database: @mongodb.database@
 
 --- # HanLP 配置
 hanlp:
