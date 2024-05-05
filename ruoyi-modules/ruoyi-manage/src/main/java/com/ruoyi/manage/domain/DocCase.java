@@ -66,15 +66,17 @@ public class DocCase extends BaseEntity {
     /**
      * 案件正文
      */
+    @TableField(exist = false)
     private String content;
     /**
      * 修正后的案件正文
      */
+    @TableField(exist = false)
     private String stripContent;
-
     /**
      * 语义信息
      */
+    @TableField(exist = false)
     private String extra;
 
     /**
@@ -104,6 +106,7 @@ public class DocCase extends BaseEntity {
      */
 //    @TableField(typeHandler = JacksonTypeHandler.class)
 //    private List<Map<String, Object>> relatedCases;
+    @TableField(exist = false)
     private String relatedCases;
     /**
      * 状态（0：停用；1：正常）

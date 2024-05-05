@@ -27,6 +27,11 @@ public class ProcessBo extends BaseEntity {
     @NotNull(message = "主键id（雪花id）不能为空", groups = {EditGroup.class})
     private Long id;
     /**
+     * 名称
+     */
+    @NotBlank(message = "名称不能为空", groups = {AddGroup.class, EditGroup.class})
+    private String name;
+    /**
      * 正文
      */
     @NotBlank(message = "正文不能为空", groups = {AddGroup.class, EditGroup.class})

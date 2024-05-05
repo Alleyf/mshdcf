@@ -28,6 +28,15 @@ public class RemoteCaseDocRetrieveServiceImpl implements RemoteCaseDocRetrieveSe
         return caseDocService.insert(caseDoc);
     }
 
+    @Override
+    public Integer save(CaseDoc caseDoc) {
+        Boolean exist = exist(caseDoc.getName());
+        if (!exist)
+            return caseDocService.insert(caseDoc);
+        else
+            return caseDocService.update(caseDoc);
+    }
+
 
     @Override
     public Integer insertBatch(List<CaseDoc> entityList) {

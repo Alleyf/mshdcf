@@ -69,6 +69,9 @@
                 <nacos.config.group>DEFAULT_GROUP</nacos.config.group>
                 <logstash.address>127.0.0.1:4560</logstash.address>
                 <es.address>127.0.0.1:9200</es.address>
+                <mongodb.host>127.0.0.1</mongodb.host>
+                <mongodb.port>27017</mongodb.port>
+                <mongodb.database>jdocs</mongodb.database>
             </properties>
             <activation>
                 <!-- 默认环境 -->
@@ -182,6 +185,12 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-annotation</artifactId>
                 <version>${mybatis-plus.version}</version>
+            </dependency>
+            <!--            mongodb-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-mongodb</artifactId>
+                <version>${spring-boot.version}</version>
             </dependency>
             <!-- sql性能分析插件 -->
             <dependency>
@@ -464,6 +473,14 @@
     <!--        </repository>-->
     <!--    </repositories>-->
     <repositories>
+        <repository>
+            <id>public</id>
+            <name>huawei nexus</name>
+            <url>https://mirrors.huaweicloud.com/repository/maven/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
         <repository>
             <id>spring-milestones</id>
             <name>Spring Milestones</name>

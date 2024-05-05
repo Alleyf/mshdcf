@@ -29,6 +29,14 @@ public interface RemoteCaseDocRetrieveService {
     Integer insertBatch(List<CaseDoc> entityList);
 
     /**
+     * 保存（新增或修改）
+     *
+     * @param caseDoc 司法文书索引对象
+     * @return 保存条数
+     */
+    Integer save(CaseDoc caseDoc);
+
+    /**
      * 修改
      *
      * @param caseDoc 司法文书索引对象

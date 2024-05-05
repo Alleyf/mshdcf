@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.BeanCopyUtils;
 import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
@@ -16,6 +17,7 @@ import com.ruoyi.common.mybatis.core.page.TableDataInfo;
 import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.bo.DocCaseBo;
 import com.ruoyi.manage.domain.bo.ProcessBo;
+import com.ruoyi.manage.domain.mo.MDocCase;
 import com.ruoyi.manage.domain.vo.DocCaseVo;
 import com.ruoyi.manage.enums.MiningStatus;
 import com.ruoyi.manage.enums.SocketMsgType;
@@ -25,15 +27,14 @@ import com.ruoyi.retrieve.api.RemoteCaseDocRetrieveService;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
 import com.ruoyi.websocket.api.RemoteWebSocketService;
 import com.ruoyi.websocket.domain.WebscoketMessage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -44,8 +45,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> implements IDocCaseService {
 
+    private final MDocCaseService mDocCaseService;
     @DubboReference(version = "1.0", group = "case", timeout = 200000)
     private RemoteCaseDocRetrieveService remoteCaseRetrieveService;
     @DubboReference
@@ -58,7 +61,11 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
      */
     @Override
     public DocCaseVo queryById(Long id) {
-        return baseMapper.selectVoById(id);
+        DocCaseVo docCaseVo = baseMapper.selectVoById(id);
+        // todo: mongodb查询,后续通过exist=false去除mysql在mongo中已有的字段数据
+        MDocCase mDocCase = mDocCaseService.getDocCaseById(id);
+        fillDocCaseVo(docCaseVo);
+        return docCaseVo;
     }
 
     /**
@@ -71,27 +78,86 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         lqw.eq(ObjectUtil.isNotNull(bo.getIsMining()), DocCase::getIsMining, MiningStatus.getMiningStatus(bo.getIsMining()));
 //        传入分页查询器和条件查询修饰器进行分页查询
         Page<DocCaseVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        // 填充案例视图对象列表中额外信息
+        fillDocCaseVoList(result.getRecords());
         return TableDataInfo.build(result);
     }
 
     /**
-     * 查询司法案例列表
+     * 查询文档案例列表
+     *
+     * @param bo 搜索条件对象，用于构建查询条件
+     * @return 返回文档案例的视图对象列表
      */
     @Override
     public List<DocCaseVo> queryList(DocCaseBo bo) {
+        // 构建查询条件
         LambdaQueryWrapper<DocCase> lqw = buildQueryWrapper(bo);
-        return baseMapper.selectVoList(lqw);
+        // 根据查询条件从数据库中选择相应的视图列表
+        List<DocCaseVo> docCaseVos = baseMapper.selectVoList(lqw);
+
+        // 防御性编程：确保列表不为空且不为null
+        if (docCaseVos == null) {
+            docCaseVos = new ArrayList<>();
+        }
+
+        fillDocCaseVoList(docCaseVos);
+        return docCaseVos;
     }
 
     /**
-     * 查询法案列表
+     * 填充案例视图对象列表中额外信息
+     *
+     * @param docCaseVos 案例视图对象列表
+     * @return 填充后的案例视图对象列表
+     */
+    private void fillDocCaseVoList(List<DocCaseVo> docCaseVos) {
+        // 使用stream而非parallelStream以避免潜在的并发修改异常
+        docCaseVos.stream().forEach(docCaseVo -> {
+            try {
+                // TODO: 实现对MongoDB查询的逻辑优化，以便后续能够通过exist=false去除mysql在mongo中已有的字段数据
+                // 则将额外信息填充到视图对象中
+                fillDocCaseVo(docCaseVo);
+            } catch (Exception e) {
+                // 对异常进行适当的处理，例如记录日志等
+                // 日志处理逻辑...
+                log.error("查询文档案例视图对象时发生异常：{}", e.getMessage());
+                e.printStackTrace();
+                throw new ServiceException(e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * 将MongoDB数据填充到DocCaseVo中
+     *
+     * @param docCaseVo 视图对象
+     */
+    private void fillDocCaseVo(DocCaseVo docCaseVo) {
+        MDocCase mDocCase = mDocCaseService.getDocCaseById(docCaseVo.getId());
+        if (mDocCase != null) {
+            docCaseVo.setContent(mDocCase.getContent());
+            docCaseVo.setStripContent(mDocCase.getStripContent());
+            docCaseVo.setRelatedCases(mDocCase.getRelatedCases());
+            docCaseVo.setExtra(mDocCase.getExtra());
+        }
+    }
+
+
+    /**
+     * 查询案例列表
      */
     @Override
     public List<DocCaseVo> queryListByIds(Long[] ids) {
         List<Long> idLs = Arrays.asList(ids);
         List<DocCase> list = baseMapper.selectBatchIds(idLs);
-        return BeanUtil.copyToList(list, DocCaseVo.class);
+        List<DocCaseVo> docCaseVos = BeanCopyUtils.copyList(list, DocCaseVo.class);
+        if (docCaseVos != null) {
+            fillDocCaseVoList(docCaseVos);
+        }
+        return docCaseVos;
     }
+
 
     private LambdaQueryWrapper<DocCase> buildQueryWrapper(DocCaseBo bo) {
         Map<String, Object> params = bo.getParams();
@@ -116,29 +182,50 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
      * 新增司法案例
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean insertByBo(DocCaseBo bo) {
-        DocCase add = BeanUtil.toBean(bo, DocCase.class);
-        validEntityBeforeSave(add);
+        DocCase add = BeanCopyUtils.copy(bo, DocCase.class);
+        if (add != null) {
+            validEntityBeforeSave(add);
+        }
         boolean flag = baseMapper.insert(add) > 0;
         if (flag) {
             log.info("新增司法案例成功，id：{}", add.getId());
-//            bo.setId(add.getId());
-//            添加es索引
-            DocCase newCase = selectDocCaseByName(add.getName());
-            flag = remoteCaseRetrieveService.insert(BeanCopyUtils.copy(newCase, CaseDoc.class)) > 0;
+//            DocCaseVo docCaseVo = BeanCopyUtils.copy(add, DocCaseVo.class);
+            saveMongoAndEs(add);
         }
         return flag;
+    }
+
+    /**
+     * 保存司法案例到MongoDB和Elasticsearch
+     *
+     * @param docCase 司法案例对象，包含需要保存的信息
+     */
+    @Override
+    public void saveMongoAndEs(DocCase docCase) {
+        // 添加mongodb记录
+        MDocCase mDocCase = BeanCopyUtils.copy(docCase, MDocCase.class);
+        MDocCase newMDocCase = mDocCaseService.saveDocCase(mDocCase);
+        if (newMDocCase == null) {
+            throw new ServiceException("新增司法案例mongodb记录失败");
+        }
+        CaseDoc caseDoc = BeanCopyUtils.copy(docCase, CaseDoc.class);
+        boolean esFlag = remoteCaseRetrieveService.save(caseDoc) > 0;
+        if (!esFlag) {
+            throw new ServiceException("新增司法案例es索引失败");
+        }
     }
 
     /**
      * 批量添加司法案例到es
      */
     @Override
-    public Integer insertBatch(String clientId) {
+    public Integer syncAllCaseToEs(String clientId) {
         // 验证clientId的合法性
         Assert.notNull(clientId, "clientId不能为空");
 
-        List<DocCase> allCase = baseMapper.selectList();
+        List<DocCaseVo> allCase = this.queryList(new DocCaseBo());
         // 当查询结果为空时，直接返回0或抛出异常，避免后续逻辑执行
         if (allCase.isEmpty()) {
             return 0;
@@ -148,7 +235,9 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         int allCaseSize = allCase.size();
 
         // 设置mysqlId
-        caseDocs.forEach(caseDoc -> caseDoc.setMysqlId(caseDoc.getId()));
+        if (caseDocs != null) {
+            caseDocs.forEach(caseDoc -> caseDoc.setMysqlId(caseDoc.getId()));
+        }
 
         int insertNum = 100; // 批量插入数
         int successNum = 0;
@@ -160,9 +249,12 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         } else {
             int epoch = allCaseSize / insertNum + (allCaseSize % insertNum != 0 ? 1 : 0);
             for (int i = 0; i < epoch; i++) {
-                List<CaseDoc> subList = (i == epoch - 1) ?
-                    caseDocs.subList(i * insertNum, allCaseSize) :
-                    caseDocs.subList(i * insertNum, (i + 1) * insertNum);
+                List<CaseDoc> subList = null;
+                if (caseDocs != null) {
+                    subList = (i == epoch - 1) ?
+                        caseDocs.subList(i * insertNum, allCaseSize) :
+                        caseDocs.subList(i * insertNum, (i + 1) * insertNum);
+                }
                 successNum += remoteCaseRetrieveService.insertBatch(subList);
                 sendMessage(clientId, successNum, allCaseSize);
             }
@@ -185,13 +277,17 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
      * 修改司法案例
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean updateByBo(DocCaseBo bo) {
-        DocCase update = BeanUtil.toBean(bo, DocCase.class);
-        validEntityBeforeSave(update);
+        DocCase update = BeanCopyUtils.copy(bo, DocCase.class);
+        if (update != null) {
+            validEntityBeforeSave(update);
+        }
         boolean flag = baseMapper.updateById(update) > 0;
         if (flag) {
-//            更新es索引
-            flag = remoteCaseRetrieveService.update(BeanCopyUtils.copy(update, CaseDoc.class)) > 0;
+//            更新mongo记录和es索引
+//            DocCaseVo docCaseVo = BeanCopyUtils.copy(update, DocCaseVo.class);
+            saveMongoAndEs(update);
         }
         return flag;
     }
@@ -220,10 +316,24 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
 //        }
         boolean flag = baseMapper.deleteBatchIds(ids) > 0;
         if (flag) {
-//            删除es索引
-            remoteCaseRetrieveService.deleteBatch(ids.toArray(new Long[0]));
+            // 删除mongodb记录和es索引
+            deleteMongoAndEs(ids);
         }
         return flag;
+    }
+
+    /**
+     * 删除MongoDB和Elasticsearch中的记录
+     * 该方法首先会删除指定ID的MongoDB文档，然后删除对应的Elasticsearch索引。
+     *
+     * @param ids 需要删除的记录的ID集合，类型为Long的Collection
+     */
+    private void deleteMongoAndEs(Collection<Long> ids) {
+        // 删除MongoDB记录
+        mDocCaseService.deleteBatch(ids.toArray(new Long[0]));
+
+        // 删除Elasticsearch索引
+        remoteCaseRetrieveService.deleteBatch(ids.toArray(new Long[0]));
     }
 
     /**
@@ -233,6 +343,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
      * @return int 成功个数
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int process(List<ProcessBo> processList) {
         AtomicInteger success = new AtomicInteger(0);
         List<DocCase> docCases = BeanCopyUtils.copyList(processList, DocCase.class);
@@ -248,11 +359,11 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
                 docCase.setContent(docCase.getStripContent());
                 boolean sqlFlag = baseMapper.updateById(docCase) > 0;
                 if (sqlFlag) {
-                    //            更新es索引
-                    boolean esFlag = remoteCaseRetrieveService.update(BeanCopyUtils.copy(docCase, CaseDoc.class)) > 0;
-                    if (esFlag) {
-                        success.addAndGet(1);
-                    }
+                    // 更新mongo记录和es索引
+//                    DocCaseVo docCaseVo = BeanCopyUtils.copy(docCase, DocCaseVo.class);
+                    saveMongoAndEs(docCase);
+                    success.addAndGet(1);
+//                    boolean esFlag = remoteCaseRetrieveService.update(BeanCopyUtils.copy(docCase, CaseDoc.class)) > 0;
                 }
             });
         }
@@ -266,6 +377,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
      * @return int 成功个数
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int processContent(List<ProcessBo> processList) {
         AtomicInteger success = new AtomicInteger(0);
         List<DocCase> docCases = BeanCopyUtils.copyList(processList, DocCase.class);
@@ -275,11 +387,10 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
                 docCase.setIsMining(MiningStatus.STRIPED);
                 boolean sqlFlag = baseMapper.updateById(docCase) > 0;
                 if (sqlFlag) {
-                    //            更新es索引
-                    boolean esFlag = remoteCaseRetrieveService.update(BeanCopyUtils.copy(docCase, CaseDoc.class)) > 0;
-                    if (esFlag) {
-                        success.addAndGet(1);
-                    }
+                    // 更新mongo记录和es索引
+//                    DocCaseVo docCaseVo = BeanCopyUtils.copy(docCase, DocCaseVo.class);
+                    saveMongoAndEs(docCase);
+                    success.addAndGet(1);
                 }
             });
         }
@@ -293,6 +404,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
      * @return int 成功个数
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int processExtra(List<ProcessBo> processList) {
         AtomicInteger success = new AtomicInteger(0);
         List<DocCase> docCases = BeanCopyUtils.copyList(processList, DocCase.class);
@@ -302,11 +414,13 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
                 docCase.setIsMining(MiningStatus.MININGED);
                 boolean sqlFlag = baseMapper.updateById(docCase) > 0;
                 if (sqlFlag) {
-                    //            更新es索引
-                    boolean esFlag = remoteCaseRetrieveService.update(BeanCopyUtils.copy(docCase, CaseDoc.class)) > 0;
-                    if (esFlag) {
-                        success.addAndGet(1);
-                    }
+                    // 更新mongo记录和es索引
+                    saveMongoAndEs(docCase);
+                    success.addAndGet(1);
+//                    boolean esFlag = remoteCaseRetrieveService.update(BeanCopyUtils.copy(docCase, CaseDoc.class)) > 0;
+//                    if (esFlag) {
+//                        success.addAndGet(1);
+//                    }
                 }
             });
         }

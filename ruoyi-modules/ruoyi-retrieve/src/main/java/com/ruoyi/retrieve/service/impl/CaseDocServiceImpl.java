@@ -70,8 +70,6 @@ public class CaseDocServiceImpl implements ICaseDocService {
      */
     @Override
     public Integer update(CaseDoc caseDoc) {
-        // TODO: 2024/2/2 更新和新建司法案例和法律法规均报错？
-        //        设置词云
 //        String wordCloud = getWordCloud(caseDoc.getName(), caseDoc.getContent());
 //        caseDoc.setWordCloud(wordCloud);
         return caseDocMapper.updateById(caseDoc);
@@ -117,7 +115,8 @@ public class CaseDocServiceImpl implements ICaseDocService {
     @Override
     public CaseDoc selectByName(String name) {
         LambdaEsQueryChainWrapper<CaseDoc> lqw = EsWrappers.lambdaChainQuery(caseDocMapper).eq(StringUtils.isNotEmpty(name), CaseDoc::getName, name);
-        return caseDocMapper.selectOne(lqw);
+        CaseDoc caseDoc = caseDocMapper.selectOne(lqw);
+        return caseDoc;
     }
 
     /**

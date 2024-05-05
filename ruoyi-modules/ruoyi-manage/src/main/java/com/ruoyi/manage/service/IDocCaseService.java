@@ -40,9 +40,16 @@ public interface IDocCaseService extends IService<DocCase> {
     Boolean insertByBo(DocCaseBo bo);
 
     /**
+     * 保存司法案例到MongoDB和Elasticsearch
+     *
+     * @param docCase 司法案例对象，包含需要保存的信息
+     */
+    void saveMongoAndEs(DocCase docCase);
+
+    /**
      * 批量插入
      */
-    Integer insertBatch(String clientId);
+    Integer syncAllCaseToEs(String clientId);
 
     /**
      * 修改司法案例
