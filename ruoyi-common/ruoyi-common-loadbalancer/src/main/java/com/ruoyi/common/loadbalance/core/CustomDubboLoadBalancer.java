@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * 自定义 Dubbo 负载均衡算法
  *
- * @author Lion Li
+ * @author csFan
  */
 @Slf4j
 public class CustomDubboLoadBalancer extends AbstractLoadBalance {

@@ -19,7 +19,6 @@ import {
 } from "@/api/manage/statisticAnalyse";
 import * as echarts from 'echarts';
 
-
 use([
   CanvasRenderer,
   PieChart,
@@ -30,6 +29,8 @@ use([
 ]);
 
 provide(THEME_KEY, "white");
+
+const defaultListTab = ref(1);
 
 const lineData = ref([])
 const barData = ref([])
@@ -189,7 +190,7 @@ const caseCausePie = ref({
 const lawTypePie = ref({
   animation: true,
   title: {
-    text: "法条类型",
+    text: "法律法规",
     subtext: "种类",
     x: "center",
     y: "center",
@@ -249,7 +250,6 @@ const allDocsBarLine = ref({
   backgroundColor: "#ffffff",
   tooltip: {
     trigger: 'axis',
-
     axisPointer: {
       type: 'cross',
       // type: 'shadow',
@@ -276,12 +276,8 @@ const allDocsBarLine = ref({
   dataZoom: [{
     type: 'inside',
     start: 0,
-    end: 100
-  }, {
-    start: 0,
-    end: 100,
-    handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V2'
-  }],
+    end: 500
+  },],
   grid: {
     top: '8%',
     left: '1%',
@@ -326,7 +322,7 @@ const allDocsBarLine = ref({
   yAxis: [{
     type: 'value',
     min: 0,
-    // max: 140,
+    max: 500,
     splitNumber: 10,
     splitLine: {
       show: true,
@@ -488,18 +484,20 @@ const getDocsData = async () => {
   ]);
   // 将获取到的数据赋值给相应的变量
   totalDocs.value = totalCaseRes.data + totalLawRes.data;
+  // allDocsBarLine.value.yAxis.max = totalCaseRes.data;
 }
 const getProvince = () => {
   let resData = {};
   let total = 0;
   countProvinceCase().then((res) => {
     resData = res.data; // 存储返回的数据
+    // console.log(resData)
     allProvinces.forEach((province) => {
       barData.value.push(resData[province] || 0);
       total += resData[province] || 0;
     })
     barData.value.forEach((province) => (
-        lineData.value.push((province * 100 / totalDocs.value).toFixed(1))
+      lineData.value.push((province * 100 / totalDocs.value).toFixed(1))
     ))
   })
 }
@@ -528,33 +526,55 @@ import chinaMap from "@/views/chinaMap";
   <div class="mx-auto">
     <!--    <el-tabs class="mx-auto w-full" lazy="false" tab-position="left">-->
     <!--    <h2 class="text-center font-bold text-2xl">司法案例信息统计</h2>-->
-    <el-card class="m-2">
-      <el-row :gutter="10" class="mx-auto flex justify-evenly items-center">
-        <div ref="caseTypeRef" class="chart-container">
-          <v-chart :option="caseTypePie" class="chart"></v-chart>
-        </div>
-        <div ref="caseProcessRef" class="chart-container">
-          <v-chart :option="caseProcessPie" auto-resize class="chart"></v-chart>
-        </div>
-        <div ref="caseCauseRef" class="chart-container">
-          <v-chart :option="caseCausePie" auto-resize class="chart"></v-chart>
-        </div>
-        <div ref="lawTypeRef" class="chart-container">
-          <v-chart :option="lawTypePie" class="chart"></v-chart>
-        </div>
-      </el-row>
-      <!-- 中国地图 省级 一级页面 -->
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <china-map :title="'全国各省司法案例分布'"/>
-        </el-col>
-        <el-col :span="12">
-          <!--          <el-calendar v-model="value"/>-->
-          <v-chart :option="allDocsBarLine" autoresize class="m-5 mx-auto barChart"></v-chart>
-        </el-col>
-      </el-row>
-    </el-card>
-
+    <el-tabs v-model="defaultListTab" :tab-position="'top'" class="el-tabs mx-1" style=""
+             @tab-click="handleTabClick">
+      <el-tab-pane :name="1" label="数据中台">
+        <el-card class="m-2">
+          <el-row :gutter="10" class="mx-auto flex justify-evenly items-center">
+            <div ref="caseTypeRef" class="chart-container">
+              <v-chart :option="caseTypePie" class="chart"></v-chart>
+            </div>
+            <div ref="caseProcessRef" class="chart-container">
+              <v-chart :option="caseProcessPie" auto-resize class="chart"></v-chart>
+            </div>
+            <div ref="caseCauseRef" class="chart-container">
+              <v-chart :option="caseCausePie" auto-resize class="chart"></v-chart>
+            </div>
+            <div ref="lawTypeRef" class="chart-container">
+              <v-chart :option="lawTypePie" class="chart"></v-chart>
+            </div>
+          </el-row>
+          <!-- 中国地图 省级 一级页面 -->
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <china-map :title="'全国各省司法案例分布'"/>
+            </el-col>
+            <el-col :span="12">
+              <!--          <el-calendar v-model="value"/>-->
+              <v-chart :option="allDocsBarLine" autoresize class="m-5 mx-auto barChart"></v-chart>
+            </el-col>
+          </el-row>
+        </el-card>
+      </el-tab-pane>
+      <el-tab-pane :name="2" label="案例看板">
+        <IFrame
+          allowtransparency
+          class="htmlClass"
+          frameborder="0"
+          src="http://localhost:11210/public/dashboard/c9a2e5d0-1728-45e1-a104-cc13c188e6fa"
+          width="100%"
+        />
+      </el-tab-pane>
+      <el-tab-pane :name="3" label="法条看板">
+        <IFrame
+          allowtransparency
+          class="htmlClass"
+          frameborder="0"
+          src="http://localhost:11210/public/dashboard/ec934840-aa7f-4764-922c-50856c451a0a"
+          width="100%"
+        />
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 

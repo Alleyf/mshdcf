@@ -3,7 +3,7 @@ package com.ruoyi.common.core.constant;
 /**
  * 返回状态码
  *
- * @author Lion Li
+ * @author csFan
  */
 public interface HttpStatus {
     /**

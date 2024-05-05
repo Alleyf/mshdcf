@@ -4,13 +4,10 @@ import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.manage.domain.vo.DocCaseVo;
 import com.ruoyi.manage.domain.vo.LawRegulationVo;
-import com.ruoyi.manage.service.impl.DataProcessService;
 import com.ruoyi.manage.service.impl.StatisticAnalyseService;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -81,7 +78,7 @@ public class StatisticAnalyseController extends BaseController {
      * @return R<Map < String, Integer>> 案件按省份统计
      */
     @GetMapping("/case/count/province")
-    public R<Map<String, Integer>> countCasesByProvince() {
+    public R<Map<String, Long>> countCasesByProvince() {
         return R.ok(statisticAnalyseService.countCasesByProvince());
     }
 
@@ -101,7 +98,7 @@ public class StatisticAnalyseController extends BaseController {
      * @return R<Map < String, Integer>> 案件按审判进程统计
      */
     @GetMapping("/case/count/process")
-    public R<Map<String, Integer>> countCasesByProcess() {
+    public R<Map<String, Long>> countCasesByProcess() {
         return R.ok(statisticAnalyseService.countCasesByProcess());
     }
 
@@ -111,8 +108,8 @@ public class StatisticAnalyseController extends BaseController {
      * @return R<Map < String, Integer>> 案件按案由统计
      */
     @GetMapping("/case/count/cause")
-    public R<Map<String, Integer>> countCasesByRootCause() {
-        return R.ok(statisticAnalyseService.countCasesByRootCase());
+    public R<Map<String, Long>> countCasesByRootCause() {
+        return R.ok(statisticAnalyseService.countCasesByRootCause());
     }
 
     /**

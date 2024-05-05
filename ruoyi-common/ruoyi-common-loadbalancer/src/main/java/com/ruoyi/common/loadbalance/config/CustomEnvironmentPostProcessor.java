@@ -8,18 +8,18 @@ import org.springframework.core.env.ConfigurableEnvironment;
 /**
  * dubbo自定义负载均衡配置注入
  *
- * @author Lion Li
+ * @author csFan
  */
 public class CustomEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
-	@Override
-	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+    @Override
+    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         System.setProperty("dubbo.consumer.loadbalance", "customDubboLoadBalancer");
-	}
+    }
 
-	@Override
-	public int getOrder() {
-		return Ordered.HIGHEST_PRECEDENCE;
-	}
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
+    }
 
 }

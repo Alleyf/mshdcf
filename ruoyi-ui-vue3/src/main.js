@@ -1,4 +1,4 @@
-import {createApp, ref} from 'vue'
+import {createApp} from 'vue'
 
 import Cookies from 'js-cookie'
 
@@ -15,6 +15,23 @@ import router from './router'
 import directive from './directive' // directive
 import VueCharts from 'vue-echarts'
 
+// 引入vue-fullpage
+import VueFullPage from 'vue-fullpage.js';
+// import 'fullpage.js/vendors/scrolloverflow' // 如果需要使用scrollOverflow选项，需要引入此文件
+import 'fullpage.js/dist/fullpage.min.css' // 引入fullpage.js的样式文件
+// markdown预览插件
+import VMdPreview from '@kangc/v-md-editor/lib/preview';
+import '@kangc/v-md-editor/lib/style/preview.css';
+import githubTheme from '@kangc/v-md-editor/lib/theme/github.js';
+import '@kangc/v-md-editor/lib/theme/style/github.css';
+
+// highlightjs
+import hljs from 'highlight.js';
+
+VMdPreview.use(githubTheme, {
+  Hljs: hljs,
+});
+
 // 注册指令
 import plugins from './plugins' // plugins
 import {download} from '@/utils/request'
@@ -25,7 +42,6 @@ import {sendWebMessage} from "@/utils/websocket";
 import 'virtual:svg-icons-register'
 import SvgIcon from '@/components/SvgIcon'
 import elementIcons from '@/components/SvgIcon/svgicon'
-import {Icon} from '@iconify/vue';
 
 
 import './permission' // permission control
@@ -42,6 +58,9 @@ import RightToolbar from '@/components/RightToolbar'
 import QEditor from "@/components/Editor"
 // 富文本组件
 import WEditor from "@/components/WEditor"
+// markdown 组件
+import Vditor from "@/components/Vditor"
+
 
 // 文件上传组件
 import FileUpload from "@/components/FileUpload"
@@ -86,23 +105,26 @@ app.component('ImagePreview', ImagePreview)
 app.component('RightToolbar', RightToolbar)
 app.component('WEditor', WEditor)
 app.component('QEditor', QEditor)
+app.component('VEditor', Vditor)
 app.component('IFrame', IFrame)
 app.component('v-chart', VueCharts)
+app.component('svg-icon', SvgIcon)
 
 
 app.use(router)
 app.use(store)
 app.use(plugins)
 app.use(elementIcons)
-app.component('svg-icon', SvgIcon)
+app.use(VueFullPage)
+app.use(VMdPreview)
 
 directive(app)
 
 // 使用element-plus 并且设置全局的大小
 app.use(ElementPlus, {
-    locale: locale,
-    // 支持 large、default、small
-    size: Cookies.get('size') || 'default'
+  locale: locale,
+  // 支持 large、default、small
+  size: Cookies.get('size') || 'default'
 })
 
 // 修改 el-dialog 默认点击遮照为不关闭

@@ -6,7 +6,7 @@ import com.ruoyi.resource.api.domain.SysFile;
 /**
  * 文件服务
  *
- * @author Lion Li
+ * @author csFan
  */
 public interface RemoteFileService {
 

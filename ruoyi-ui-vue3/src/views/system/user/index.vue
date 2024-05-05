@@ -193,7 +193,7 @@
     </el-row>
 
     <!-- 添加或修改用户配置对话框 -->
-    <el-dialog v-model="open" :title="title" append-to-body width="600px">
+    <el-dialog v-model="open" :title="title" append-to-body center width="600px">
       <el-form ref="userRef" :model="form" :rules="rules" label-width="80px">
         <el-row>
           <el-col :span="12">
@@ -310,7 +310,7 @@
     </el-dialog>
 
     <!-- 用户导入对话框 -->
-    <el-dialog v-model="upload.open" :title="upload.title" append-to-body width="400px">
+    <el-dialog v-model="upload.open" :title="upload.title" append-to-body center width="400px">
       <el-upload
         ref="uploadRef"
         :action="upload.url + '?updateSupport=' + upload.updateSupport"
@@ -454,7 +454,7 @@ function getDeptTree() {
   deptTreeSelect().then(response => {
     deptOptions.value = response.data;
   });
-};
+}
 
 /** 查询用户列表 */
 function getList() {
@@ -464,19 +464,19 @@ function getList() {
     userList.value = res.rows;
     total.value = res.total;
   });
-};
+}
 
 /** 节点单击事件 */
 function handleNodeClick(data) {
   queryParams.value.deptId = data.id;
   handleQuery();
-};
+}
 
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1;
   getList();
-};
+}
 
 /** 重置按钮操作 */
 function resetQuery() {
@@ -485,7 +485,7 @@ function resetQuery() {
   queryParams.value.deptId = undefined;
   proxy.$refs.deptTreeRef.setCurrentKey(null);
   handleQuery();
-};
+}
 
 /** 删除按钮操作 */
 function handleDelete(row) {
@@ -497,7 +497,7 @@ function handleDelete(row) {
     proxy.$modal.msgSuccess("删除成功");
   }).catch(() => {
   });
-};
+}
 
 /** 导出按钮操作 */
 function handleExport() {
@@ -509,7 +509,7 @@ function handleExport() {
   proxy.download("system/user/export", {
     ...queryParams.value,
   }, `user_${new Date().getTime()}.xlsx`);
-};
+}
 
 /** 用户状态修改  */
 function handleStatusChange(row) {
@@ -521,7 +521,7 @@ function handleStatusChange(row) {
   }).catch(function () {
     row.status = row.status === "0" ? "1" : "0";
   });
-};
+}
 
 /** 更多操作 */
 function handleCommand(command, row) {
@@ -535,13 +535,13 @@ function handleCommand(command, row) {
     default:
       break;
   }
-};
+}
 
 /** 跳转角色分配 */
 function handleAuthRole(row) {
   const userId = row.userId;
   router.push("/system/user-auth/role/" + userId);
-};
+}
 
 /** 重置密码按钮操作 */
 function handleResetPwd(row) {
@@ -557,25 +557,26 @@ function handleResetPwd(row) {
     });
   }).catch(() => {
   });
-};
+}
 
 /** 选择条数  */
 function handleSelectionChange(selection) {
   ids.value = selection.map(item => item.userId);
   single.value = selection.length != 1;
   multiple.value = !selection.length;
-};
+}
 
 /** 导入按钮操作 */
 function handleImport() {
   upload.title = "用户导入";
   upload.open = true;
-};
+}
 
 /** 下载模板操作 */
 function importTemplate() {
   proxy.download("system/user/importTemplate", {}, `user_template_${new Date().getTime()}.xlsx`);
-};
+}
+
 /**文件上传中处理 */
 const handleFileUploadProgress = (event, file, fileList) => {
   upload.isUploading = true;
@@ -592,7 +593,7 @@ const handleFileSuccess = (response, file, fileList) => {
 /** 提交上传文件 */
 function submitFileForm() {
   proxy.$refs["uploadRef"].submit();
-};
+}
 
 /** 重置操作表单 */
 function reset() {
@@ -611,13 +612,13 @@ function reset() {
     roleIds: []
   };
   proxy.resetForm("userRef");
-};
+}
 
 /** 取消按钮 */
 function cancel() {
   open.value = false;
   reset();
-};
+}
 
 /** 新增按钮操作 */
 function handleAdd() {
@@ -629,7 +630,7 @@ function handleAdd() {
     title.value = "添加用户";
     form.value.password = initPassword.value;
   });
-};
+}
 
 /** 修改按钮操作 */
 function handleUpdate(row) {
@@ -645,7 +646,7 @@ function handleUpdate(row) {
     title.value = "修改用户";
     form.password = "";
   });
-};
+}
 
 /** 提交按钮 */
 function submitForm() {
@@ -666,7 +667,7 @@ function submitForm() {
       }
     }
   });
-};
+}
 
 getDeptTree();
 getList();

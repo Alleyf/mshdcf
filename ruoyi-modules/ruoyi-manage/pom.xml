@@ -36,6 +36,16 @@
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-api-retrieve</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-io</artifactId>
+                    <groupId>commons-io</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-lang</artifactId>
+                    <groupId>commons-lang</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!--        sentinel-->
@@ -47,7 +57,6 @@
         <dependency>
             <groupId>com.hankcs.hanlp.restful</groupId>
             <artifactId>hanlp-restful</artifactId>
-            <version>0.0.15</version>
         </dependency>
 
         <!-- RuoYi Common Log -->
@@ -119,10 +128,10 @@
             <artifactId>ruoyi-api-websocket</artifactId>
         </dependency>
         <!--        websocket服务-->
-        <dependency>
-            <groupId>com.ruoyi</groupId>
-            <artifactId>ruoyi-common-websocket</artifactId>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.ruoyi</groupId>-->
+        <!--            <artifactId>ruoyi-common-websocket</artifactId>-->
+        <!--        </dependency>-->
         <!--        mq消息队列服务-->
         <dependency>
             <groupId>com.ruoyi</groupId>

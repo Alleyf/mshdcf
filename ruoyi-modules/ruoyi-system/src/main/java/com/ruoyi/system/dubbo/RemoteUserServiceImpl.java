@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * 用户服务
  *
- * @author Lion Li
+ * @author csFan
  */
 @RequiredArgsConstructor
 @Service
@@ -39,8 +39,8 @@ public class RemoteUserServiceImpl implements RemoteUserService {
     @Override
     public LoginUser getUserInfo(String username) throws UserException {
         SysUser sysUser = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
-                .select(SysUser::getUserName, SysUser::getStatus)
-                .eq(SysUser::getUserName, username));
+            .select(SysUser::getUserName, SysUser::getStatus)
+            .eq(SysUser::getUserName, username));
         if (ObjectUtil.isNull(sysUser)) {
             throw new UserException("user.not.exists", username);
         }
@@ -55,8 +55,8 @@ public class RemoteUserServiceImpl implements RemoteUserService {
     @Override
     public LoginUser getUserInfoByPhonenumber(String phonenumber) throws UserException {
         SysUser sysUser = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
-                .select(SysUser::getPhonenumber, SysUser::getStatus)
-                .eq(SysUser::getPhonenumber, phonenumber));
+            .select(SysUser::getPhonenumber, SysUser::getStatus)
+            .eq(SysUser::getPhonenumber, phonenumber));
         if (ObjectUtil.isNull(sysUser)) {
             throw new UserException("user.not.exists", phonenumber);
         }

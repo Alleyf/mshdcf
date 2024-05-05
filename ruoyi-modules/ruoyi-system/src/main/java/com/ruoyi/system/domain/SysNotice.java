@@ -1,5 +1,6 @@
 package com.ruoyi.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.ruoyi.common.core.web.domain.BaseEntity;
@@ -9,13 +10,14 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
 
 /**
  * 通知公告表 sys_notice
  *
- * @author Lion Li
+ * @author csFan
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -41,6 +43,14 @@ public class SysNotice extends BaseEntity {
      * 公告类型（1通知 2公告）
      */
     private String noticeType;
+
+    /**
+     * 发送目标用户ID
+     */
+    @TableField(exist = false)
+//    @NotEmpty(message = "发送目标用户ID不能为空")
+//    @Size(min = 1, message = "至少有一个发送目标用户")
+    private Long[] targetIds;
 
     /**
      * 公告内容

@@ -30,7 +30,7 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
 /**
  * WebFlux 工具类
  *
- * @author Lion Li
+ * @author csFan
  */
 public class WebFluxUtils {
 
@@ -56,7 +56,7 @@ public class WebFluxUtils {
 
     /**
      * 读取request内的body
-     *
+     * <p>
      * 注意一个request只能读取一次 读取之后需要重新包装
      */
     public static String resolveBodyFromRequest(ServerHttpRequest serverHttpRequest) {
@@ -73,7 +73,7 @@ public class WebFluxUtils {
 
     /**
      * 从缓存中读取request内的body
-     *
+     * <p>
      * 注意要求经过 {@link ServerWebExchangeUtils#cacheRequestBody(ServerWebExchange, Function)} 此方法创建缓存
      * 框架内已经使用 {@link GlobalCacheRequestFilter} 全局创建了body缓存
      *

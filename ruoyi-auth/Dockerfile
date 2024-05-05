@@ -1,6 +1,6 @@
 FROM anapsix/alpine-java:8_server-jre_unlimited
 
-MAINTAINER Lion Li
+MAINTAINER csFan
 
 RUN mkdir -p /ruoyi/auth/logs  \
     /ruoyi/auth/temp  \

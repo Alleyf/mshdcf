@@ -7,7 +7,7 @@ import org.springframework.boot.context.metrics.buffering.BufferingApplicationSt
 /**
  * SpringCloud-Stream-MQ 案例项目
  *
- * @author Lion Li
+ * @author csFan
  */
 @SpringBootApplication
 public class RuoYiStreamMqApplication {

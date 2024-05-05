@@ -7,7 +7,7 @@ import org.springframework.boot.context.metrics.buffering.BufferingApplicationSt
 /**
  * 演示模块
  *
- * @author Lion Li
+ * @author csFan
  */
 @SpringBootApplication
 public class RuoYiDemoApplication {

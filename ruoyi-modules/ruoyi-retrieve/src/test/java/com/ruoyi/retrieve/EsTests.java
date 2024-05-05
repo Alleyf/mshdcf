@@ -1,6 +1,6 @@
 package com.ruoyi.retrieve;
 
-import cn.easyes.core.core.EsWrappers;
+import org.dromara.easyes.core.core.EsWrappers;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
 import com.ruoyi.retrieve.esmapper.CaseDocMapper;
 import org.junit.jupiter.api.Assertions;

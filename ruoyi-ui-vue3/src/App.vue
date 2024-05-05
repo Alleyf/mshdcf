@@ -14,6 +14,11 @@ onMounted(() => {
 </script>
 <style lang="scss">
 
+.app-container {
+  height: 100vh;
+  overflow: auto;
+}
+
 /* 定义滚动条整体样式 */
 ::-webkit-scrollbar {
   width: 8px; /* 滚动条宽度 */

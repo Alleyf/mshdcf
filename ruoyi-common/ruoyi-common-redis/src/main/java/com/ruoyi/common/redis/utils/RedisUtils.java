@@ -1,15 +1,15 @@
 package com.ruoyi.common.redis.utils;
 
 import com.ruoyi.common.core.utils.SpringUtils;
+import com.ruoyi.common.core.utils.StringUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.redisson.api.*;
+import org.redisson.spring.data.connection.RedissonConnectionFactory;
+import org.springframework.data.redis.connection.RedisConnection;
 
 import java.time.Duration;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 /**
  * redis 工具类
  *
- * @author Lion Li
+ * @author csFan
  * @version 3.1.0 新增
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 public class RedisUtils {
 
     private static final RedissonClient CLIENT = SpringUtils.getBean(RedissonClient.class);
+    private static final RedissonConnectionFactory connectionFactory = SpringUtils.getBean(RedissonConnectionFactory.class);
 
     /**
      * 限流
@@ -128,7 +129,6 @@ public class RedisUtils {
         bucket.expireAsync(duration);
         batch.execute();
     }
-
 
     /**
      * 如果不存在则设置 并返回 true 如果存在则返回 false
@@ -486,6 +486,37 @@ public class RedisUtils {
     public static Boolean hasKey(String key) {
         RKeys rKeys = CLIENT.getKeys();
         return rKeys.countExists(key) > 0;
+    }
+
+    /**
+     * 获取redis服务器相关信息
+     *
+     * @return Map<String, Object> redis服务器相关信息
+     */
+    public static Map<String, Object> getInfo() {
+
+        RedisConnection connection = connectionFactory.getConnection();
+        // 获取redis缓存完整信息
+        Properties info = connection.info();
+        // 获取redis缓存命令统计信息
+        Properties commandStats = connection.info("commandstats");
+        // 获取redis缓存中可用键Key的总数
+        Long dbSize = connection.dbSize();
+        Map<String, Object> result = new HashMap<>(3);
+        result.put("info", info);
+        result.put("dbSize", dbSize);
+        // 命令统计
+        List<Map<String, Object>> pieList = new ArrayList<>();
+        assert commandStats != null;
+        commandStats.stringPropertyNames().forEach(key -> {
+            Map<String, Object> data = new HashMap<>(2);
+            String property = commandStats.getProperty(key);
+            data.put("name", StringUtils.removeStart(key, "cmdstat_"));
+            data.put("value", Integer.parseInt(StringUtils.substringBetween(property, "calls=", ",usec")));
+            pieList.add(data);
+        });
+        result.put("commandStats", pieList);
+        return result;
     }
 
 }

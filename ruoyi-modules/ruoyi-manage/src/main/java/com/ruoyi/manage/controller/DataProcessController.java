@@ -2,7 +2,6 @@ package com.ruoyi.manage.controller;
 
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.web.controller.BaseController;
-import com.ruoyi.common.websocket.websocket.WebSocketService;
 import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.LawRegulation;
 import com.ruoyi.manage.service.impl.DataProcessService;
@@ -13,7 +12,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -33,8 +31,8 @@ public class DataProcessController extends BaseController {
 
     @Resource
     private DataProcessService dataProcessService;
-//    @DubboReference
-//    private RemoteWebSocketService remoteWebSocketService;
+    @DubboReference
+    private RemoteWebSocketService remoteWebSocketService;
 
 
     /**
@@ -189,9 +187,9 @@ public class DataProcessController extends BaseController {
     @GetMapping("/push")
     public R<Void> push(@RequestParam(value = "clientId", required = false) String clientId, @RequestParam("message") String message) {
         if (null != clientId) {
-            WebSocketService.sendMessage(clientId, message);
+            remoteWebSocketService.sendToAll(message);
         } else {
-            WebSocketService.sendMessage("", message);
+            remoteWebSocketService.sendToOne(clientId, message);
         }
         return R.ok();
     }

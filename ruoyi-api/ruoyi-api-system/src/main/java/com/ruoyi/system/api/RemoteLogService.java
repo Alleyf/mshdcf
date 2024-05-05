@@ -6,7 +6,7 @@ import com.ruoyi.system.api.domain.SysOperLog;
 /**
  * 日志服务
  *
- * @author Lion Li
+ * @author csFan
  */
 public interface RemoteLogService {
 

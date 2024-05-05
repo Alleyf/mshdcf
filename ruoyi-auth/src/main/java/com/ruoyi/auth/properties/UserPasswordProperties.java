@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * 用户密码配置
  *
- * @author Lion Li
+ * @author csFan
  */
 @Data
 @Configuration

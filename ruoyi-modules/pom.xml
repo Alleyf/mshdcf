@@ -17,6 +17,7 @@
         <module>ruoyi-manage</module>
         <module>ruoyi-retrieve</module>
         <module>ruoyi-websocket</module>
+        <module>ruoyi-gpt</module>
     </modules>
 
     <artifactId>ruoyi-modules</artifactId>

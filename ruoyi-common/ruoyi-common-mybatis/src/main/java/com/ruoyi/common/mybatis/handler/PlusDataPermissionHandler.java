@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 /**
  * 数据权限过滤
  *
- * @author Lion Li
+ * @author csFan
  * @version 3.5.0
  */
 @Slf4j
@@ -102,7 +102,7 @@ public class PlusDataPermissionHandler {
         Set<String> conditions = new HashSet<>();
         for (RoleDTO role : user.getRoles()) {
             user.setRoleId(role.getRoleId());
-            // 获取角色权限泛型
+            // 获取数据权限枚举
             DataScopeType type = DataScopeType.findCode(role.getDataScope());
             if (ObjectUtil.isNull(type)) {
                 throw new ServiceException("角色数据范围异常 => " + role.getDataScope());

@@ -10,7 +10,7 @@ import org.apache.dubbo.config.annotation.DubboReference;
 /**
  * 用户名翻译实现
  *
- * @author Lion Li
+ * @author csFan
  */
 @AllArgsConstructor
 @TranslationType(type = TransConstant.USER_ID_TO_NAME)

@@ -28,11 +28,20 @@
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-common-redis</artifactId>
         </dependency>
-        <!--         websocket-->
+        <!--        ruoyi-api-websocket-->
         <dependency>
             <groupId>com.ruoyi</groupId>
-            <artifactId>ruoyi-common-websocket</artifactId>
+            <artifactId>ruoyi-api-websocket</artifactId>
         </dependency>
+        <!--        dubbo-->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-common-dubbo</artifactId>
+        </dependency><!--         websocket-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.ruoyi</groupId>-->
+        <!--            <artifactId>ruoyi-common-websocket</artifactId>-->
+        <!--        </dependency>-->
     </dependencies>
 
 </project>

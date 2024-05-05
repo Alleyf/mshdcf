@@ -22,7 +22,7 @@ import java.time.Duration;
 /**
  * 邮件功能
  *
- * @author Lion Li
+ * @author csFan
  */
 @Slf4j
 @Validated

@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * 响应信息主体
  *
- * @author Lion Li
+ * @author csFan
  */
 @Data
 @NoArgsConstructor
@@ -88,7 +88,7 @@ public class R<T> implements Serializable {
     /**
      * 返回警告消息
      *
-     * @param msg 返回内容
+     * @param msg  返回内容
      * @param data 数据对象
      * @return 警告消息
      */

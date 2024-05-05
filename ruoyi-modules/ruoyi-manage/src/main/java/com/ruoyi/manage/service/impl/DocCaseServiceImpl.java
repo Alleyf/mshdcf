@@ -5,35 +5,36 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson2.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.core.utils.BeanCopyUtils;
 import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.ruoyi.common.satoken.utils.LoginHelper;
-import com.ruoyi.common.websocket.websocket.WebSocketService;
+import com.ruoyi.manage.domain.DocCase;
+import com.ruoyi.manage.domain.bo.DocCaseBo;
 import com.ruoyi.manage.domain.bo.ProcessBo;
+import com.ruoyi.manage.domain.vo.DocCaseVo;
 import com.ruoyi.manage.enums.MiningStatus;
 import com.ruoyi.manage.enums.SocketMsgType;
-import com.ruoyi.manage.mq.WebscoketMessage;
+import com.ruoyi.manage.mapper.DocCaseMapper;
+import com.ruoyi.manage.service.IDocCaseService;
 import com.ruoyi.retrieve.api.RemoteCaseDocRetrieveService;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
+import com.ruoyi.websocket.api.RemoteWebSocketService;
+import com.ruoyi.websocket.domain.WebscoketMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
-import com.ruoyi.manage.domain.bo.DocCaseBo;
-import com.ruoyi.manage.domain.vo.DocCaseVo;
-import com.ruoyi.manage.domain.DocCase;
-import com.ruoyi.manage.mapper.DocCaseMapper;
-import com.ruoyi.manage.service.IDocCaseService;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * 司法案例Service业务层处理
@@ -46,7 +47,9 @@ import java.util.stream.Collectors;
 public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> implements IDocCaseService {
 
     @DubboReference(version = "1.0", group = "case", timeout = 200000)
-    public RemoteCaseDocRetrieveService remoteCaseRetrieveService;
+    private RemoteCaseDocRetrieveService remoteCaseRetrieveService;
+    @DubboReference
+    private RemoteWebSocketService remoteWebSocketService;
     @Resource
     private DocCaseMapper baseMapper;
 
@@ -104,8 +107,8 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         lqw.ge(bo.getJudgeDate() != null, DocCase::getJudgeDate, bo.getJudgeDate());
         lqw.le(bo.getPubDate() != null, DocCase::getPubDate, bo.getPubDate());
         lqw.like(StringUtils.isNotBlank(bo.getLegalBasis()), DocCase::getLegalBasis, bo.getLegalBasis());
-        lqw.eq(StringUtils.isNotBlank(bo.getParty()), DocCase::getParty, bo.getParty());
         lqw.eq(bo.getStatus() != null, DocCase::getStatus, bo.getStatus());
+        lqw.eq(bo.getIsMining() != null, DocCase::getIsMining, MiningStatus.getMiningStatus(bo.getIsMining()));
         return lqw;
     }
 
@@ -127,41 +130,55 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         return flag;
     }
 
+    /**
+     * 批量添加司法案例到es
+     */
     @Override
     public Integer insertBatch(String clientId) {
-//        String clientId = LoginHelper.getLoginId();
+        // 验证clientId的合法性
+        Assert.notNull(clientId, "clientId不能为空");
+
         List<DocCase> allCase = baseMapper.selectList();
-        List<CaseDoc> all = BeanCopyUtils.copyList(allCase, CaseDoc.class);
+        // 当查询结果为空时，直接返回0或抛出异常，避免后续逻辑执行
+        if (allCase.isEmpty()) {
+            return 0;
+        }
+
+        List<CaseDoc> caseDocs = BeanCopyUtils.copyList(allCase, CaseDoc.class);
         int allCaseSize = allCase.size();
-//        设置mysqlId
-        Assert.notNull(all, "数据库暂无案例数据，请先新增数据");
-        all = all.stream().peek(caseDoc -> caseDoc.setMysqlId(caseDoc.getId())).collect(Collectors.toList());
-//      分块同步
-        int successNum = 0, insertNum = 100;
+
+        // 设置mysqlId
+        caseDocs.forEach(caseDoc -> caseDoc.setMysqlId(caseDoc.getId()));
+
+        int insertNum = 100; // 批量插入数
+        int successNum = 0;
+
+        // 分块同步
         if (allCaseSize <= insertNum) {
-            successNum = remoteCaseRetrieveService.insertBatch(all);
-//            发送同步进展消息
-            WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.CASE.getType(), "全量同步司法案例", "同步进度：" + successNum + "/" + allCaseSize, clientId);
-            WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
+            successNum = remoteCaseRetrieveService.insertBatch(caseDocs);
+            sendMessage(clientId, successNum, allCaseSize);
         } else {
-//            判断是否为300的整数倍
-            boolean remain = all.size() % insertNum != 0;
-//            查询批量插入总批次
-            int epoch = remain ? all.size() / insertNum + 1 : all.size() / insertNum;
-            for (int i = 0; i < epoch; i += 1) {
-                List<CaseDoc> subList;
-                if (remain && i == epoch - 1) {
-                    subList = all.subList(i * insertNum, all.size());
-                } else {
-                    subList = all.subList(i * insertNum, (i + 1) * insertNum);
-                }
+            int epoch = allCaseSize / insertNum + (allCaseSize % insertNum != 0 ? 1 : 0);
+            for (int i = 0; i < epoch; i++) {
+                List<CaseDoc> subList = (i == epoch - 1) ?
+                    caseDocs.subList(i * insertNum, allCaseSize) :
+                    caseDocs.subList(i * insertNum, (i + 1) * insertNum);
                 successNum += remoteCaseRetrieveService.insertBatch(subList);
-                //            发送同步进展消息
-                WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.CASE.getType(), "全量同步司法案例", "同步进度：" + successNum + "/" + allCaseSize, clientId);
-                WebSocketService.sendMessage(clientId, JSONObject.toJSONString(message));
+                sendMessage(clientId, successNum, allCaseSize);
             }
         }
         return successNum;
+    }
+
+//    todo 添加增量同步（查询es所有数据和mysql所有数据，遍历mysql数据借助布隆过滤器判断是否存在于es中，不存在则添加到es：问题在于速度肯定很慢）
+
+    /**
+     * 发送同步进度消息
+     */
+    private void sendMessage(String clientId, int successNum, int allCaseSize) {
+        WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.CASE.getType(),
+            "全量同步司法案例", "同步进度：" + successNum + "/" + allCaseSize, clientId);
+        remoteWebSocketService.sendToOne(clientId, JSONObject.toJSONString(message));
     }
 
     /**
@@ -228,6 +245,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
                 if (checkMininged(docCase)) {
                     docCase.setIsMining(MiningStatus.MININGED);
                 }
+                docCase.setContent(docCase.getStripContent());
                 boolean sqlFlag = baseMapper.updateById(docCase) > 0;
                 if (sqlFlag) {
                     //            更新es索引
@@ -322,6 +340,20 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
      * @return boolean
      */
     boolean checkMininged(DocCase docCase) {
-        return !StringUtils.isBlank(docCase.getExtra());
+        String originExtra = "{" + "\"keyword\": \"\"," +
+            "    \"summary\": \"\",\n" +
+            "    \"plea\": \"\",\n" +
+            "    \"label\": \"\",\n" +
+            "    \"plai\": \"\",\n" +
+            "    \"defe\": \"\",\n" +
+            "    \"article\": \"xx\",\n" +
+            "    \"party\": {\n" +
+            "        \"plaintiff\": \"\",\n" +
+            "        \"defendant\": \"\"\n" +
+            "    },\n" +
+            "    \"fact\": \"\",\n" +
+            "    \"note\": \"\"\n" +
+            "}";
+        return !StringUtils.isBlank(docCase.getExtra()) && !docCase.getExtra().equals(originExtra);
     }
 }

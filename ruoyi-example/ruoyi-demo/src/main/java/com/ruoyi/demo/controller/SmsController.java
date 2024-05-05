@@ -17,7 +17,7 @@ import java.util.LinkedHashMap;
  * 短信演示案例
  * 请先阅读文档 否则无法使用
  *
- * @author Lion Li
+ * @author csFan
  * @version 4.2.0
  */
 @Validated

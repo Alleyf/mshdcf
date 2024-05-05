@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 /**
  * OSS对象存储对象
  *
- * @author Lion Li
+ * @author csFan
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

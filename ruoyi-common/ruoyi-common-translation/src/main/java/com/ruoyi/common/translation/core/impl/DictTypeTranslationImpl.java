@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 /**
  * 字典翻译实现
  *
- * @author Lion Li
+ * @author csFan
  */
 @AllArgsConstructor
 @TranslationType(type = TransConstant.DICT_TYPE_TO_LABEL)

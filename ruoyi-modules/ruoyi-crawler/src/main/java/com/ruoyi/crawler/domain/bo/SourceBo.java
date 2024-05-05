@@ -42,7 +42,7 @@ public class SourceBo extends BaseEntity {
     /**
      * 数据源授权（0：不需要授权；1：需要授权）
      */
-    @NotBlank(message = "数据源是否需要登录不能为空", groups = {AddGroup.class, EditGroup.class})
+    @NotNull(message = "数据源是否需要登录不能为空", groups = {AddGroup.class, EditGroup.class})
     private Integer authorize;
     /**
      * 数据源url地址

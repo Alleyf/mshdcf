@@ -7,7 +7,7 @@ import javax.validation.constraints.NotBlank;
 /**
  * 短信登录对象
  *
- * @author Lion Li
+ * @author csFan
  */
 
 @Data

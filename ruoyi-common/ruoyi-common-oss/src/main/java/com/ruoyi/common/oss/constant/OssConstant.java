@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * 对象存储常量
  *
- * @author Lion Li
+ * @author csFan
  */
 public interface OssConstant {
 
@@ -28,7 +28,7 @@ public interface OssConstant {
     /**
      * 云服务商
      */
-    String[] CLOUD_SERVICE = new String[] {"aliyun", "qcloud", "qiniu", "obs"};
+    String[] CLOUD_SERVICE = new String[]{"aliyun", "qcloud", "qiniu", "obs"};
 
     /**
      * https 状态

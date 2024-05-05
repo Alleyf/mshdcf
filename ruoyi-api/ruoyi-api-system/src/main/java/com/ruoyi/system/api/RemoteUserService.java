@@ -9,7 +9,7 @@ import com.ruoyi.system.api.model.XcxLoginUser;
 /**
  * 用户服务
  *
- * @author Lion Li
+ * @author csFan
  */
 public interface RemoteUserService {
 

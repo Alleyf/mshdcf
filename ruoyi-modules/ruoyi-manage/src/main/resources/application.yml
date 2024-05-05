@@ -46,7 +46,7 @@ easy-es:
   # 是否开启EE自动配置
   enable: false
   # es连接地址+端口 格式必须为ip:port,如果是集群则可用逗号隔开
-  address: 8.130.88.159:9200
+  address: @es.address@
   # 默认为http
   schema: http
   banner: false
@@ -66,7 +66,7 @@ spring:
     host: localhost
     port: 5672
     # 虚拟主机必须提前在mq山创建好
-    virtual-host: /mshdcf
+    virtual-host: /
     username: admin
     password: admin
   cloud:

@@ -1,6 +1,8 @@
 package com.ruoyi.manage.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.ruoyi.common.core.constant.CacheNames;
 import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.LawRegulation;
 import com.ruoyi.manage.domain.vo.DocCaseVo;
@@ -9,6 +11,7 @@ import com.ruoyi.manage.mapper.DocCaseMapper;
 import com.ruoyi.manage.mapper.LawRegulationMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 统计分析业务实现类
@@ -32,6 +36,47 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 public class StatisticAnalyseService {
+    // 使用HashMap来存储省份代码和简称的映射关系
+    private static final Map<Character, String> provinceCodeMap = new HashMap<>();
+
+    static {
+        provinceCodeMap.put('辽', "辽宁");
+        provinceCodeMap.put('京', "北京");
+        provinceCodeMap.put('沪', "上海");
+        provinceCodeMap.put('津', "天津");
+        provinceCodeMap.put('渝', "重庆");
+        provinceCodeMap.put('冀', "河北");
+        provinceCodeMap.put('晋', "山西");
+        provinceCodeMap.put('蒙', "内蒙古");
+        provinceCodeMap.put('吉', "吉林");
+        provinceCodeMap.put('黑', "黑龙江");
+        provinceCodeMap.put('苏', "江苏");
+        provinceCodeMap.put('浙', "浙江");
+        provinceCodeMap.put('皖', "安徽");
+        provinceCodeMap.put('闽', "福建");
+        provinceCodeMap.put('赣', "江西");
+        provinceCodeMap.put('鲁', "山东");
+        provinceCodeMap.put('豫', "河南");
+        provinceCodeMap.put('鄂', "湖北");
+        provinceCodeMap.put('湘', "湖南");
+        provinceCodeMap.put('粤', "广东");
+        provinceCodeMap.put('桂', "广西");
+        provinceCodeMap.put('琼', "海南");
+        provinceCodeMap.put('川', "四川");
+        provinceCodeMap.put('贵', "贵州");
+        provinceCodeMap.put('云', "云南");
+        provinceCodeMap.put('藏', "西藏");
+        provinceCodeMap.put('陕', "陕西");
+        provinceCodeMap.put('甘', "甘肃");
+        provinceCodeMap.put('青', "青海");
+        provinceCodeMap.put('宁', "宁夏");
+        provinceCodeMap.put('新', "新疆");
+        provinceCodeMap.put('港', "香港");
+        provinceCodeMap.put('澳', "澳门");
+        provinceCodeMap.put('台', "台湾");
+        // 更多省份...
+    }
+
     private final DocCaseMapper docCaseMapper;
     private final LawRegulationMapper lawRegulationMapper;
 
@@ -39,89 +84,18 @@ public class StatisticAnalyseService {
      * 从案号中提取省份
      *
      * @param caseNumber 案号
-     * @return String-省份
+     * @return String 省份
      */
-    private static String extractProvinceFromCaseNumber(String caseNumber) {
-        if (caseNumber == null) {
+    public static String extractProvinceFromCaseNumber(String caseNumber) {
+        if (caseNumber == null || caseNumber.length() < 7) {
+            // 检查caseNumber是否为null或长度不足
             return null;
         }
         char provinceAbbr = caseNumber.charAt(6);
-        // 这里需要一个映射来将省份代码转换为省份简称
-        // 例如：(2023)辽06民终351号，省份代码是"辽"，对应的省份简称是"辽宁"
-        // 你可以根据需要添加更多的省份映射
-        switch (provinceAbbr) {
-            case '辽':
-                return "辽宁";
-            case '京':
-                return "北京";
-            case '沪':
-                return "上海";
-            case '津':
-                return "天津";
-            case '渝':
-                return "重庆";
-            case '冀':
-                return "河北";
-            case '晋':
-                return "山西";
-            case '蒙':
-                return "内蒙古";
-            case '吉':
-                return "吉林";
-            case '黑':
-                return "黑龙江";
-            case '苏':
-                return "江苏";
-            case '浙':
-                return "浙江";
-            case '皖':
-                return "安徽";
-            case '闽':
-                return "福建";
-            case '赣':
-                return "江西";
-            case '鲁':
-                return "山东";
-            case '豫':
-                return "河南";
-            case '鄂':
-                return "湖北";
-            case '湘':
-                return "湖南";
-            case '粤':
-                return "广东";
-            case '桂':
-                return "广西";
-            case '琼':
-                return "海南";
-            case '川':
-                return "四川";
-            case '贵':
-                return "贵州";
-            case '云':
-                return "云南";
-            case '藏':
-                return "西藏";
-            case '陕':
-                return "陕西";
-            case '甘':
-                return "甘肃";
-            case '青':
-                return "青海";
-            case '宁':
-                return "宁夏";
-            case '新':
-                return "新疆";
-            case '港':
-                return "香港";
-            case '澳':
-                return "澳门";
-            case '台':
-                return "台湾";
-            // 更多省份...
-            default:
-                return null;
-        }
+        // 使用映射查找省份简称
+        // 如果找不到匹配的省份，返回null
+        // 可以在这里添加日志记录或其他错误处理
+        return provinceCodeMap.get(provinceAbbr);
     }
 
     private Map<String, Object> initProvinceMap(String province) {
@@ -136,16 +110,31 @@ public class StatisticAnalyseService {
      *
      * @return Map<String, Integer>-全国各省案件数量
      */
-    public Map<String, Integer> countCasesByProvince() {
-        List<DocCase> docCases = docCaseMapper.selectList();
-        String[] caseNumbers = docCases.stream().map(DocCase::getNumber).toArray(String[]::new);
-        Map<String, Integer> provinceCases = new HashMap<>(34);
-        for (String caseNumber : caseNumbers) {
-            String province = extractProvinceFromCaseNumber(caseNumber);
+    @Cacheable(cacheNames = CacheNames.PROVINCE_NUMBER)
+    public Map<String, Long> countCasesByProvince() {
+        List<DocCaseVo> docCases = docCaseMapper.selectVoList(Wrappers.lambdaQuery(DocCase.class).select(DocCase::getNumber));
+        // 使用HashMap进行省份统计，以提高性能
+        Map<String, Long> provinceCases = new HashMap<>(34);
+        docCases.forEach(docCase -> {
+            String province = extractProvinceFromCaseNumber(docCase.getNumber());
             if (province != null) {
-                provinceCases.put(province, provinceCases.getOrDefault(province, 0) + 1);
+                provinceCases.put(province, provinceCases.getOrDefault(province, 0L) + 1L);
             }
-        }
+        });
+
+//        docCases.forEach(docCase -> {
+//            String province = extractProvinceFromCaseNumber(docCase.getNumber());
+//            if (province != null) {
+//                docCase.setProvince(province);
+//            }
+//        });
+//        Map<String, Long> provinceCases = docCases.stream()
+//            .collect(Collectors.groupingBy(DocCaseVo::getProvince, Collectors.counting()));
+//        provinceCases.entrySet().stream()
+//            .collect(Collectors.toMap(
+//                entry -> extractProvinceFromCaseNumber(entry.getKey()), // 将案号转换为省份
+//                Map.Entry::getValue // 保持案件数量不变
+//            ));
         return provinceCases;
     }
 
@@ -154,6 +143,7 @@ public class StatisticAnalyseService {
      *
      * @return Map<String, Integer>-各文书类型数量
      */
+    @Cacheable(cacheNames = CacheNames.CASE_TYPE)
     public Map<String, Long> countCasesByType() {
         List<Map<String, Object>> typeCases = docCaseMapper.countByType();
         Map<String, Long> types = new HashMap<>(6);
@@ -178,6 +168,7 @@ public class StatisticAnalyseService {
      *
      * @return Map<String, Integer>-各法条类型数量
      */
+    @Cacheable(cacheNames = CacheNames.LAW_TYPE)
     public Map<String, Long> countLawsByType() {
         List<Map<String, Object>> typeLaws = lawRegulationMapper.countByType();
         Map<String, Long> types = new HashMap<>(6);
@@ -196,13 +187,16 @@ public class StatisticAnalyseService {
      *
      * @return Map<String, Integer>-各根案由类型数量
      */
-    public Map<String, Integer> countCasesByRootCase() {
-        List<DocCase> docCases = docCaseMapper.selectList();
-        String[] rootCauses = docCases.stream().map(DocCase::getCause).toArray(String[]::new);
-        Map<String, Integer> rootCauseCases = new HashMap<>(5);
-        for (String rootCause : rootCauses) {
-            rootCauseCases.put(rootCause, rootCauseCases.getOrDefault(rootCause, 0) + 1);
-        }
+    @Cacheable(cacheNames = CacheNames.CASE_CAUSE)
+    public Map<String, Long> countCasesByRootCause() {
+        List<DocCase> docCases = docCaseMapper.selectList(Wrappers.lambdaQuery(DocCase.class).select(DocCase::getCause));
+        Map<String, Long> rootCauseCases = docCases.stream()
+            .collect(Collectors.groupingBy(DocCase::getCause, Collectors.counting()));
+//        String[] rootCauses = docCases.stream().map(DocCase::getCause).toArray(String[]::new);
+//        Map<String, Integer> rootCauseCases = new HashMap<>(5);
+//        for (String rootCause : rootCauses) {
+//            rootCauseCases.put(rootCause, rootCauseCases.getOrDefault(rootCause, 0) + 1);
+//        }
         return rootCauseCases;
     }
 
@@ -211,13 +205,16 @@ public class StatisticAnalyseService {
      *
      * @return Map<String, Integer>-各审判程序类型数量
      */
-    public Map<String, Integer> countCasesByProcess() {
-        List<DocCase> docCases = docCaseMapper.selectList();
-        String[] processes = docCases.stream().map(DocCase::getProcess).toArray(String[]::new);
-        Map<String, Integer> processCases = new HashMap<>(5);
-        for (String process : processes) {
-            processCases.put(process, processCases.getOrDefault(process, 0) + 1);
-        }
+    @Cacheable(cacheNames = CacheNames.CASE_PROCESS)
+    public Map<String, Long> countCasesByProcess() {
+        List<DocCase> docCases = docCaseMapper.selectList(Wrappers.lambdaQuery(DocCase.class).select(DocCase::getProcess));
+        Map<String, Long> processCases = docCases.stream()
+            .collect(Collectors.groupingBy(DocCase::getProcess, Collectors.counting()));
+//        String[] processes = docCases.stream().map(DocCase::getProcess).toArray(String[]::new);
+//        Map<String, Integer> processCases = new HashMap<>(5);
+//        for (String process : processes) {
+//            processCases.put(process, processCases.getOrDefault(process, 0) + 1);
+//        }
         return processCases;
     }
 
@@ -227,6 +224,7 @@ public class StatisticAnalyseService {
      *
      * @return Long-所有案件数量
      */
+    @Cacheable(cacheNames = CacheNames.CASE_TOTAL, sync = true)
     public Long caseTotal() {
         return docCaseMapper.selectCount(null);
     }
@@ -236,6 +234,7 @@ public class StatisticAnalyseService {
      *
      * @return Long-所有法律法规数量
      */
+    @Cacheable(cacheNames = CacheNames.LAW_TOTAL)
     public Long lawTotal() {
         return lawRegulationMapper.selectCount(null);
     }
@@ -272,6 +271,12 @@ public class StatisticAnalyseService {
         return lawRegulationMapper.selectCount(lqw);
     }
 
+    /**
+     * 获取平台最新10条案件
+     *
+     * @return List<DocCaseVo>-最新10条案件
+     */
+    @Cacheable(cacheNames = CacheNames.NEW_CASES)
     public List<DocCaseVo> selectNewTenCases() {
         LambdaQueryWrapper<DocCase> lqw = new LambdaQueryWrapper<>();
         lqw.orderByDesc(DocCase::getCreateTime);
@@ -280,6 +285,12 @@ public class StatisticAnalyseService {
         return docCaseMapper.selectVoList(lqw);
     }
 
+    /**
+     * 获取平台最新10条法律法规
+     *
+     * @return List<LawRegulationVo>-最新10条法律法规
+     */
+    @Cacheable(cacheNames = CacheNames.NEW_LAWS)
     public List<LawRegulationVo> selectNewTenLaws() {
         LambdaQueryWrapper<LawRegulation> lqw = new LambdaQueryWrapper<>();
         lqw.orderByDesc(LawRegulation::getCreateTime);

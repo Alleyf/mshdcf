@@ -129,9 +129,10 @@ public class DocCaseController extends BaseController {
     /**
      * 全量同步司法案例
      */
-//    @SaCheckPermission("manage:case:add")
-//    @Log(title = "司法案例", businessType = BusinessType.INSERT)
+
     @GetMapping("/syncAll")
+    @SaCheckPermission("manage:case:add")
+    @Log(title = "司法案例", businessType = BusinessType.INSERT)
     public R<Void> syncAll() {
 //        采用消息队列异步处理，借助websocket实时发送处理进度通知
         websocketProducer.sendMsg("全量同步司法案例", SocketMsgType.CASE.getType(), "开始同步司法案例数据", LoginHelper.getLoginId(), 0L);
@@ -197,16 +198,16 @@ public class DocCaseController extends BaseController {
         return toAjax(docCaseService.deleteWithValidByIds(Arrays.asList(ids), true));
     }
 
-    /**
-     * 测试mq-websocket
-     *
-     * @param msg      消息
-     * @param clientId 客户端id
-     * @return R<Void>
-     */
-    @GetMapping("/testmq")
-    public R<Void> testmq(String msg, String clientId) {
-        websocketProducer.sendMsg("testmq", SocketMsgType.NORMAL.getType(), msg, LoginHelper.getLoginId(), 0L);
-        return R.ok("test mq send websocket msg");
-    }
+//    /**
+//     * 测试mq-websocket
+//     *
+//     * @param msg      消息
+//     * @param clientId 客户端id
+//     * @return R<Void>
+//     */
+//    @GetMapping("/testmq")
+//    public R<Void> testmq(String msg, String clientId) {
+//        websocketProducer.sendMsg("testmq", SocketMsgType.NORMAL.getType(), msg, LoginHelper.getLoginId(), 0L);
+//        return R.ok("test mq send websocket msg");
+//    }
 }

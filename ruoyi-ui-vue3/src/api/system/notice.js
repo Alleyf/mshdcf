@@ -42,3 +42,12 @@ export function delNotice(noticeId) {
     method: 'delete'
   })
 }
+
+// 发送公告
+export function sendNotice(data) {
+  return request({
+    url: '/system/notice/send',
+    method: 'put',
+    data: data
+  })
+}

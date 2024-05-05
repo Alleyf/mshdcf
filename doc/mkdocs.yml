@@ -1,0 +1,72 @@
+site_name: MSHDCF
+site_description: MSHDCF 是一个多源异构司法数据汇聚融合处理挖掘平台，用于学习和研究。目前支持“数据获取-->存储表征-->处理挖掘”链式获取存储处理司法数据，为基于司法大数据的深度研究应用以完成各种下游任务提供有力支撑。
+site_author: csFan
+copyright: Copyright © 2024 [csFan](https://alleyf.github.io)
+repo_url: https://github.com/Alleyf/mshdcf
+edit_uri: edit/main/docs/
+nav:
+  - Home: guide.md
+  - Collection: collection.md
+  - About: about.md
+theme:
+  name: material
+  language: zh
+  features:
+    - navigation.tabs
+    - navigation.instant
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: "green"
+      accent: "indigo"
+      toggle:
+        icon: material/weather-night
+        name: 切换到暗色主题
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: 切换到亮色主题
+
+  font:
+    text: Roboto
+    code: Roboto Mono
+  icon:
+    repo: fontawesome/brands/github-alt
+
+    logo: fontawesome/solid/book-open
+
+  favicon: images/favicon.ico
+
+  static_templates:
+    - 404.html
+
+markdown_extensions:
+  - admonition # 提示块
+  - footnotes # 脚注
+  - meta # 定义元数据，通过文章上下文控制，如disqus
+  - pymdownx.caret # 下划线上标
+  - pymdownx.tilde # 删除线下标
+  - pymdownx.critic # 增加删除修改高亮注释，可修饰行内或段落
+  - pymdownx.details # 提示块可折叠
+  - pymdownx.inlinehilite # 行内代码高亮
+  - pymdownx.mark # 文本高亮
+  - pymdownx.smartsymbols # 符号转换
+  - pymdownx.superfences # 代码嵌套在列表里
+  - toc: # 锚点
+      permalink: true
+  #  - pymdownx.arithmatex  # 数学公式
+  - pymdownx.betterem: # 对加粗和斜体更好的检测
+      smart_enable: all
+  - pymdownx.magiclink # 自动识别超链接
+  - pymdownx.tasklist: # 复选框checklist
+      custom_checkbox: true
+
+# PDF导出插件
+plugins:
+  - search

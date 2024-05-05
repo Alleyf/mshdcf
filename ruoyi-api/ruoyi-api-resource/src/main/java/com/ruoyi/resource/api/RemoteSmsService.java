@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 /**
  * 短信服务
  *
- * @author Lion Li
+ * @author csFan
  */
 public interface RemoteSmsService {
 

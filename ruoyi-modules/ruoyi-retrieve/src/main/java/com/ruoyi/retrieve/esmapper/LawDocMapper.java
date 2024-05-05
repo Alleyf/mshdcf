@@ -1,6 +1,6 @@
 package com.ruoyi.retrieve.esmapper;
 
-import cn.easyes.core.core.BaseEsMapper;
+import org.dromara.easyes.core.core.BaseEsMapper;
 import com.ruoyi.retrieve.api.domain.LawDoc;
 
 /**

@@ -179,6 +179,7 @@ export default {
         if (val !== this.currentValue) {
           this.currentValue = val === null ? "" : val;
           if (this.editor) {
+            console.log(this.currentValue)
             this.editor.setContent(this.currentValue);
           }
         }

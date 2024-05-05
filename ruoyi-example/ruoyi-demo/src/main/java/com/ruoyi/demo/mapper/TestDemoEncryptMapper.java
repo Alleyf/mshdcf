@@ -6,7 +6,7 @@ import com.ruoyi.demo.domain.TestDemoEncrypt;
 /**
  * 测试加密功能
  *
- * @author Lion Li
+ * @author csFan
  */
 public interface TestDemoEncryptMapper extends BaseMapperPlus<TestDemoEncryptMapper, TestDemoEncrypt, TestDemoEncrypt> {
 

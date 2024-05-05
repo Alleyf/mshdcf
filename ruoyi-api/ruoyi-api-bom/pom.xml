@@ -41,6 +41,12 @@
                 <artifactId>ruoyi-api-websocket</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <!--            gpt接口-->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-api-gpt</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

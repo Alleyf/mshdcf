@@ -1,6 +1,6 @@
 FROM openjdk:8u201-jre-alpine
 
-MAINTAINER Lion Li
+MAINTAINER csFan
 
 RUN mkdir -p /ruoyi/seata-server/logs \
     /ruoyi/skywalking/agent

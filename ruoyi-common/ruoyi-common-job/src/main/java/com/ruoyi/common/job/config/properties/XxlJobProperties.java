@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * xxljob配置类
  *
- * @author Lion Li
+ * @author csFan
  */
 @Data
 @ConfigurationProperties(prefix = "xxl.job")

@@ -11,11 +11,22 @@ import {getCurrentInstance, onMounted, reactive, ref, toRefs} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {getToken} from "@/utils/auth";
 import QEditor from "@/components/Editor/index.vue";
-import {Edit, Picture, Switch, UploadFilled, UserFilled} from "@element-plus/icons-vue";
+import {
+  Back,
+  Brush, Check, CirclePlus,
+  Close,
+  Edit, HelpFilled,
+  Picture,
+  Refresh,
+  Right,
+  Switch,
+  UploadFilled,
+  UserFilled
+} from "@element-plus/icons-vue";
 import {Icon} from '@iconify/vue';
 import {miningCase, reviseCase} from "@/api/manage/process";
-import {getRegulation} from "@/api/manage/regulation";
-import {getCaseWorldCloud} from "@/api/retrieve/case";
+import FileUpload from "@/components/FileUpload/index.vue";
+
 
 const {proxy} = getCurrentInstance();
 const {
@@ -38,6 +49,19 @@ const single = ref(true);
 const multiple = ref(true);
 const showSearch = ref(true);
 const currentTab = ref(1);
+
+const uploadPdf = ref({
+  // 是否显示弹出层（PDF上传）
+  open: false,
+  // 弹出层标题（PDF上传）
+  title: "PDF文件上传",
+  // 是否禁用上传
+  isUploading: true,
+  // 设置上传的请求头部
+  headers: {Authorization: "Bearer " + getToken()},
+  // 上传的地址
+  url: import.meta.env.VITE_APP_BASE_API + "/manage/case/uploadPdf"
+})
 
 /*** 案例导入参数 */
 const upload = reactive({
@@ -162,36 +186,50 @@ const dialogForm = ref(null)
 //案例数据清洗挖掘
 const handleProcess = () => {
   // 浅拷贝
+  // todo 第二次打开extra为空
   processData.value = []
-  console.log(processData.value)
-  const toAdd = []
-  const tempList = caseListOrigin.value
+  processDataStage.value = []
+  let toAdd
+  let tempList;
+  getList()
   if (defaultListTab.value === 1) {
-    tempList.value = caseListOrigin.value
+    tempList = caseListOrigin.value
   } else if (defaultListTab.value === 2) {
-    tempList.value = caseListStriped.value
+    tempList = caseListStriped.value
   } else {
-    tempList.value = caseList.value
+    tempList = caseList.value
   }
-  tempList.value.forEach(item => {
-    const exist = processData.value.findIndex(data => item.id === data.id) !== -1
-    if (ids.value.includes(item.id) && !exist) {
-      // 判断extra是否是非空字符串，是则需要解析，否则无需解析
-      if ((item.extra !== "" || item.extra !== null) && typeof item.extra === 'string') {
-        // 解析json字符串
-        item.extra = JSON.parse(item.extra);
-      } else {
-        item.extra = extra.value
-      }
-      toAdd.push(item); // 将元素添加到新数组中
-      // 将解析后的json对象还原为json字符串
-      // item.extra = JSON.stringify(item.extra);
+  // console.log(tempList)
+  toAdd = tempList.filter(item => ids.value.includes(item.id)).map(item => {
+    if ((item.extra !== "" || item.extra !== null) && typeof item.extra === 'string') {
+      // 解析json字符串
+      item.extra = JSON.parse(item.extra);
+    } else {
+      item.extra = extra.value
     }
+    return item;
   })
+  // tempList.value.forEach(item => {
+  //   const existIndex = processData.value.findIndex(data => item.id === data.id)
+  //   const exist = existIndex !== -1
+  //
+  //   // alert(JSON.stringify(item.extra))
+  //   // 判断extra是否是非空字符串，是则需要解析，否则无需解析
+  //   if ((item.extra !== "" || item.extra !== null) && typeof item.extra === 'string') {
+  //     // 解析json字符串
+  //     item.extra = JSON.parse(item.extra);
+  //   } else {
+  //     item.extra = extra.value
+  //   }
+  //   // 更新已存在于ProcessData的extra 字段
+  //   if (ids.value.includes(item.id)) {
+  //     toAdd.push(item); // 将元素添加到新数组中
+  //     // 将解析后的json对象还原为json字符串
+  //     // item.extra = JSON.stringify(item.extra);
+  //   }
+  // })
   processData.value = processData.value.concat(toAdd);
   processDialog.value = true
-  // processData.value = caseListCopy
-  // console.log(ids.value, processData.value)
 }
 
 const handleProcessStage = (data) => {
@@ -215,7 +253,7 @@ const handleProcessStage = (data) => {
     });
   }
   console.log(processDataStage.value)
-  ElMessage.success(`数据<${data.name}>暂存成功，已经暂存${processDataStage.value.length}条数据}`)
+  ElMessage.success(`数据<${data.name}>暂存成功，已经暂存${processDataStage.value.length}条数据`)
 }
 const handleProcessSubmit = () => {
   if (processDataStage.value.length === 0) {
@@ -264,10 +302,12 @@ const handleRemoveTab = (targetName) => {
 
 const handleProcessStrip = (data) => {
   // todo 调用数据清洗接口，并将结果更新到processData中
+  proxy.$modal.loading('数据清洗中，请稍后...')
   console.log(data)
   reviseCase(data.id).then(res => {
     if (res.code === 200) {
       // 数据更新重新获取
+      proxy?.$modal.closeLoading();
       data.stripContent = res.data.stripContent
       ElMessage.success(res.msg)
     } else {
@@ -278,10 +318,12 @@ const handleProcessStrip = (data) => {
 
 const handleProcessMining = (data) => {
   // todo 调用数据挖掘接口，并将结果更新到processData中
+  proxy.$modal.loading('数据挖掘中，请稍后...')
   console.log(data)
   miningCase(data.id).then(res => {
     if (res.code === 200) {
       // 数据更新重新获取
+      proxy?.$modal.closeLoading();
       data.extra = JSON.parse(res.data.extra)
       ElMessage.success(res.msg)
     } else {
@@ -332,7 +374,7 @@ const getList = () => {
 
 const handleTabClick = (pane, ev) => {
   // todo 数据清洗挖掘tab页切换回调函数
-  console.log(pane.props.name)
+  // console.log(pane.props.name)
   if (pane.props.name === 1) {
     // 设置分页的总页数为ORIGIN的总页数
     queryParams.value.isMining = 0
@@ -388,7 +430,9 @@ const handleSelectionChange = selection => {
   ids.value = selection.map(item => item.id)
   single.value = selection.length !== 1
   multiple.value = !selection.length
-  proxy.$modal.msgSuccess("已选中" + selection.length + "条数据");
+  if (ids.value.length !== 0) {
+    proxy.$modal.msgSuccess("已选中" + selection.length + "条数据");
+  }
 }
 
 const resetForm = () => {
@@ -443,11 +487,23 @@ const handleUpdate = row => {
   })
 }
 
+const MiningStatusMap = {
+  'ORIGIN': 0,
+  'STRIPED': 1,
+  'MININGED': 2
+}
+
+const reviseForm = () => {
+  form.value.isMining = MiningStatusMap[form.value.isMining]
+}
+
 const submitForm = () => {
   dialogForm.value.validate(valid => {
     if (valid) {
       buttonLoading.value = true
       if (form.value.id != null) {
+        // 挖掘状态转换
+        reviseForm()
         updateCase(form.value).then(() => {
           ElMessage.success('修改成功')
           open.value = false
@@ -509,7 +565,7 @@ const handleFileSuccess = (response, file, fileList) => {
 /** 提交上传文件 */
 function submitFileForm() {
   proxy.$refs["uploadRef"].submit();
-};
+}
 
 const handleExport = () => {
   console.log({
@@ -551,6 +607,30 @@ const handleSync = () => {
   })
 }
 
+const handleUploadPdf = () => {
+  uploadPdf.value.open = true
+}
+const pdfContent = ref('')
+
+// function handlePdfFile(uploadFile) {
+//   console.log(uploadFile, pdfContent.value)
+//
+//   const url = uploadFile.url
+//   getDocument(url).promise.then((pdfDoc) => {
+//
+//     for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+//       pdfDoc.getPage(pageNum).then((page) => {
+//         page.getTextContent().then((textContent) => {
+//           pdfContent.value += textContent.items.map((item) => item.str).join(' ');
+//         });
+//       });
+//     }
+//
+//   });
+//
+//   // fileReader.readAsArrayBuffer(uploadFile);
+// }
+
 onMounted(() => {
   getList()
   // proxy.sendWebMessage("欢迎使用来到管理分析页面")
@@ -572,16 +652,16 @@ onMounted(() => {
           label-width="80px"
         >
           <el-form-item label="案件名称" label-width="80" prop="name">
-            <el-input v-model="queryParams.name"></el-input>
+            <el-input v-model="queryParams.name"/>
           </el-form-item>
           <el-form-item label="审判法院" label-width="80" prop="court">
-            <el-input v-model="queryParams.court"></el-input>
+            <el-input v-model="queryParams.court"/>
           </el-form-item>
           <el-form-item label="案号" label-width="40" prop="number">
-            <el-input v-model="queryParams.number"></el-input>
+            <el-input v-model="queryParams.number"/>
           </el-form-item>
           <el-form-item label="案由" label-width="80" prop="cause">
-            <el-select v-model="queryParams.cause">
+            <el-select v-model="queryParams.cause" clearable @change="handleQuery">
               <el-option
                 v-for="item in doc_case_cause"
                 :key="item.value"
@@ -591,7 +671,7 @@ onMounted(() => {
             </el-select>
           </el-form-item>
           <el-form-item label="文书类型" label-width="80" prop="type">
-            <el-select v-model="queryParams.type">
+            <el-select v-model="queryParams.type" clearable @change="handleQuery">
               <el-option
                 v-for="item in doc_case_type"
                 :key="item.value"
@@ -607,7 +687,7 @@ onMounted(() => {
           <!--          <el-input v-model="queryParams.label"/>-->
           <!--        </el-form-item>-->
           <el-form-item label="案件来源" label-width="80" prop="sourceId">
-            <el-select v-model="queryParams.sourceId">
+            <el-select v-model="queryParams.sourceId" clearable @change="handleQuery">
               <el-option
                 v-for="item in crawler_source"
                 :key="item.value"
@@ -642,7 +722,7 @@ onMounted(() => {
           <!--          <el-input v-model="queryParams.relatedCases"></el-input>-->
           <!--        </el-form-item>-->
           <el-form-item label="状态" prop="status">
-            <el-select v-model="queryParams.status">
+            <el-select v-model="queryParams.status" clearable @change="handleQuery">
               <el-option
                 v-for="item in crawl_common_status"
                 :key="item.value"
@@ -705,6 +785,16 @@ onMounted(() => {
           >导入
           </el-button>
         </el-col>
+        <!--        <el-col :span="1.5">-->
+        <!--          <el-button-->
+        <!--            v-hasPermi="['manage:case:import']"-->
+        <!--            icon="Upload"-->
+        <!--            plain-->
+        <!--            type="primary"-->
+        <!--            @click="handleUploadPdf"-->
+        <!--          >上传-->
+        <!--          </el-button>-->
+        <!--        </el-col>-->
         <el-col :span="1.5">
           <el-button
             v-hasPermi="['manage:case:export']"
@@ -1121,7 +1211,7 @@ onMounted(() => {
         </el-tab-pane>
       </el-tabs>
       <!-- 添加或修改司法案例对话框 -->
-      <el-dialog v-model="open" :title="title" align-center>
+      <el-dialog v-model="open" :title="title" align-center draggable>
         <el-form ref="dialogForm" :model="form" :rules="rules" label-width="100px">
           <el-form-item label="案件名称" prop="name">
             <el-input v-model="form.name" placeholder="请输入案件名称"/>
@@ -1163,7 +1253,7 @@ onMounted(() => {
           </el-form-item>
           <el-form-item label="案件正文" prop="content">
             <el-link href="javascript:void(0);" type="primary" @click="handleOpenContent">进入案件正文</el-link>
-            <el-dialog v-model="openContent" title="输入案件正文">
+            <el-dialog v-model="openContent" draggable overflow title="输入案件正文">
               <q-editor v-model="form.content" :min-height="400"/>
             </el-dialog>
           </el-form-item>
@@ -1198,9 +1288,134 @@ onMounted(() => {
           <el-form-item label="法律依据" prop="legalBasis">
             <el-input v-model="form.legalBasis" placeholder="请输入法律依据"/>
           </el-form-item>
-          <el-form-item label="当事人" prop="party">
-            <el-input v-model="form.party" placeholder="请输入当事人"/>
+          <!--          <el-form-item label="当事人" prop="party">-->
+          <!--            <el-input v-model="form.party" placeholder="请输入当事人"/>-->
+          <!--          </el-form-item>-->
+          <!--          <el-form-item label="相关案件" prop="relatedCases">-->
+          <!--            <el-input v-model="form.relatedCases" placeholder="请输入内容" type="textarea"/>-->
+          <!--          </el-form-item>-->
+          <el-form-item label="状态" prop="status">
+            <el-select v-model="form.status" placeholder="请选择状态">
+              <el-option
+                v-for="dict in crawl_common_status"
+                :key="dict.value"
+                :label="dict.label"
+                :value="parseInt(dict.value)"
+              ></el-option>
+            </el-select>
           </el-form-item>
+        </el-form>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
+            <el-button @click="cancelDialog">取 消</el-button>
+          </span>
+        </template>
+      </el-dialog>
+
+      <!--      上传pdf对话框-->
+      <el-dialog v-model="uploadPdf.open" :title="upload.title" append-to-body draggable width="40%">
+        <file-upload
+          ref="uploadPdfRef"
+          :limit="1"
+          :modelValue="pdfContent"
+          accept=".pdf"
+          drag
+          @uploaded="handlePdfFile"
+        >
+          <el-icon class="el-icon--upload">
+            <upload-filled/>
+          </el-icon>
+          <div class="el-upload__text">
+            将文件拖到此处，或
+            <em>点击上传</em>
+          </div>
+          <template #tip>
+            <div class="el-upload__tip">
+              只能上传pdf文件，且不超过10M
+              {{ pdfContent }}
+            </div>
+          </template>
+        </file-upload>
+        <el-form ref="dialogForm" :model="form" :rules="rules" label-width="100px">
+          <el-form-item label="案件名称" prop="name">
+            <el-input v-model="form.name" placeholder="请输入案件名称"/>
+          </el-form-item>
+          <el-form-item label="审判法院" prop="court">
+            <el-input v-model="form.court" placeholder="请输入审判法院"/>
+          </el-form-item>
+          <el-form-item label="案号" prop="number">
+            <el-input v-model="form.number" placeholder="请输入案号"/>
+          </el-form-item>
+          <el-form-item label="原始链接" prop="url">
+            <el-input v-model="form.url" placeholder="请输入原始链接"/>
+          </el-form-item>
+          <el-form-item label="案由" prop="cause">
+            <el-select v-model="form.cause" placeholder="请选择案由">
+              <el-option
+                v-for="dict in doc_case_cause"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="文书类型" prop="type">
+            <el-select v-model="form.type" placeholder="请选择文书类型">
+              <el-option
+                v-for="dict in doc_case_type"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="审理程序" prop="process">
+            <el-input v-model="form.process" placeholder="请输入审理程序"/>
+          </el-form-item>
+          <el-form-item label="详细案由" prop="label">
+            <el-input v-model="form.label" placeholder="请输入详细案由"/>
+          </el-form-item>
+          <el-form-item label="案件正文" prop="content">
+            <el-link href="javascript:void(0);" type="primary" @click="handleOpenContent">进入案件正文</el-link>
+            <el-dialog v-model="openContent" draggable overflow title="输入案件正文">
+              <q-editor v-model="form.content" :min-height="400"/>
+            </el-dialog>
+          </el-form-item>
+          <el-form-item label="案件来源" prop="sourceId">
+            <el-select v-model="form.sourceId" placeholder="请选择案件来源">
+              <el-option
+                v-for="dict in crawler_source"
+                :key="dict.value"
+                :label="dict.label"
+                :value="parseInt(dict.value)"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="判决日期" prop="judgeDate">
+            <el-date-picker v-model="form.judgeDate"
+                            clearable
+                            placeholder="请选择判决日期"
+                            type="date"
+                            value-format="YYYY-MM-DD"
+            >
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="公开日期" prop="pubDate">
+            <el-date-picker v-model="form.pubDate"
+                            clearable
+                            placeholder="请选择公开日期"
+                            type="date"
+                            value-format="YYYY-MM-DD"
+            >
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="法律依据" prop="legalBasis">
+            <el-input v-model="form.legalBasis" placeholder="请输入法律依据"/>
+          </el-form-item>
+          <!--          <el-form-item label="当事人" prop="party">-->
+          <!--            <el-input v-model="form.party" placeholder="请输入当事人"/>-->
+          <!--          </el-form-item>-->
           <!--          <el-form-item label="相关案件" prop="relatedCases">-->
           <!--            <el-input v-model="form.relatedCases" placeholder="请输入内容" type="textarea"/>-->
           <!--          </el-form-item>-->
@@ -1224,7 +1439,7 @@ onMounted(() => {
       </el-dialog>
 
       <!-- 案例导入对话框 -->
-      <el-dialog v-model="upload.open" :title="upload.title" append-to-body width="400px">
+      <el-dialog v-model="upload.open" :title="upload.title" append-to-body draggable width="400px">
         <el-upload
           ref="uploadRef"
           :action="upload.url + '?updateSupport=' + upload.updateSupport"
@@ -1263,7 +1478,7 @@ onMounted(() => {
       </el-dialog>
 
       <!-- 清洗挖掘对话框 -->
-      <el-dialog v-model="processDialog" :fullscreen="true" title="司法案例数据清洗挖掘" width="100%">
+      <el-dialog v-model="processDialog" :fullscreen="true" draggable title="司法案例数据清洗挖掘" width="100%">
         <el-steps :active="processStep" align-center class="mb-10" finish-status="success">
           <el-step :icon="Edit" description="对数据格式进行格式化并去除异常字符" title="Step 1：数据清洗"/>
           <el-step :icon="UploadFilled" :status="'finish'" description="对数据进行挖掘分析提取潜在信息"
@@ -1354,29 +1569,31 @@ onMounted(() => {
                 </el-col>
               </el-form>
               <div class="flex justify-end items-end mt-3"> <!-- 添加 justify-end 和 items-end 类 -->
-                <el-button @click="cancelDialog">取 消</el-button>
-                <el-button :plain="true" type="primary" @click="resetProcess(data)">还原</el-button>
-                <el-button :disabled="processStep <= 0" :loading="buttonLoading" type="primary"
+                <el-button :icon="Close" @click="cancelDialog">取 消</el-button>
+                <el-button :icon="Refresh" :plain="true" type="primary" @click="resetProcess(data)">还原</el-button>
+                <el-button :disabled="processStep <= 0" :icon="Back" type="primary"
                            @click="handleProcessPrev">
                   上一步
                 </el-button>
-                <el-button :disabled="processStep >= 1" :loading="buttonLoading" type="primary"
+                <el-button :disabled="processStep >= 1" :icon="Right" type="primary"
                            @click="handleProcessNext">
                   下一步
                 </el-button>
-                <el-button :disabled="processStep !== 0" :loading="buttonLoading" type="warning"
+                <el-button :disabled="processStep !== 0" :icon="Brush" :loading="buttonLoading" type="warning"
                            @click="handleProcessStrip(data)">
                   开始清洗
                 </el-button>
-                <el-button :disabled="processStep !== 1" :loading="buttonLoading" type="warning"
+                <el-button :disabled="processStep !== 1" :icon="HelpFilled" :loading="buttonLoading" type="warning"
                            @click="handleProcessMining(data)">
                   开始挖掘
                 </el-button>
-                <el-button :disabled="processStep !== 1" :loading="buttonLoading" type="success"
+                <!--                <el-button :disabled="processStep !== 1" type="success"-->
+                <!--                           @click="handleProcessStage(data)">               -->
+                <el-button :icon="CirclePlus" type="success"
                            @click="handleProcessStage(data)">
                   暂 存
                 </el-button>
-                <el-button :disabled="processDataStage.length===0" :loading="buttonLoading" type="warning"
+                <el-button :disabled="processDataStage.length===0" :icon="Check" type="warning"
                            @click="handleProcessSubmit">
                   提 交
                 </el-button>

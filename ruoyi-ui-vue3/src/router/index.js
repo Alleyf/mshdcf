@@ -48,6 +48,11 @@ export const constantRoutes = [
     hidden: true
   },
   {
+    path: '/dashboard',
+    component: () => import('@/views/dashboard'),
+    hidden: true
+  },
+  {
     path: "/:pathMatch(.*)*",
     component: () => import('@/views/error/404'),
     hidden: true
@@ -89,13 +94,13 @@ export const constantRoutes = [
 // 动态路由，基于用户权限动态去加载
 export const dynamicRoutes = [
   {
-    path: '/retrieve/case',
+    path: '/retrieve/case-detail',
     component: Layout,
     hidden: true,
     permissions: ['retrieve:case:list'],
     children: [
       {
-        path: 'caseDetail/:id(\\d+)',
+        path: 'case/:id(\\d+)',
         component: () => import('@/views/retrieve/case/detail/index.vue'),
         name: 'CaseDetail',
         meta: {title: '案件详情', activeMenu: '/retrieve/case'}
@@ -103,16 +108,16 @@ export const dynamicRoutes = [
     ]
   },
   {
-    path: '/retrieve/law',
+    path: '/retrieve/law-detail',
     component: Layout,
     hidden: true,
-    permissions: ['retrieve:law:list'],
+    permissions: ['retrieve:regulation:list'],
     children: [
       {
-        path: 'lawDetail/:id(\\d+)',
+        path: 'law/:id(\\d+)',
         component: () => import('@/views/retrieve/regulation/detail/index.vue'),
         name: 'LawDetail',
-        meta: {title: '法条详情', activeMenu: '/retrieve/law'}
+        meta: {title: '法条详情', activeMenu: '/retrieve/regulation'}
       }
     ]
   },

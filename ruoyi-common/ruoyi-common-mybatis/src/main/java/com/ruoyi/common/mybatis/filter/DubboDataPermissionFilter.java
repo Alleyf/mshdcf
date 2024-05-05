@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * dubbo 数据权限参数传递
  *
- * @author Lion Li
+ * @author csFan
  */
 @Slf4j
 @Activate(group = {CommonConstants.CONSUMER})

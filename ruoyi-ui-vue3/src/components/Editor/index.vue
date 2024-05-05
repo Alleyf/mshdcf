@@ -28,6 +28,12 @@
 
 <script setup>
 import {QuillEditor, Quill} from '@vueup/vue-quill';
+import ImageResize from 'quill-image-resize-module';
+import {ImageDrop} from 'quill-image-drop-module';
+
+Quill.register('modules/ImageDrop', ImageDrop);
+Quill.register('modules/imageResize', ImageResize);
+import 'quill-image-resize-module/image-resize.min.js';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import {getToken} from "@/utils/auth";
 import {computed, getCurrentInstance, ref, toRaw, watch} from "vue";
@@ -99,7 +105,21 @@ const options = ref({
           }
         },
       },
-    }
+    },
+    ImageDrop: true,
+    imageResize: {
+      displayStyles: {
+        backgroundColor: 'black',
+        border: 'none',
+        color: 'white',
+      },
+      modules: ['Resize', 'DisplaySize', 'Toolbar'],
+    },
+    history: {
+      delay: 1000,
+      maxStack: 50,
+      userOnly: false,
+    },
   },
   placeholder: "请输入内容",
   readOnly: props.readOnly,

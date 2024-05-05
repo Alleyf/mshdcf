@@ -5,7 +5,7 @@ import com.ruoyi.common.core.exception.user.UserException;
 /**
  * 验证码错误异常类
  *
- * @author Lion Li
+ * @author csFan
  */
 public class CaptchaException extends UserException {
     private static final long serialVersionUID = 1L;

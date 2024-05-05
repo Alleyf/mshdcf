@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * Mybatis异常处理器
  *
- * @author Lion Li
+ * @author csFan
  */
 @Slf4j
 @RestControllerAdvice

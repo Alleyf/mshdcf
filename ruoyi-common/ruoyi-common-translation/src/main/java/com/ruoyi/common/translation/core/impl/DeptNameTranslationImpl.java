@@ -10,7 +10,7 @@ import org.apache.dubbo.config.annotation.DubboReference;
 /**
  * 部门翻译实现
  *
- * @author Lion Li
+ * @author csFan
  */
 @AllArgsConstructor
 @TranslationType(type = TransConstant.DEPT_ID_TO_NAME)

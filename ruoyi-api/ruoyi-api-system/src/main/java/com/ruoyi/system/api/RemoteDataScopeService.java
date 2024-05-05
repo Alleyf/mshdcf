@@ -3,7 +3,7 @@ package com.ruoyi.system.api;
 /**
  * 数据权限服务
  *
- * @author Lion Li
+ * @author csFan
  */
 public interface RemoteDataScopeService {
 

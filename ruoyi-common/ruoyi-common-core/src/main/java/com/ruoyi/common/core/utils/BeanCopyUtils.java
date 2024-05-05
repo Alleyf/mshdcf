@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * bean拷贝工具(基于 cglib 性能优异)
  *
- * @author Lion Li
+ * @author csFan
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BeanCopyUtils {
@@ -190,7 +190,7 @@ public class BeanCopyUtils {
         private String genKey(Class<?> srcClass, Class<?> targetClass, Converter converter) {
             final StringBuilder key = StrUtil.builder()
                 .append(srcClass.getName()).append('#').append(targetClass.getName());
-            if(null != converter){
+            if (null != converter) {
                 key.append('#').append(converter.getClass().getName());
             }
             return key.toString();

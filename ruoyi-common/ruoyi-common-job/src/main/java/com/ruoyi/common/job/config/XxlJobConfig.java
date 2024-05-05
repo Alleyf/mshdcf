@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * xxl-job config
  *
- * @author Lion Li
+ * @author csFan
  */
 @Slf4j
 @AutoConfiguration
