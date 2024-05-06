@@ -51,6 +51,9 @@ onMounted(() => {
   }
   getCase(id).then(async res => {
     caseItem.value = res.data;
+    // console.log(caseItem.value)
+    caseItem.value.relatedCases = JSON.parse(caseItem.value.relatedCases);
+
     // console.log(query)
     if (query.keyword !== "" || query.keyword === undefined) {
       // if (res.data.stripContent) {
@@ -156,10 +159,9 @@ const handleTabClick = (pane, ev) => {
               {{ caseItem.judgeDate }}
           </span>
         </p>
-        <el-card ref="typewriter">
-          <div id="content" class="content" style="padding: 10px;">
+        <el-card ref="typewriter" class="bg-gray-100 border border-gray-200 rounded-lg p-4">
+          <div id="content" class="prose max-w-none text-xl">
             <!--          <div v-for="(item,index) in textLs" :key="index" style="padding: 10px;">-->
-            <!--              todo 加粗的html也被显示出来了-->
             <!--            <span v-for="str in handleContent(item)" v-html="str"/>-->
             <!--          <p v-html="displayedText"/>-->
             <!--          </div>-->
@@ -176,80 +178,54 @@ const handleTabClick = (pane, ev) => {
               <el-divider/>
 
               <el-row :gutter="20" :justify="'space-between'">
-                <el-col v-if="caseItem.court" class="flex">
+                <el-col v-if="caseItem.court" class="flex text-lg">
                   <Icon :icon="icons['court']" class="text-2xl"/>
                   审判法院：{{
                     caseItem.court
                   }}
                 </el-col>
-                <el-col v-if="caseItem.number">
+                <el-col v-if="caseItem.number" class="flex text-lg">
                   <Icon :icon="icons['number']" class="text-2xl"/>
                   案 号：{{ caseItem.number }}
                 </el-col>
-                <el-col v-if="caseItem.type">
+                <el-col v-if="caseItem.type" class="flex text-lg">
                   <Icon :icon="icons['type']" class="text-2xl"/>
-                  案件类型：{{ caseItem.type }}
+                  案件类型：
+                  <el-tag type="success">{{ caseItem.type }}</el-tag>
                 </el-col>
-                <el-col v-if="caseItem.label">
+                <el-col v-if="caseItem.label" class="flex text-lg">
                   <Icon :icon="icons['label']" class="text-2xl"/>
-                  标签：{{ caseItem.label }}
+                  标签：
+                  <el-tag type="danger">{{ caseItem.label }}</el-tag>
                 </el-col>
-                <el-col v-if="caseItem.cause">
+                <el-col v-if="caseItem.cause" class="flex text-lg">
                   <Icon :icon="icons['cause']" class="text-2xl"/>
-                  案由：{{ caseItem.cause }}
+                  案由：
+                  <el-tag type="warning">{{ caseItem.cause }}</el-tag>
                 </el-col>
-                <el-col v-if="caseItem.process">
+                <el-col v-if="caseItem.process" class="flex text-lg">
                   <Icon :icon="icons['process']" class="text-2xl"/>
-                  审理程序：{{ caseItem.process }}
+                  审理程序：
+                  <el-tag>{{ caseItem.process }}</el-tag>
                 </el-col>
-                <el-col v-if="caseItem.url">
+                <el-col v-if="caseItem.url" class="flex text-lg">
                   <Icon :icon="icons['url']" class="text-2xl"/>
                   案件来源：
                   <el-link :href="caseItem.url" target="_blank" type="primary">
                     {{ caseItem.source }}
                   </el-link>
                 </el-col>
-                <el-col v-if="caseItem.judgeDate">
+                <el-col v-if="caseItem.judgeDate" class="flex text-lg">
                   <Icon :icon="icons['judgeDate']" class="text-2xl"/>
                   判决日期：{{ caseItem.judgeDate }}
                 </el-col>
-                <el-col v-if="caseItem.party">
-                  <Icon :icon="icons['party']" class="text-2xl"/>
-                  当事人：{{ caseItem.party }}
-                </el-col>
+                <!--                <el-col v-if="caseItem.party">-->
+                <!--                  <Icon :icon="icons['party']" class="text-2xl"/>-->
+                <!--                  当事人：{{ caseItem.party }}-->
+                <!--                </el-col>-->
               </el-row>
             </el-card>
           </el-tab-pane>
-          <!--          <el-tab-pane v-if="caseItem.extra.summary" label="摘要总结">-->
-          <!--            <el-card :shadow="'always'">-->
-          <!--              <el-tag style="font-weight: bold;font-size: large" type="warning">摘要总结</el-tag>-->
-          <!--              <el-divider/>-->
-          <!--              <p-->
-          <!--                style="background-color: rgb(240, 240, 240); padding: 10px; margin: 10px; border: 1px solid rgb(240, 240, 240);color: rgb(100, 100, 100);">-->
-          <!--                {{ caseItem.extra.summary }}</p>-->
-          <!--            </el-card>-->
-          <!--          </el-tab-pane>-->
-          <!--          <el-tab-pane v-if="caseItem.legalBasis || caseItem.extra.article" label="法律依据">-->
-          <!--            <el-card :shadow="'always'">-->
-          <!--              <el-tag style="font-weight: bold;font-size: large" type="danger">法律依据</el-tag>-->
-          <!--              <el-divider/>-->
-          <!--              <p v-if="caseItem.legalBasis">{{ caseItem.legalBasis }}</p>-->
-          <!--              <p v-else-if="caseItem.extra.article">{{ caseItem.extra.article }}</p>-->
-          <!--            </el-card>-->
-          <!--          </el-tab-pane>-->
-          <!--          <el-tab-pane v-if="caseItem.relatedCases" label="相关案例">-->
-          <!--            <el-card :shadow="'always'">-->
-          <!--              <el-tag style="font-weight: bold;font-size: large" type="warning">相关案例</el-tag>-->
-          <!--              <el-divider/>-->
-          <!--              <ul>-->
-          <!--                <el-link v-for="(item,index) in caseItem.relatedCases" :key="index" :href="item.url">-->
-          <!--                  {{-->
-          <!--                    item.name-->
-          <!--                  }}-->
-          <!--                </el-link>-->
-          <!--              </ul>-->
-          <!--            </el-card>-->
-          <!--          </el-tab-pane>-->
           <el-tab-pane :lazy="true" label="案例词云">
             <el-card :shadow="'always'">
               <el-tag style="font-weight: bold;font-size: large" type="warning">案例词云</el-tag>
@@ -258,14 +234,12 @@ const handleTabClick = (pane, ev) => {
                         style="margin-left: 52px;height: 80%;width: 80%"/>
             </el-card>
           </el-tab-pane>
-          <el-tab-pane v-if="Object.keys(caseItem.extra).length !== 0" label="语义信息"
+          <el-tab-pane v-if="Object.keys(caseItem.extra).length !== 0" label="潜在信息"
                        style="font-weight: normal;font-size: medium">
-            <!--            <el-divider/>-->
-            <!--            <el-tag style="font-weight: bold;font-size: large" type="warning">语义信息</el-tag>-->
 
             <el-tabs tab-position="right">
 
-              <el-tab-pane v-if="Object.keys(caseItem.extra).length !== 0" label="附加信息">
+              <el-tab-pane v-if="Object.keys(caseItem.extra).length !== 0" label="挖掘信息">
                 <el-card :shadow="'always'">
                   <el-row :gutter="20" :justify="'space-between'">
                     <div v-if="caseItem.extra.party" class="text-center m-auto">
@@ -273,30 +247,30 @@ const handleTabClick = (pane, ev) => {
                       ⚖️
                       <el-tag size="small" type="danger">{{ caseItem.extra.party.defendant }}</el-tag>
                     </div>
-                    <el-col v-if="caseItem.extra.keyword">
+                    <el-col v-if="caseItem.extra.keyword" class="text-lg">
                       <span class="font-black">关键字：</span>{{ caseItem.extra.keyword }}
                     </el-col>
-                    <el-col v-if="caseItem.extra.plea"><span class="font-black">诉讼要求：</span>{{
+                    <el-col v-if="caseItem.extra.plea" class="text-lg"><span class="font-black">诉讼要求：</span>{{
                         caseItem.extra.plea
                       }}
                     </el-col>
-                    <el-col v-if="caseItem.extra.label"><span class="font-black">案件类型：</span>{{
+                    <el-col v-if="caseItem.extra.label" class="text-lg"><span class="font-black">案件类型：</span>{{
                         caseItem.extra.label
                       }}
                     </el-col>
-                    <el-col v-if="caseItem.extra.plai"><span class="font-black">原告诉述：</span>{{
+                    <el-col v-if="caseItem.extra.plai" class="text-lg"><span class="font-black">原告诉述：</span>{{
                         caseItem.extra.plai
                       }}
                     </el-col>
-                    <el-col v-if="caseItem.extra.defe"><span class="font-black">被告辩称：</span>{{
+                    <el-col v-if="caseItem.extra.defe" class="text-lg"><span class="font-black">被告辩称：</span>{{
                         caseItem.extra.defe
                       }}
                     </el-col>
-                    <el-col v-if="caseItem.extra.fact"><span class="font-black">案件事实：</span>{{
+                    <el-col v-if="caseItem.extra.fact" class="text-lg"><span class="font-black">案件事实：</span>{{
                         caseItem.extra.fact
                       }}
                     </el-col>
-                    <el-col v-if="caseItem.extra.note"><span class="font-black">判决记录：</span>{{
+                    <el-col v-if="caseItem.extra.note" class="text-lg"><span class="font-black">判决记录：</span>{{
                         caseItem.extra.note
                       }}
                     </el-col>
@@ -309,7 +283,8 @@ const handleTabClick = (pane, ev) => {
                 <el-card :shadow="'always'">
                   <el-tag style="font-weight: bold;font-size: large" type="warning">摘要总结</el-tag>
                   <el-divider/>
-                  <p style="padding: 10px; margin: 10px; color: rgb(63,61,61); text-indent: 2em">
+                  <p class="text-lg my-2  mx-1 text-black-600 font-bold  text-justify"
+                     style="text-indent: 2em">
                     {{ caseItem.extra.summary }}</p>
                 </el-card>
               </el-tab-pane>
@@ -317,21 +292,26 @@ const handleTabClick = (pane, ev) => {
                 <el-card :shadow="'always'" style="color: #ba2636">
                   <el-tag style="font-weight: bold;font-size: large" type="danger">法律依据</el-tag>
                   <el-divider/>
-                  <p v-if="caseItem.legalBasis">{{ caseItem.legalBasis }}</p>
-                  <p v-else-if="caseItem.extra.article">{{ caseItem.extra.article }}</p>
+                  <p v-if="caseItem.legalBasis" class="text-lg">{{ caseItem.legalBasis }}</p>
+                  <p v-else-if="caseItem.extra.article" class="text-lg">{{ caseItem.extra.article }}</p>
                 </el-card>
               </el-tab-pane>
               <el-tab-pane v-if="caseItem.relatedCases" label="相关案例">
                 <el-card :shadow="'always'">
                   <el-tag style="font-weight: bold;font-size: large" type="warning">相关案例</el-tag>
                   <el-divider/>
-                  <ul>
-                    <el-link v-for="(item,index) in caseItem.relatedCases" :key="index" :href="item.url">
-                      {{
-                        item.name
-                      }}
-                    </el-link>
-                  </ul>
+                  <ol>
+                    <li v-for="(item,index) in caseItem.relatedCases"
+                        :key="index" class="text-blue-600 mx-10 my-2 font-bold text-lg hover:text-yellow-500"
+                        style="list-style-type: decimal">
+                      <el-link :href="item.url" target="_blank">
+                        <p class="font-bold text-lg my-1 hover:text-yellow-500">{{
+                            item.name
+                          }}
+                        </p>
+                      </el-link>
+                    </li>
+                  </ol>
                 </el-card>
               </el-tab-pane>
             </el-tabs>

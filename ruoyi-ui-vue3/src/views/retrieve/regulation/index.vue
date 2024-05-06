@@ -311,7 +311,7 @@ const handleSearch = () => {
 const handleDetail = (item) => {
   // 打开遮罩层
   proxy?.$modal.loading("正在打开" + item.name + "法条文书，请稍后...");
-  proxy.$router.push("/retrieve/law-detail/law/" + item.id + "?" + `keyword=${advancedForm.value.name}`)
+  proxy.$router.push("/retrieve/lawDetail/" + item.id + "?" + `keyword=${advancedForm.value.name}`)
   // 关闭遮罩层
   proxy?.$modal.closeLoading();
 }

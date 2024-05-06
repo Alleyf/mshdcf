@@ -94,28 +94,28 @@ export const constantRoutes = [
 // 动态路由，基于用户权限动态去加载
 export const dynamicRoutes = [
   {
-    path: '/retrieve/case-detail',
+    path: '/retrieve',
     component: Layout,
     hidden: true,
     permissions: ['retrieve:case:list'],
     children: [
       {
-        path: 'case/:id(\\d+)',
-        component: () => import('@/views/retrieve/case/detail/index.vue'),
+        path: 'caseDetail/:id(\\d+)',
+        component: () => import('@/views/retrieve/case/detail'),
         name: 'CaseDetail',
         meta: {title: '案件详情', activeMenu: '/retrieve/case'}
       }
     ]
   },
   {
-    path: '/retrieve/law-detail',
+    path: '/retrieve',
     component: Layout,
     hidden: true,
     permissions: ['retrieve:regulation:list'],
     children: [
       {
-        path: 'law/:id(\\d+)',
-        component: () => import('@/views/retrieve/regulation/detail/index.vue'),
+        path: 'lawDetail/:id(\\d+)',
+        component: () => import('@/views/retrieve/regulation/detail'),
         name: 'LawDetail',
         meta: {title: '法条详情', activeMenu: '/retrieve/regulation'}
       }

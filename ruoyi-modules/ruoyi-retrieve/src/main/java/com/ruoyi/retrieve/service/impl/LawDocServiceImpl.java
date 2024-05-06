@@ -109,10 +109,22 @@ public class LawDocServiceImpl implements ILawDocService {
         return lawDocMapper.selectById(id);
     }
 
+    //    @Override
+//    public LawDoc selectByName(String name) {
+//        return EsWrappers.lambdaChainQuery(lawDocMapper).eq(StringUtils.isNotEmpty(name), LawDoc::getName, name).one();
+//    }
     @Override
     public LawDoc selectByName(String name) {
-        LambdaEsQueryChainWrapper<LawDoc> lqw = EsWrappers.lambdaChainQuery(lawDocMapper).eq(StringUtils.isNotEmpty(name), LawDoc::getName, name);
-        return lawDocMapper.selectOne(lqw);
+        // 使用Easy-Es的链式调用来构建查询条件
+        LambdaEsQueryWrapper<LawDoc> queryWrapper = new LambdaEsQueryWrapper<>();
+
+        // 添加查询条件，如果name不为空，则按name进行精确匹配
+        if (StringUtils.isNotEmpty(name)) {
+            queryWrapper.eq(LawDoc::getName, name);
+        }
+
+        // 执行查询并返回结果
+        return lawDocMapper.selectOne(queryWrapper);
     }
 
     /**
@@ -269,7 +281,8 @@ public class LawDocServiceImpl implements ILawDocService {
             .ge(ObjectUtil.isNotNull(bo.getReleaseDate()), LawDoc::getReleaseDate, bo.getReleaseDate())
             .le(ObjectUtil.isNotNull(bo.getExecuteDate()), LawDoc::getExecuteDate, bo.getExecuteDate())
             .like(StringUtils.isNotEmpty(bo.getReleaseOrganization()), LawDoc::getReleaseOrganization, bo.getReleaseOrganization())
-            .notSelect(LawDoc::getHighlightName, LawDoc::getHighlightContent, LawDoc::getHighlightStripContent, LawDoc::getMysqlId, LawDoc::getExtra)
+//            .notSelect(LawDoc::getHighlightName, LawDoc::getHighlightContent, LawDoc::getHighlightStripContent, LawDoc::getMysqlId, LawDoc::getExtra)
+            .notSelect(LawDoc::getHighlightContent, LawDoc::getHighlightStripContent, LawDoc::getMysqlId, LawDoc::getExtra)
             .sortByScore(SortOrder.DESC);
         return lqw;
     }

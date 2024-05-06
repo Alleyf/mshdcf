@@ -148,9 +148,9 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         int allCaseSize = allCase.size();
 
         // 设置mysqlId
-        caseDocs.forEach(caseDoc -> caseDoc.setMysqlId(caseDoc.getId()));
+        caseDocs.stream().forEach(caseDoc -> caseDoc.setMysqlId(caseDoc.getId()));
 
-        int insertNum = 100; // 批量插入数
+        int insertNum = 300; // 批量插入数
         int successNum = 0;
 
         // 分块同步

@@ -77,7 +77,24 @@ public class LawDocController extends BaseController {
     @GetMapping("/{id}")
     public R<Object> get(@PathVariable("id") Long id) {
         LawDoc lawDoc = lawDocService.selectById(id);
-        worldCloudProducer.sendMsg(lawDoc.getId(), lawDoc.getName(), lawDoc.getContent(), 0L);
+        if (lawDoc != null) {
+            worldCloudProducer.sendMsg(lawDoc.getId(), lawDoc.getName(), lawDoc.getContent(), 0L);
+        }
+        return R.ok(lawDoc);
+    }
+
+    /**
+     * 根据name查询
+     *
+     * @param name name
+     * @return R
+     */
+    @GetMapping("/name/{name}")
+    public R<Object> get(@PathVariable("name") String name) {
+        LawDoc lawDoc = lawDocService.selectByName(name);
+        if (lawDoc != null) {
+            worldCloudProducer.sendMsg(lawDoc.getId(), lawDoc.getName(), lawDoc.getContent(), 0L);
+        }
         return R.ok(lawDoc);
     }
 

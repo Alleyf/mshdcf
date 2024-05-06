@@ -80,7 +80,7 @@ public class LawRegulationBo extends BaseEntity {
     /**
      * 发布机关
      */
-    @NotBlank(message = "发布机关不能为空", groups = {AddGroup.class, EditGroup.class})
+//    @NotBlank(message = "发布机关不能为空", groups = {AddGroup.class, EditGroup.class})
     private String releaseOrganization;
 
     /**

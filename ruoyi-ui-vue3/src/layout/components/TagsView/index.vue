@@ -1,21 +1,20 @@
 <!--<template>-->
-<!--  <div id="tags-view-container" class="tags-view-container flex justify-around items-center">-->
+<!--  <div id="tags-view-container" class="tags-view-container">-->
 <!--    <scroll-pane ref="scrollPaneRef" class="tags-view-wrapper" @scroll="handleScroll">-->
 <!--      <router-link-->
-<!--          v-for="tag in visitedViews"-->
-<!--          :key="tag.path"-->
-<!--          :class="isActive(tag) ? 'active' : ''"-->
-<!--          :data-path="tag.path"-->
-<!--          :style="activeStyle(tag)"-->
-<!--          :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }"-->
-<!--          class="tags-view-item flex justify-start flex-nowrap items-center m-auto flex-row"-->
-<!--          @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''"-->
-<!--          @contextmenu.prevent="openMenu(tag, $event)"-->
+<!--        v-for="tag in visitedViews"-->
+<!--        :key="tag.path"-->
+<!--        :class="isActive(tag) ? 'active' : ''"-->
+<!--        :data-path="tag.path"-->
+<!--        :style="activeStyle(tag)"-->
+<!--        :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }"-->
+<!--        class="tags-view-item"-->
+<!--        @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''"-->
+<!--        @contextmenu.prevent="openMenu(tag, $event)"-->
 <!--      >-->
 <!--        {{ tag.title }}-->
-<!--        <span v-if="!isAffix(tag)" class="flex-1 justify-self-auto" @click.prevent.stop="closeSelectedTag(tag)">-->
-<!--&lt;!&ndash;          <close class="el-icon-close" style="width: 1em; height: 1em;vertical-align: middle;"/>&ndash;&gt;-->
-<!--          <Icon class="text-xs" icon="material-symbols:close"/>-->
+<!--        <span v-if="!isAffix(tag)" @click.prevent.stop="closeSelectedTag(tag)">-->
+<!--          <close class="el-icon-close" style="width: 1em; height: 1em;vertical-align: middle;"/>-->
 <!--        </span>-->
 <!--      </router-link>-->
 <!--    </scroll-pane>-->
@@ -47,19 +46,20 @@
 <!--    </ul>-->
 <!--  </div>-->
 <!--</template>-->
+
 <template>
   <div id="tags-view-container" class="tags-view-container flex items-center h-10 m-auto">
     <scroll-pane ref="scrollPaneRef" class="tags-view-wrapper m-auto flex-1 items-center">
       <router-link
-          v-for="tag in visitedViews"
-          :key="tag.path"
-          :class="isActive(tag) ? 'active' : ''"
-          :data-path="tag.path"
-          :style="activeStyle(tag)"
-          :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }"
-          class="tags-view-item flex justify-start flex-nowrap items-center m-auto flex-row"
-          @click.middle.self.prevent="!isAffix(tag) ? closeSelectedTag(tag) : ''"
-          @click.prevent="openMenu(tag, $event)"
+        v-for="tag in visitedViews"
+        :key="tag.path"
+        :class="isActive(tag) ? 'active' : ''"
+        :data-path="tag.path"
+        :style="activeStyle(tag)"
+        :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }"
+        class="tags-view-item flex justify-start flex-nowrap items-center m-auto flex-row"
+        @click.middle.self.prevent="!isAffix(tag) ? closeSelectedTag(tag) : ''"
+        @click.prevent="openMenu(tag, $event)"
       >
         {{ tag.title }}
         <span v-if="!isAffix(tag)" class="flex-1 justify-self-auto" @click.prevent.stop="closeSelectedTag(tag)">

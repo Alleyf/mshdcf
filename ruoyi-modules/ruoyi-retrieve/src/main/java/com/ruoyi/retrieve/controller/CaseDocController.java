@@ -9,6 +9,7 @@ import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
 import com.ruoyi.common.redis.utils.RedisUtils;
 import com.ruoyi.retrieve.api.domain.CaseDoc;
+import com.ruoyi.retrieve.api.domain.LawDoc;
 import com.ruoyi.retrieve.esmapper.CaseDocMapper;
 import com.ruoyi.retrieve.mq.producer.WorldCloudProducer;
 import com.ruoyi.retrieve.service.ICaseDocService;
@@ -75,21 +76,23 @@ public class CaseDocController extends BaseController {
      * @return R
      */
     @GetMapping("/{id}")
-    public R<Object> get(@PathVariable("id") Long id) {
+    public R<CaseDoc> get(@PathVariable("id") Long id) {
         CaseDoc caseDoc = caseDocService.selectById(id);
-//        if (StringUtils.isNotEmpty(caseDoc.getWordCloud())) {
-//            return R.ok(caseDoc.getWordCloud(), caseDoc);
-//        }
 //        todo: 设置为异步生成词云，通过消息队列实现
         worldCloudProducer.sendMsg(caseDoc.getId(), caseDoc.getName(), caseDoc.getContent(), 0L);
-//        String worldCloud = WorldCloudUtils.genWorldCloud(caseDoc.getName(), caseDoc.getContent());
-//        Map<String, Object> map = BeanCopyUtils.copyToMap(caseDoc);
-//        if (map == null) {
-//            map = new HashMap<>();
-//        }
-        // 将worldCloud放入Map中
-//        map.put("worldCloud", worldCloud);
-//        return R.ok(worldCloud, map);
+        return R.ok(caseDoc);
+    }
+
+    /**
+     * 根据name查询
+     *
+     * @param name name
+     * @return R
+     */
+    @GetMapping("/name/{name}")
+    public R<CaseDoc> get(@PathVariable("name") String name) {
+        CaseDoc caseDoc = caseDocService.selectByName(name);
+        worldCloudProducer.sendMsg(caseDoc.getId(), caseDoc.getName(), caseDoc.getContent(), 0L);
         return R.ok(caseDoc);
     }
 

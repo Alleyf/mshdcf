@@ -156,10 +156,9 @@ const handleTabClick = (pane, ev) => {
               {{ lawItem.releaseDate }}
           </span>
         </p>
-        <el-card ref="typewriter">
-          <div id="content" class="content" style="padding: 10px;">
+        <el-card ref="typewriter" class="bg-gray-100 border border-gray-200 rounded-lg p-4">
+          <div id="content" class="prose max-w-none text-xl">
             <!--          <div v-for="(item,index) in textLs" :key="index" style="padding: 10px;">-->
-            <!--              todo 加粗的html也被显示出来了-->
             <!--            <span v-for="str in handleContent(item)" v-html="str"/>-->
             <!--          <p v-html="displayedText"/>-->
             <!--          </div>-->
@@ -175,41 +174,45 @@ const handleTabClick = (pane, ev) => {
             <el-card :shadow="'always'" class="el-space--vertical">
               <el-tag style="font-weight: bold;font-size: large">基本信息</el-tag>
               <el-row :gutter="20" :justify="'space-between'">
-                <el-col v-if="lawItem.releaseOrganization" class="flex">
+                <el-col v-if="lawItem.releaseOrganization" class="flex text-lg">
                   <Icon :icon="icons['releaseOrganization']" class="text-2xl"/>
-                  颁布组织：{{
-                    lawItem.releaseOrganization
-                  }}
+                  颁布组织：
+                  <el-tag>{{
+                      lawItem.releaseOrganization
+                    }}
+                  </el-tag>
                 </el-col>
-                <el-col v-if="lawItem.field">
+                <el-col v-if="lawItem.field" class="flex text-lg">
                   <Icon :icon="icons['field']" class="text-2xl"/>
                   归属领域 ：{{ lawItem.field }}
                 </el-col>
-                <el-col v-if="lawItem.type">
+                <el-col v-if="lawItem.type" class="flex text-lg">
                   <Icon :icon="icons['type']" class="text-2xl"/>
-                  案件类型：{{ lawItem.type }}
+                  法条类型：
+                  <el-tag type="success">{{ lawItem.type }}</el-tag>
                 </el-col>
-                <el-col v-if="lawItem.structure">
+                <el-col v-if="lawItem.structure" class="flex text-lg">
                   <Icon :icon="icons['structure']" class="text-2xl"/>
                   法条结构：{{ lawItem.structure }}
                 </el-col>
-                <el-col v-if="lawItem.reviseNum">
+                <el-col v-if="lawItem.reviseNum" class="flex text-lg">
                   <Icon :icon="icons['reviseNum']" class="text-2xl"/>
                   修订次数：{{ lawItem.reviseNum }}
                 </el-col>
-                <el-col v-if="lawItem.releaseDate">
+                <el-col v-if="lawItem.releaseDate" class="flex text-lg">
                   <Icon :icon="icons['releaseDate']" class="text-2xl"/>
                   发布日期：{{ lawItem.releaseDate }}
                 </el-col>
-                <el-col v-if="lawItem.executeDate">
+                <el-col v-if="lawItem.executeDate" class="flex text-lg">
                   <Icon :icon="icons['executeDate']" class="text-2xl"/>
-                  实施日期：{{ lawItem.executeDate }}
+                  实施日期：
+                  <el-tag type="warning">{{ lawItem.executeDate }}</el-tag>
                 </el-col>
-                <el-col v-if="lawItem.isValidity">
+                <el-col v-if="lawItem.isValidity" class="flex text-lg">
                   <Icon :icon="icons['isValidity']" class="text-2xl"/>
                   现行有效：{{ lawItem.isValidity }}
                 </el-col>
-                <el-col v-if="lawItem.url">
+                <el-col v-if="lawItem.url" class="flex text-lg">
                   <Icon :icon="icons['url']" class="text-2xl"/>
                   案件来源：
                   <el-link :href="lawItem.url" target="_blank" type="primary">
@@ -227,30 +230,31 @@ const handleTabClick = (pane, ev) => {
                         style="margin-left: 52px;height: 80%;width: 80%"/>
             </el-card>
           </el-tab-pane>
-          <el-tab-pane v-if="Object.keys(lawItem.extra).length !== 0" label="语义信息"
+          <el-tab-pane v-if="Object.keys(lawItem.extra).length !== 0" label="潜在信息"
                        style="font-weight: normal;font-size: medium">
 
             <el-tabs tab-position="right">
 
-              <el-tab-pane v-if="Object.keys(lawItem.extra).length !== 0" label="附加信息">
+              <el-tab-pane v-if="Object.keys(lawItem.extra).length !== 0" label="挖掘信息">
                 <el-card :shadow="'always'">
                   <el-row :gutter="20" :justify="'space-between'">
-                    <el-col v-if="lawItem.extra.field"><span class="font-black">所属领域：</span>{{
+                    <el-col v-if="lawItem.extra.field" class="text-lg"><span class="font-black">所属领域：</span>{{
                         lawItem.extra.field
                       }}
                     </el-col>
-                    <el-col v-if="lawItem.extra.type"><span class="font-black">法条类型：</span>{{ lawItem.extra.type }}
+                    <el-col v-if="lawItem.extra.type" class="text-lg"><span
+                      class="font-black">法条类型：</span>{{ lawItem.extra.type }}
                     </el-col>
-                    <el-col v-if="lawItem.extra.organization"><span
+                    <el-col v-if="lawItem.extra.organization" class="text-lg"><span
                       class="font-black">颁布组织：</span>{{ lawItem.extra.organization }}
                     </el-col>
-                    <el-col v-if="lawItem.extra.release"><span
+                    <el-col v-if="lawItem.extra.release" class="text-lg"><span
                       class="font-black">发行日期：</span>{{ lawItem.extra.release }}
                     </el-col>
-                    <el-col v-if="lawItem.extra.execute"><span
+                    <el-col v-if="lawItem.extra.execute" class="text-lg"><span
                       class="font-black">实施日期：</span>{{ lawItem.extra.execute }}
                     </el-col>
-                    <el-col v-if="lawItem.extra.scope"><span class="font-black">作用范围：</span>{{
+                    <el-col v-if="lawItem.extra.scope" class="text-lg"><span class="font-black">作用范围：</span>{{
                         lawItem.extra.scope
                       }}
                     </el-col>
@@ -263,7 +267,7 @@ const handleTabClick = (pane, ev) => {
                 <el-card :shadow="'always'">
                   <el-tag style="font-weight: bold;font-size: large" type="warning">摘要总结</el-tag>
                   <el-divider/>
-                  <p style="padding: 10px; margin: 10px; color: rgb(63,61,61); text-indent: 2em">
+                  <p class="text-lg my-2  mx-1 text-black-600 font-bold  text-justify" style="text-indent: 2em">
                     {{ lawItem.extra.abstract }}</p>
                 </el-card>
               </el-tab-pane>
@@ -272,10 +276,13 @@ const handleTabClick = (pane, ev) => {
                   <el-tag style="font-weight: bold;font-size: large" type="danger">法律依据</el-tag>
                   <el-divider/>
                   <ol>
-                    <li v-for="(item,index) in lawItem.extra.basis" :key="index">
-                      {{
-                        item
-                      }}
+                    <li v-for="(item,index) in lawItem.extra.basis" :key="index"
+                        class="text-blue-600 mx-8 my-2 font-bold text-lg hover:text-red-500"
+                        style="list-style-type: decimal">
+                      <p>{{
+                          item
+                        }}
+                      </p>
                     </li>
                   </ol>
                 </el-card>
@@ -285,7 +292,9 @@ const handleTabClick = (pane, ev) => {
                   <el-tag style="font-weight: bold;font-size: large" type="warning">主要内容</el-tag>
                   <el-divider/>
                   <ol v-if="Array.isArray(lawItem.extra.main)">
-                    <li v-for="(item,index) in lawItem.extra.main" :key="index">
+                    <li v-for="(item,index) in lawItem.extra.main" :key="index"
+                        class="text-black-500 mx-8 my-2 font-bold text-lg hover:text-blue-500"
+                        style="list-style-type: decimal">
                       {{
                         item
                       }}

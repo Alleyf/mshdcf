@@ -66,7 +66,6 @@
                       <el-container v-if="item.relatedCases!=null&&item.relatedCases.length>0"
                                     class="text-muted hidden">
                         <el-link v-for="(item,index) in item.relatedCases" :key="index" :href="item.url"
-                                 :icon="Notebook"
                                  class="relatedCase" target="_blank">
                           {{ item.name }}
                         </el-link>
@@ -307,7 +306,7 @@ const handleSearch = () => {
 const handleDetail = (item) => {
   // 打开遮罩层
   proxy?.$modal.loading("正在打开" + item.name + "案例文书，请稍后...");
-  proxy.$router.push("/retrieve/case-detail/case/" + item.id + "?" + `keyword=${advancedForm.value.name}`)
+  proxy.$router.push("/retrieve/caseDetail/" + item.id + "?" + `keyword=${advancedForm.value.name}`)
   // 关闭遮罩层
   proxy?.$modal.closeLoading();
 }

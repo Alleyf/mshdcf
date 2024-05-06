@@ -116,9 +116,18 @@ public class CaseDocServiceImpl implements ICaseDocService {
 
     @Override
     public CaseDoc selectByName(String name) {
-        LambdaEsQueryChainWrapper<CaseDoc> lqw = EsWrappers.lambdaChainQuery(caseDocMapper).eq(StringUtils.isNotEmpty(name), CaseDoc::getName, name);
-        return caseDocMapper.selectOne(lqw);
+        // 使用Easy-Es的链式调用来构建查询条件
+        LambdaEsQueryWrapper<CaseDoc> queryWrapper = new LambdaEsQueryWrapper<>();
+
+        // 添加查询条件，如果name不为空，则按name进行精确匹配
+        if (StringUtils.isNotEmpty(name)) {
+            queryWrapper.eq(CaseDoc::getName, name);
+        }
+
+        // 执行查询并返回结果
+        return caseDocMapper.selectOne(queryWrapper);
     }
+
 
     /**
      * 根据关键字精确查询
@@ -297,7 +306,8 @@ public class CaseDocServiceImpl implements ICaseDocService {
             .le(StringUtils.isNotEmpty(bo.getPubDate()), CaseDoc::getPubDate, bo.getPubDate())
             .like(StringUtils.isNotEmpty(bo.getLegalBasis()), CaseDoc::getLegalBasis, bo.getLegalBasis())
 //            .like(StringUtils.isNotEmpty(bo.getParty()), CaseDoc::getParty, bo.getParty())
-            .notSelect(CaseDoc::getHighlightName, CaseDoc::getHighlightContent, CaseDoc::getHighlightStripContent, CaseDoc::getMysqlId, CaseDoc::getExtra)
+//            .notSelect(CaseDoc::getHighlightName, CaseDoc::getHighlightContent, CaseDoc::getHighlightStripContent, CaseDoc::getMysqlId, CaseDoc::getExtra)
+            .notSelect(CaseDoc::getHighlightContent, CaseDoc::getHighlightStripContent, CaseDoc::getMysqlId, CaseDoc::getExtra)
             .sortByScore(SortOrder.DESC);
         return lqw;
     }

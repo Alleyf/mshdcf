@@ -28,14 +28,15 @@ public class CaseDoc implements Serializable {
     /**
      * mysql中的唯一id
      */
-    @IndexField(fieldType = FieldType.KEYWORD)
+    @IndexField(fieldType = FieldType.KEYWORD, value = "mId")
     private Long mysqlId;
 
     /**
      * 案件名称
      */
-    @HighLight(mappingField = "highlightName", preTag = "<text style='color:red'>", postTag = "</text>")
-    @IndexField(fieldType = FieldType.KEYWORD_TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
+//    @HighLight(mappingField = "highlightName", preTag = "<text style='color:red'>", postTag = "</text>")
+    @IndexField(fieldType = FieldType.KEYWORD, analyzer = Analyzer.NONE, searchAnalyzer = Analyzer.NONE)
+//    @IndexField(fieldType = FieldType.KEYWORD_TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
     private String name;
     /**
      * 审判法院
@@ -112,6 +113,7 @@ public class CaseDoc implements Serializable {
     /**
      * 当事人
      */
+    @IndexField(exist = false)
     private String party;
     /**
      * 相关案件（记录name并以|分隔,应该用json保存,等爬虫重新爬取保存json格式到数据库再替换为map类型）
@@ -126,8 +128,8 @@ public class CaseDoc implements Serializable {
     /**
      * 标题高亮返回值被映射的字段
      */
-    @IndexField(exist = false)
-    private String highlightName;
+//    @IndexField(exist = false)
+//    private String highlightName;
     /**
      * 正文高亮返回值被映射的字段
      */

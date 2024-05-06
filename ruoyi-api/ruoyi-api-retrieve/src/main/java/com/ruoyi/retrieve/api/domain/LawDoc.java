@@ -33,14 +33,15 @@ public class LawDoc implements Serializable {
     /**
      * mysql中的唯一id
      */
-    @IndexField(fieldType = FieldType.KEYWORD)
+    @IndexField(fieldType = FieldType.KEYWORD, value = "mId")
     private Long mysqlId;
 
     /**
      * 案件名称
      */
-    @HighLight(mappingField = "highlightName", preTag = "<text style='color:red'>", postTag = "</text>")
-    @IndexField(fieldType = FieldType.KEYWORD_TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
+//    @HighLight(mappingField = "highlightName", preTag = "<text style='color:red'>", postTag = "</text>")
+    @IndexField(fieldType = FieldType.KEYWORD, analyzer = Analyzer.NONE, searchAnalyzer = Analyzer.NONE)
+//    @IndexField(fieldType = FieldType.KEYWORD_TEXT, analyzer = Analyzer.IK_SMART, searchAnalyzer = Analyzer.IK_MAX_WORD)
     private String name;
     /**
      * 所属领域
@@ -118,11 +119,11 @@ public class LawDoc implements Serializable {
     @IndexField(exist = false)
     private Float score;
 
-    /**
-     * 标题高亮返回值被映射的字段
-     */
-    @IndexField(exist = false)
-    private String highlightName;
+//    /**
+//     * 标题高亮返回值被映射的字段
+//     */
+//    @IndexField(exist = false)
+//    private String highlightName;
     /**
      * 正文高亮返回值被映射的字段
      */
