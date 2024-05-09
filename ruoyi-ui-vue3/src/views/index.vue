@@ -410,16 +410,16 @@ const getProvince = () => {
 const handleClick = (index) => {
   switch (index) {
     case 0:
-      router.push({path: '/manage/case'});
+      router.push({path: '/manage/caseMan'});
       break;
     case 1:
-      router.push({path: '/manage/case'});
+      router.push({path: '/manage/caseMan'});
       break
     case 2:
-      router.push({path: '/manage/regulation'});
+      router.push({path: '/manage/regulationMan'});
       break;
     case 3:
-      router.push({path: '/manage/regulation'});
+      router.push({path: '/manage/regulationMan'});
       break;
   }
 }

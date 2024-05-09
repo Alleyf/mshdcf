@@ -990,21 +990,16 @@ onMounted(() => {
             </el-table-column>
             <el-table-column label="案号" prop="number" width="210"></el-table-column>
             <el-table-column label="案由" prop="cause" width="150"></el-table-column>
-            <el-table-column label="原始链接" prop="url" width="150">
-              <template #default="scope">
-                <el-link :href="scope.row.url" target="_blank" type="primary">
-                  <span class="hidden"> {{ scope.row.url }}</span>
-                </el-link>
-              </template>
-            </el-table-column>
+            <!--            <el-table-column label="原始链接" prop="url" width="150">-->
+            <!--              <template #default="scope">-->
+            <!--                <el-link :href="scope.row.url" target="_blank" type="primary">-->
+            <!--                  <span class="hidden"> {{ scope.row.url }}</span>-->
+            <!--                </el-link>-->
+            <!--              </template>-->
+            <!--            </el-table-column>-->
             <el-table-column label="文书类型" prop="type" width="150"></el-table-column>
             <el-table-column label="审理程序" prop="process" width="150"></el-table-column>
             <el-table-column label="详细案由" prop="label" width="180"></el-table-column>
-            <el-table-column label="案件来源" prop="sourceId" width="150">
-              <template #default="scope">
-                <dict-tag :options="crawler_source" :value="scope.row.sourceId"/>
-              </template>
-            </el-table-column>
             <el-table-column label="判决日期" prop="judgeDate" sortable width="150">
               <template #default="scope">
                 <div style="display: flex; align-items: center">
@@ -1022,6 +1017,11 @@ onMounted(() => {
                   <template #content class="newLine">{{ row.legalBasis }}</template>
                   <span class="hidden">{{ row.legalBasis }}</span>
                 </el-tooltip>
+              </template>
+            </el-table-column>
+            <el-table-column label="案件来源" prop="sourceId" width="150">
+              <template #default="scope">
+                <dict-tag :options="crawler_source" :value="scope.row.sourceId"/>
               </template>
             </el-table-column>
             <!--        <el-table-column label="当事人" prop="party" width="150"></el-table-column>-->

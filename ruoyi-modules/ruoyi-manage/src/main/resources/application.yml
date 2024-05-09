@@ -41,15 +41,15 @@ hanlp:
   #  url: https://www.hanlp.com/hanlp/v21/redirect
   token: "NDE4OEBiYnMuaGFubHAuY29tOjBBa0hKY2p3YVhUelVoRFY="
 
---- # elasticsearch 功能配置
-easy-es:
-  # 是否开启EE自动配置
-  enable: false
-  # es连接地址+端口 格式必须为ip:port,如果是集群则可用逗号隔开
-  address: @es.address@
-  # 默认为http
-  schema: http
-  banner: false
+#--- # elasticsearch 功能配置
+#easy-es:
+#  # 是否开启EE自动配置
+#  enable: false
+#  # es连接地址+端口 格式必须为ip:port,如果是集群则可用逗号隔开
+#  address: @es.address@
+#  # 默认为http
+#  schema: http
+#  banner: false
 
 --- # Dubbo 配置
 dubbo:

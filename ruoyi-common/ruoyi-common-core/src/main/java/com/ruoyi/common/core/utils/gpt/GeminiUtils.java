@@ -49,7 +49,7 @@ public class GeminiUtils {
     public static final int OPTION = 2;
     @Value("${gpt.gemini.isProxy:false}")
 //    public static final boolean isProxy;
-    public static final boolean isProxy = true;
+    public static final boolean isProxy = false;
     /**
      * 代理
      */

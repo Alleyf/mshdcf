@@ -208,13 +208,13 @@ const handleTabClick = (pane, ev) => {
                   审理程序：
                   <el-tag>{{ caseItem.process }}</el-tag>
                 </el-col>
-                <el-col v-if="caseItem.url" class="flex text-lg">
-                  <Icon :icon="icons['url']" class="text-2xl"/>
-                  案件来源：
-                  <el-link :href="caseItem.url" target="_blank" type="primary">
-                    {{ caseItem.source }}
-                  </el-link>
-                </el-col>
+                <!--                <el-col v-if="caseItem.url" class="flex text-lg">-->
+                <!--                  <Icon :icon="icons['url']" class="text-2xl"/>-->
+                <!--                  案件来源：-->
+                <!--                  <el-link :href="caseItem.url" target="_blank" type="primary">-->
+                <!--                    {{ caseItem.source }}-->
+                <!--                  </el-link>-->
+                <!--                </el-col>-->
                 <el-col v-if="caseItem.judgeDate" class="flex text-lg">
                   <Icon :icon="icons['judgeDate']" class="text-2xl"/>
                   判决日期：{{ caseItem.judgeDate }}

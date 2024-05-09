@@ -755,13 +755,13 @@ onMounted(() => {
                 <dict-tag v-if="scope.row.type!==null" :options="law_type" :value="scope.row.type" width="180"/>
               </template>
             </el-table-column>
-            <el-table-column align="center" label="原始链接" prop="url" width="120">
-              <template #default="scope">
-                <el-link :href="scope.row.url" target="_blank" type="primary">
-                  <span class="hidden">{{ scope.row.url }}</span>
-                </el-link>
-              </template>
-            </el-table-column>
+            <!--            <el-table-column align="center" label="原始链接" prop="url" width="120">-->
+            <!--              <template #default="scope">-->
+            <!--                <el-link :href="scope.row.url" target="_blank" type="primary">-->
+            <!--                  <span class="hidden">{{ scope.row.url }}</span>-->
+            <!--                </el-link>-->
+            <!--              </template>-->
+            <!--            </el-table-column>-->
             <el-table-column align="center" label="有效性" prop="isValidity" width="180">
               <template #default="scope">
                 <dict-tag :options="crawl_common_status" :value="scope.row.isValidity"/>
@@ -789,13 +789,13 @@ onMounted(() => {
             </el-table-column>
             <el-table-column align="center" label="发布机关" prop="releaseOrganization" width="180"/>
             <!--      <el-table-column align="center" label="法规正文" prop="content"/>-->
+            <el-table-column align="center" label="法规结构" prop="structure" width="180"/>
+            <el-table-column align="center" label="修改次数" prop="reviseNum" width="180"/>
             <el-table-column align="center" label="法规来源" prop="sourceId" width="180">
               <template #default="scope">
                 <dict-tag :options="crawler_source" :value="scope.row.sourceId"/>
               </template>
             </el-table-column>
-            <el-table-column align="center" label="法规结构" prop="structure" width="180"/>
-            <el-table-column align="center" label="修改次数" prop="reviseNum" width="180"/>
             <el-table-column align="center" label="状态" prop="status" width="180">
               <template #default="scope">
                 <dict-tag :options="crawl_common_status" :value="scope.row.status"/>

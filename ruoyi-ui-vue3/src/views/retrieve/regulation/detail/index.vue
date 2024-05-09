@@ -212,13 +212,13 @@ const handleTabClick = (pane, ev) => {
                   <Icon :icon="icons['isValidity']" class="text-2xl"/>
                   现行有效：{{ lawItem.isValidity }}
                 </el-col>
-                <el-col v-if="lawItem.url" class="flex text-lg">
-                  <Icon :icon="icons['url']" class="text-2xl"/>
-                  案件来源：
-                  <el-link :href="lawItem.url" target="_blank" type="primary">
-                    {{ lawItem.source }}
-                  </el-link>
-                </el-col>
+                <!--                <el-col v-if="lawItem.url" class="flex text-lg">-->
+                <!--                  <Icon :icon="icons['url']" class="text-2xl"/>-->
+                <!--                  案件来源：-->
+                <!--                  <el-link :href="lawItem.url" target="_blank" type="primary">-->
+                <!--                    {{ lawItem.source }}-->
+                <!--                  </el-link>-->
+                <!--                </el-col>-->
               </el-row>
             </el-card>
           </el-tab-pane>

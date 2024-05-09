@@ -167,7 +167,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         int allLawSize = lawRegulations.size();
 
         // 设置mysqlId
-        lawDocs.stream().forEach(lawDoc -> lawDoc.setMysqlId(lawDoc.getId()));
+//        lawDocs.parallelStream().forEach(lawDoc -> lawDoc.setMysqlId(lawDoc.getId()));
 
         int insertNum = 300; // 批量插入数
         int successNum = 0;
