@@ -3,8 +3,8 @@ package com.ruoyi.common.core.constant;
 /**
  * @author fcs
  * @date 2024/2/24 21:10
- * @site <a href="https://alleyf.github.io">getHelp</a>
  * @description
+ * @since <a href="https://alleyf.github.io">getHelp</a>
  */
 public interface GPTConstants {
     /**
@@ -31,11 +31,11 @@ public interface GPTConstants {
     /**
      * Coze-GPT请求地址
      */
-    String COZE_API_URL = "http://103.225.198.88:7077/v1/chat/completions";
+    String COZE_API_URL = "http://127.0.0.1:9090/v1/chat/completions";
     /**
      * Coze-GPT请求密钥
      */
-    String COZE_API_SECRET = "coze123456";
+    String COZE_API_SECRET = "123456";
 
     /**
      * MoonShot-GPT请求地址

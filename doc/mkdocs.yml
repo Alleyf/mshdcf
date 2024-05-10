@@ -6,7 +6,7 @@ repo_url: https://github.com/Alleyf/mshdcf
 edit_uri: edit/main/docs/
 nav:
   - Home: guide.md
-  - Collection: collection.md
+  #  - Collection: collection.md
   - About: about.md
 theme:
   name: material

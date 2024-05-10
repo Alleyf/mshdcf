@@ -27,8 +27,17 @@
 
 <div align='center'>
     <img src="http://qnpicmap.fcsluck.top/pics/202311131334305.png" alt="image-20220910212636463" width="25%" heigh="25%" style="zoom: 25%; align: center" />
-    </div>
+</div>
 
 ## VideoShare
 
 <iframe src="//player.bilibili.com/player.html?aid=431531205&bvid=BV1rG411j7u9&cid=861535623&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"  width="100%" height="400" autoload="false"> </iframe>
+
+
+<video id="player" playsinline controls data-poster="/path/to/poster.jpg">
+  <source src="https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-1080p.mp4" type="video/mp4" />
+</video>
+
+<script src="https://cdn.plyr.io/3.6.12/plyr.js"></script>
+<link rel="stylesheet" href="https://cdn.plyr.io/3.6.12/plyr.css" />
+
