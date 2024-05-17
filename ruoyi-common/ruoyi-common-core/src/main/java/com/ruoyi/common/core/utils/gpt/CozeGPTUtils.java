@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.junit.Test;
 
+import javax.swing.border.AbstractBorder;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -38,14 +39,14 @@ public class CozeGPTUtils {
      */
     public static OkHttpClient client = new OkHttpClient.Builder()
 //            设置代理
-            .proxy(proxy)
-            // 设置读取超时时间为60秒
-            .readTimeout(60, TimeUnit.SECONDS)
-            // 设置写入超时时间为60秒
-            .writeTimeout(60, TimeUnit.SECONDS)
-            // 设置连接超时时间为60秒
-            .connectTimeout(60, TimeUnit.SECONDS)
-            .build();
+        .proxy(proxy)
+        // 设置读取超时时间为60秒
+        .readTimeout(60, TimeUnit.SECONDS)
+        // 设置写入超时时间为60秒
+        .writeTimeout(60, TimeUnit.SECONDS)
+        // 设置连接超时时间为60秒
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .build();
 
     /**
      * 同步请求
@@ -156,11 +157,11 @@ public class CozeGPTUtils {
         RequestBody body = RequestBody.create(jsonRequest.get("text"), MediaType.get("application/json; charset=utf-8"));
         // 创建Request
         return new Request.Builder()
-                .url(jsonRequest.get("url"))
-                .post(body)
-                .addHeader("Authorization", GPTConstants.COZE_API_SECRET)
-                .addHeader("Content-Type", "application/json")
-                .build();
+            .url(jsonRequest.get("url"))
+            .post(body)
+            .addHeader("Authorization", GPTConstants.COZE_API_SECRET)
+            .addHeader("Content-Type", "application/json")
+            .build();
     }
 
     private static Map<String, String> getJsonRequest(String text) {
@@ -197,6 +198,9 @@ public class CozeGPTUtils {
                     // 解析 JSON 字符串
                     body = cozeParseResponse(response);
                     if (StringUtils.isNotEmpty(body)) {
+                        if (body.contains("json")) {
+                            body = body.substring(body.indexOf("{"), body.lastIndexOf("}") + 1);
+                        }
                         JSONObject jsonObject = JSONObject.parseObject(body);
                         log.info(jsonObject.toJSONString());
 //                        必须转化为json字符串才可以
