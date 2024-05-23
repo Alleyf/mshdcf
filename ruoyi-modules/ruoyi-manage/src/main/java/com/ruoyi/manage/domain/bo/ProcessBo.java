@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 /**
- * 司法案例数据智能处理业务请求对象
+ * 司法案件数据智能处理业务请求对象
  *
  * @author fcs
  * @date 2024/2/13 12:29

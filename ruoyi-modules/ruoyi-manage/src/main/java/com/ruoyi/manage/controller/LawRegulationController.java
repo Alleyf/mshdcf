@@ -116,12 +116,24 @@ public class LawRegulationController extends BaseController {
     /**
      * 全量同步法律法规
      */
-//    @SaCheckPermission("manage:regulation:add")
-//    @Log(title = "法律法规", businessType = BusinessType.INSERT)
+    @SaCheckPermission("manage:regulation:add")
+    @Log(title = "法律法规", businessType = BusinessType.INSERT)
     @GetMapping("/syncAll")
     public R<Void> syncAll() {
-        //        采用消息队列异步处理，借助websocket实时发送处理进度通知
-        websocketProducer.sendMsg("全量同步法条数据", SocketMsgType.LAW.getType(), "开始同步司法法条数据", LoginHelper.getLoginId(), 0L);
+        // 采用消息队列异步处理，借助websocket实时发送处理进度通知
+        websocketProducer.sendMsg("全量同步法条数据", SocketMsgType.LAW.getType(), "开始同步法条数据", LoginHelper.getLoginId(), 0L);
+        return R.ok("开始同步法条数据");
+    }
+
+    /**
+     * 增量同步法律法规
+     */
+    @SaCheckPermission("manage:regulation:add")
+    @Log(title = "法律法规", businessType = BusinessType.INSERT)
+    @GetMapping("/syncInc")
+    public R<Void> syncInc() {
+        // 采用消息队列异步处理，借助websocket实时发送处理进度通知
+        websocketProducer.sendMsg("增量同步法条数据", SocketMsgType.LAW.getType(), "开始同步法条数据", LoginHelper.getLoginId(), 0L);
         return R.ok("开始同步法条数据");
     }
 

@@ -34,10 +34,10 @@ import javax.validation.constraints.NotNull;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * 司法案例管理
+ * 司法案件管理
  *
  * @author alleyf
- * @description 司法案例控制器前端访问路由地址为:/manage/case
+ * @description 司法案件控制器前端访问路由地址为:/manage/case
  * @date 2024-01-26
  */
 @Validated
@@ -50,7 +50,7 @@ public class DocCaseController extends BaseController {
     private final WebsocketProducer websocketProducer;
 
     /**
-     * 查询司法案例列表
+     * 查询司法案件列表
      */
     @SaCheckPermission("manage:case:list")
     @GetMapping("/list")
@@ -60,12 +60,12 @@ public class DocCaseController extends BaseController {
 
 
     /**
-     * 导入司法案例列表
+     * 导入司法案件列表
      *
      * @param file          导入文件
      * @param updateSupport 更新已有数据
      */
-    @Log(title = "司法案例", businessType = BusinessType.IMPORT)
+    @Log(title = "司法案件", businessType = BusinessType.IMPORT)
     @SaCheckPermission("manage:case:import")
     @PostMapping(value = "/importData", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public R<Void> importData(MultipartFile file, boolean updateSupport) throws Exception {
@@ -78,35 +78,35 @@ public class DocCaseController extends BaseController {
      */
     @PostMapping("/importTemplate")
     public void importTemplate(HttpServletResponse response) {
-        ExcelUtil.exportExcel(new ArrayList<>(), "司法案例数据", DocCaseImportVo.class, response);
+        ExcelUtil.exportExcel(new ArrayList<>(), "司法案件数据", DocCaseImportVo.class, response);
     }
 
     /**
-     * 导出司法案例列表
+     * 导出司法案件列表
      */
     @SaCheckPermission("manage:case:export")
-    @Log(title = "司法案例", businessType = BusinessType.EXPORT)
+    @Log(title = "司法案件", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DocCaseBo bo, HttpServletResponse response) {
         List<DocCaseVo> list = docCaseService.queryList(bo);
-        ExcelUtil.exportExcel(list, "司法案例", DocCaseVo.class, response);
+        ExcelUtil.exportExcel(list, "司法案件", DocCaseVo.class, response);
     }
 
     /**
-     * 导出选中司法案例列表
+     * 导出选中司法案件列表
      */
     @SaCheckPermission("manage:case:export")
-    @Log(title = "司法案例", businessType = BusinessType.EXPORT)
+    @Log(title = "司法案件", businessType = BusinessType.EXPORT)
     @PostMapping("/exportSelected")
     public void exportIds(Long[] ids, HttpServletResponse response) {
         System.out.println(Arrays.toString(ids));
         System.out.println(ids.getClass());
         List<DocCaseVo> list = docCaseService.queryListByIds(ids);
-        ExcelUtil.exportExcel(list, "司法案例", DocCaseVo.class, response);
+        ExcelUtil.exportExcel(list, "司法案件", DocCaseVo.class, response);
     }
 
     /**
-     * 获取司法案例详细信息
+     * 获取司法案件详细信息
      *
      * @param id 主键
      */
@@ -117,82 +117,96 @@ public class DocCaseController extends BaseController {
     }
 
     /**
-     * 新增司法案例
+     * 新增司法案件
      */
     @SaCheckPermission("manage:case:add")
-    @Log(title = "司法案例", businessType = BusinessType.INSERT)
+    @Log(title = "司法案件", businessType = BusinessType.INSERT)
     @PostMapping()
     public R<Void> add(@Validated(AddGroup.class) @RequestBody DocCaseBo bo) {
         return toAjax(docCaseService.insertByBo(bo));
     }
 
     /**
-     * 全量同步司法案例
+     * 全量同步司法案件
      */
 
     @GetMapping("/syncAll")
     @SaCheckPermission("manage:case:add")
-    @Log(title = "司法案例", businessType = BusinessType.INSERT)
+    @Log(title = "司法案件", businessType = BusinessType.INSERT)
     public R<Void> syncAll() {
 //        采用消息队列异步处理，借助websocket实时发送处理进度通知
-        websocketProducer.sendMsg("全量同步司法案例", SocketMsgType.CASE.getType(), "开始同步司法案例数据", LoginHelper.getLoginId(), 0L);
-//        return R.ok("成功同步司法案例数据：" + docCaseService.insertBatch() + "条");
-        return R.ok("开始同步司法案例数据");
+        websocketProducer.sendMsg("全量同步司法案件", SocketMsgType.CASE.getType(), "开始同步司法案件数据", LoginHelper.getLoginId(), 0L);
+//        return R.ok("成功同步司法案件数据：" + docCaseService.insertBatch() + "条");
+        return R.ok("开始同步司法案件数据");
     }
 
     /**
-     * 修改司法案例
+     * 增量同步司法案件
+     */
+
+    @GetMapping("/syncInc")
+    @SaCheckPermission("manage:case:add")
+    @Log(title = "司法案件", businessType = BusinessType.INSERT)
+    public R<Void> syncInc() {
+//        采用消息队列异步处理，借助websocket实时发送处理进度通知
+        websocketProducer.sendMsg("增量同步司法案件", SocketMsgType.CASE.getType(), "开始同步司法案件数据", LoginHelper.getLoginId(), 0L);
+//        return R.ok("成功同步司法案件数据：" + docCaseService.insertBatch() + "条");
+        return R.ok("开始同步司法案件数据");
+    }
+
+    /**
+     * 修改司法案件
      */
     @SaCheckPermission("manage:case:edit")
-    @Log(title = "司法案例", businessType = BusinessType.UPDATE)
+    @Log(title = "司法案件", businessType = BusinessType.UPDATE)
     @PutMapping
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody DocCaseBo bo) {
         return toAjax(docCaseService.updateByBo(bo));
     }
 
     /**
-     * 批量智能处理司法案例
+     * 批量智能处理司法案件
      *
      * @param processList 待处理案例列表
      */
     @SaCheckPermission("manage:case:edit")
-    @Log(title = "司法案例", businessType = BusinessType.UPDATE)
+    @Log(title = "司法案件", businessType = BusinessType.UPDATE)
     @PutMapping("/process")
     public R<Void> process(@Validated(EditGroup.class) @RequestBody List<ProcessBo> processList) {
         return R.ok("成功处理：" + docCaseService.process(processList) + "条");
     }
 
     /**
-     * 批量清洗司法案例
+     * 批量清洗司法案件
      *
      * @param processList 待处理案例列表
      */
     @SaCheckPermission("manage:case:edit")
-    @Log(title = "司法案例", businessType = BusinessType.UPDATE)
+    @Log(title = "司法案件", businessType = BusinessType.UPDATE)
     @PutMapping("/revise")
     public R<Void> saveContent(@Validated(EditGroup.class) @RequestBody List<ProcessBo> processList) {
         return R.ok("成功处理：" + docCaseService.processContent(processList) + "条");
     }
 
     /**
-     * 批量挖掘司法案例
+     * 批量挖掘司法案件
      *
      * @param processList 待处理案例列表
      */
     @SaCheckPermission("manage:case:edit")
-    @Log(title = "司法案例", businessType = BusinessType.UPDATE)
+    @Log(title = "司法案件", businessType = BusinessType.UPDATE)
     @PutMapping("/mining")
     public R<Void> saveExtra(@Validated(EditGroup.class) @RequestBody List<ProcessBo> processList) {
         return R.ok("成功处理：" + docCaseService.processExtra(processList) + "条");
     }
 
     /**
-     * 删除司法案例
+     * 删除司法案件
      *
      * @param ids 主键串
      */
     @SaCheckPermission("manage:case:remove")
-    @Log(title = "司法案例", businessType = BusinessType.DELETE)
+    @Log(title = "司法案件", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@Validated @NotEmpty(message = "主键不能为空") @PathVariable Long[] ids) {
         return toAjax(docCaseService.deleteWithValidByIds(Arrays.asList(ids), true));

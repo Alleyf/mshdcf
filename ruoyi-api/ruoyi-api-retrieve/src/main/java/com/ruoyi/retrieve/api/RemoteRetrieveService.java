@@ -6,7 +6,7 @@ import java.util.List;
  * @author fcs
  * @date 2024/2/1 11:00
  * @site <a href="https://alleyf.github.io">getHelp</a>
- * @description 司法案例和法律法规es远程调用服务接口
+ * @description 司法案件和法律法规es远程调用服务接口
  */
 public interface RemoteRetrieveService<T> {
     /**

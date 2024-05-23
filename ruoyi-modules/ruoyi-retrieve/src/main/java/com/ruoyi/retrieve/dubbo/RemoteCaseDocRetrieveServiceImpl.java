@@ -24,6 +24,11 @@ public class RemoteCaseDocRetrieveServiceImpl implements RemoteCaseDocRetrieveSe
 
 
     @Override
+    public List<CaseDoc> selectList() {
+        return caseDocService.selectList();
+    }
+
+    @Override
     public Integer insert(CaseDoc caseDoc) {
         return caseDocService.insert(caseDoc);
     }

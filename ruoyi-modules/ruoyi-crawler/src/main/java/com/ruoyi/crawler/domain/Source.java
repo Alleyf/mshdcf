@@ -34,7 +34,6 @@ public class Source extends BaseEntity {
      * 数据源名称
      */
     private String sourceName;
-
     /**
      * 数据源别名
      */
@@ -48,7 +47,7 @@ public class Source extends BaseEntity {
      */
     private String sourceUrl;
     /**
-     * 数据源类型（1：司法案例和法律法规；2：司法案例； 3：法律法规）
+     * 数据源类型（1：司法案件和法律法规；2：司法案件； 3：法律法规）
      */
     private Long sourceTypeId;
     /**
@@ -59,5 +58,9 @@ public class Source extends BaseEntity {
      * 状态（0：停用；1：正常）
      */
     private Integer status;
-
+    /**
+     * 删除标志（0：未删除；1：已删除）
+     */
+    @TableLogic
+    private Integer isDelete;
 }

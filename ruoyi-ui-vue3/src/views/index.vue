@@ -23,9 +23,9 @@
               <el-tag :type="card.tagType" effect="dark">{{ card.tag }}</el-tag>
             </div>
             <div class="text-4xl font-bold mt-4 flex justify-evenly items-center">{{ card.value }}
-              <!-- 对于平台司法案例（总数） -->
+              <!-- 对于平台司法案件（总数） -->
               <Icon v-if="index === 0" class="text-4xl text-green-500" icon="material-symbols:gavel"/>
-              <!-- 对于平台司法案例（日增量） -->
+              <!-- 对于平台司法案件（日增量） -->
               <Icon v-if="index === 1" class="text-4xl text-yellow-500" icon="material-symbols:calendar-add-on"/>
               <!-- 对于平台法律法规（总数） -->
               <Icon v-if="index === 2" class="text-4xl text-red-500" icon="ic:twotone-menu-book"/>
@@ -40,7 +40,7 @@
       <el-row :gutter="20">
         <el-col :span="12">
           <el-card class="box-card bg-blue-100">
-            <h2 class="text-2xl font-bold text-center">最新司法案例TOP10</h2>
+            <h2 class="text-2xl font-bold text-center">最新司法案件TOP10</h2>
             <div class="scroll-container">
               <ul v-if="topTenCases!==undefined" class="scroll-list">
                 <li v-for="(caseItem, index) in topTenCases" :key="index" class="scroll-list-item">
@@ -136,7 +136,7 @@ const topTenLaws = ref([]);
 const cards = ref([
   {
     name: 'caseTotal',
-    title: '平台司法案例',
+    title: '平台司法案件',
     value: caseTotal,
     subtitle: "平台总文书占比：",
     tag: '总数',
@@ -144,7 +144,7 @@ const cards = ref([
   },
   {
     name: 'caseIncrement',
-    title: '平台司法案例',
+    title: '平台司法案件',
     value: caseIncrement,
     subtitle: '案例文书占比：',
     tag: '日增量',

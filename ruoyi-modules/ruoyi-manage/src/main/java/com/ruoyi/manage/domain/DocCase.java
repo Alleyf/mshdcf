@@ -14,7 +14,7 @@ import com.ruoyi.common.core.web.domain.BaseEntity;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- * 司法案例对象 doc_case
+ * 司法案件对象 doc_case
  *
  * @author alleyf
  * @date 2024-01-26

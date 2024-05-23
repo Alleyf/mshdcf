@@ -11,14 +11,14 @@ import java.util.List;
  * @author fcs
  * @date 2024/1/31 16:08
  * @site <a href="https://alleyf.github.io">getHelp</a>
- * @description 司法案例es服务接口
+ * @description 司法案件es服务接口
  */
 public interface ICaseDocService {
 
     /**
      * 新增es数据
      *
-     * @param caseDoc 司法案例es对象
+     * @param caseDoc 司法案件es对象
      * @return Integer
      */
     Integer insert(CaseDoc caseDoc);
@@ -26,7 +26,7 @@ public interface ICaseDocService {
     /**
      * 修改es数据
      *
-     * @param caseDoc 司法案例es对象
+     * @param caseDoc 司法案件es对象
      * @return Integer
      */
     Integer update(CaseDoc caseDoc);
@@ -78,6 +78,13 @@ public interface ICaseDocService {
      * @return List<CaseDoc>
      */
     List<CaseDoc> selectList(String keyword, Boolean blurSearch);
+
+    /**
+     * 查询所有案件列表
+     *
+     * @return {@link List }<{@link CaseDoc }>
+     */
+    List<CaseDoc> selectList();
 
     /**
      * 根据关键字分页查询es数据

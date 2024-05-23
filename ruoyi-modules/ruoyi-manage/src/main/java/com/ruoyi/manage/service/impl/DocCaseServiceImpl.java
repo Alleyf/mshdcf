@@ -28,16 +28,15 @@ import com.ruoyi.websocket.domain.WebscoketMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
- * 司法案例Service业务层处理
+ * 司法案件Service业务层处理
  *
  * @author alleyf
  * @date 2024-01-26
@@ -54,7 +53,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     private DocCaseMapper baseMapper;
 
     /**
-     * 查询司法案例
+     * 查询司法案件
      */
     @Override
     public DocCaseVo queryById(Long id) {
@@ -62,7 +61,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     }
 
     /**
-     * 查询司法案例列表
+     * 查询司法案件列表
      */
     @Override
     public TableDataInfo<DocCaseVo> queryPageList(DocCaseBo bo, PageQuery pageQuery) {
@@ -75,7 +74,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     }
 
     /**
-     * 查询司法案例列表
+     * 查询司法案件列表
      */
     @Override
     public List<DocCaseVo> queryList(DocCaseBo bo) {
@@ -113,7 +112,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     }
 
     /**
-     * 新增司法案例
+     * 新增司法案件
      */
     @Override
     public Boolean insertByBo(DocCaseBo bo) {
@@ -121,7 +120,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         validEntityBeforeSave(add);
         boolean flag = baseMapper.insert(add) > 0;
         if (flag) {
-            log.info("新增司法案例成功，id：{}", add.getId());
+            log.info("新增司法案件成功，id：{}", add.getId());
 //            bo.setId(add.getId());
 //            添加es索引
             DocCase newCase = selectDocCaseByName(add.getName());
@@ -131,17 +130,57 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     }
 
     /**
-     * 批量添加司法案例到es
+     * 全量同步司法案件到es
+     *
+     * @param clientId 客户端ID
+     * @return {@link Integer }
      */
     @Override
-    public Integer insertBatch(String clientId) {
+    @Transactional(rollbackFor = Exception.class)
+    public Integer syncAllCase(String clientId) {
         // 验证clientId的合法性
         Assert.notNull(clientId, "clientId不能为空");
-
         List<DocCase> allCase = baseMapper.selectList();
+        Integer successNum = syncCase(clientId, allCase);
+        return successNum == null ? 0 : successNum;
+    }
+
+    /**
+     * 增量同步司法案件到es
+     *
+     * @param clientId 客户端ID
+     * @return {@link Integer }
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Integer syncIncCase(String clientId) {
+        Assert.notNull(clientId, "clientId不能为空");
+        List<CaseDoc> caseDocs = remoteCaseRetrieveService.selectList();
+        // 创建一个包含caseDocs中所有ID的Set
+        Set<Long> caseIds = caseDocs.parallelStream()
+            .map(CaseDoc::getId)
+            .collect(Collectors.toSet());
+        // 过滤出allCase中ID不在caseIds中的DocCase对象
+        List<DocCase> IncCases = baseMapper.selectList(Wrappers.<DocCase>lambdaQuery().notIn(DocCase::getId, caseIds));
+        // 增量同步数据
+        Integer successNum = syncCase(clientId, IncCases);
+        successNum = successNum == null ? 0 : successNum;
+        sendMessage(clientId, successNum, IncCases.size());
+        return successNum;
+    }
+
+
+    /**
+     * 同步司法案件
+     *
+     * @param clientId 客户端ID
+     * @param allCase  待同步的案件
+     * @return {@link Integer }
+     */
+    private Integer syncCase(String clientId, List<DocCase> allCase) {
         // 当查询结果为空时，直接返回0或抛出异常，避免后续逻辑执行
         if (allCase.isEmpty()) {
-            return 0;
+            return null;
         }
 
         List<CaseDoc> caseDocs = BeanCopyUtils.copyList(allCase, CaseDoc.class);
@@ -160,9 +199,12 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         } else {
             int epoch = allCaseSize / insertNum + (allCaseSize % insertNum != 0 ? 1 : 0);
             for (int i = 0; i < epoch; i++) {
-                List<CaseDoc> subList = (i == epoch - 1) ?
-                    caseDocs.subList(i * insertNum, allCaseSize) :
-                    caseDocs.subList(i * insertNum, (i + 1) * insertNum);
+                List<CaseDoc> subList = null;
+                if (caseDocs != null) {
+                    subList = (i == epoch - 1) ?
+                        caseDocs.subList(i * insertNum, allCaseSize) :
+                        caseDocs.subList(i * insertNum, (i + 1) * insertNum);
+                }
                 successNum += remoteCaseRetrieveService.insertBatch(subList);
                 sendMessage(clientId, successNum, allCaseSize);
             }
@@ -170,19 +212,17 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         return successNum;
     }
 
-//    todo 添加增量同步（查询es所有数据和mysql所有数据，遍历mysql数据借助布隆过滤器判断是否存在于es中，不存在则添加到es：问题在于速度肯定很慢）
-
     /**
      * 发送同步进度消息
      */
     private void sendMessage(String clientId, int successNum, int allCaseSize) {
         WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.CASE.getType(),
-            "全量同步司法案例", "同步进度：" + successNum + "/" + allCaseSize, clientId);
+            "同步司法案件", "同步进度：" + successNum + "/" + allCaseSize, clientId);
         remoteWebSocketService.sendToOne(clientId, JSONObject.toJSONString(message));
     }
 
     /**
-     * 修改司法案例
+     * 修改司法案件
      */
     @Override
     public Boolean updateByBo(DocCaseBo bo) {
@@ -211,7 +251,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     }
 
     /**
-     * 批量删除司法案例
+     * 批量删除司法案件
      */
     @Override
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
@@ -227,7 +267,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     }
 
     /**
-     * 批量智能处理司法案例
+     * 批量智能处理司法案件
      *
      * @param processList 待处理列表
      * @return int 成功个数
@@ -260,7 +300,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     }
 
     /**
-     * 批量处理司法案例内容
+     * 批量处理司法案件内容
      *
      * @param processList 待处理列表
      * @return int 成功个数
@@ -287,7 +327,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
     }
 
     /**
-     * 批量处理司法案例额外信息
+     * 批量处理司法案件额外信息
      *
      * @param processList 待处理列表
      * @return int 成功个数

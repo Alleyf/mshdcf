@@ -12,7 +12,7 @@ import java.io.Serializable;
  * @author fcs
  * @date 2024/1/31 15:37
  * @site <a href="https://alleyf.github.io">getHelp</a>
- * @description 司法案例索引
+ * @description 司法案件索引
  */
 @Data
 @IndexName(aliasName = "case", maxResultWindow = 1000000)
@@ -110,11 +110,11 @@ public class CaseDoc implements Serializable {
      */
     private Long sourceId;
 
-    /**
-     * 当事人
-     */
-    @IndexField(exist = false)
-    private String party;
+//    /**
+//     * 当事人
+//     */
+//    @IndexField(exist = false)
+//    private String party;
     /**
      * 相关案件（记录name并以|分隔,应该用json保存,等爬虫重新爬取保存json格式到数据库再替换为map类型）
      */

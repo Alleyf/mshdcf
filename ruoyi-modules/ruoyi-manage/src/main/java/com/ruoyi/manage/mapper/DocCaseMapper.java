@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 司法案例Mapper接口
+ * 司法案件Mapper接口
  *
  * @author alleyf
  * @date 2024-01-26
@@ -17,7 +17,7 @@ import java.util.Map;
 public interface DocCaseMapper extends BaseMapperPlus<DocCaseMapper, DocCase, DocCaseVo> {
 
     /**
-     * 按照类型分组查询司法案例列表
+     * 按照类型分组查询司法案件列表
      *
      * @return 法案例列表
      */

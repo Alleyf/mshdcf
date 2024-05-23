@@ -22,6 +22,10 @@ public class RemoteLawDocRetrieveServiceImpl implements RemoteLawDocRetrieveServ
 
     private final ILawDocService lawDocService;
 
+    @Override
+    public List<LawDoc> selectList() {
+        return lawDocService.selectList();
+    }
 
     /**
      * 添加es文档

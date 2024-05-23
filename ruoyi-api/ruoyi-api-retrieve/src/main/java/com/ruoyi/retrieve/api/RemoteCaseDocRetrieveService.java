@@ -8,9 +8,15 @@ import java.util.List;
  * @author fcs
  * @date 2024/1/31 21:31
  * @site <a href="https://alleyf.github.io">getHelp</a>
- * @description 司法案例RPC远程接口
+ * @description 司法案件RPC远程接口
  */
 public interface RemoteCaseDocRetrieveService {
+    /**
+     * 查询所有案件列表
+     *
+     * @return {@link List }<{@link CaseDoc }>
+     */
+    List<CaseDoc> selectList();
 
     /**
      * 新增

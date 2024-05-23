@@ -108,7 +108,7 @@ const logs = ref([
     url: 'https://github.com/Alleyf/MSHDCF'
   },
   {
-    content: '完成爬虫模块的爬虫数据源基本管理和数据检索模块的司法案例和法律法规基本管理业务功能',
+    content: '完成爬虫模块的爬虫数据源基本管理和数据检索模块的司法案件和法律法规基本管理业务功能',
     timestamp: now(),
     color: '#67C23A',
     icon: 'el-icon-s-promotion',
@@ -128,7 +128,7 @@ const logs = ref([
     url: 'https://github.com/Alleyf/MSHDCF'
   },
   {
-    content: '完成es检索模块后端对司法案例的基本检索和分页功能',
+    content: '完成es检索模块后端对司法案件的基本检索和分页功能',
     timestamp: now(),
     color: '#F56C6C',
     icon: 'el-icon-s-promotion',

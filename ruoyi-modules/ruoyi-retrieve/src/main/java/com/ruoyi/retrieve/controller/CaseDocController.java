@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 司法案例检索
+ * 司法案件检索
  *
  * @author fcs
  * @date 2024/1/31 16:06

@@ -122,7 +122,7 @@ public class MoonShotGPTUtils {
     }
 
     /**
-     * 解析司法案例挖掘案例信息
+     * 解析司法案件挖掘案例信息
      *
      * @param text 源文本
      * @return JsonString 解析后案例信息对象

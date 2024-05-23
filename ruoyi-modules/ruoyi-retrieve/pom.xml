@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>ruoyi-retrieve</artifactId>
-    <description>数据检索业务模块，检索爬取到的司法案例和法律法规等数据</description>
+    <description>数据检索业务模块，检索爬取到的司法案件和法律法规等数据</description>
 
     <properties>
         <easy-es.version>2.0.0-beta5</easy-es.version>

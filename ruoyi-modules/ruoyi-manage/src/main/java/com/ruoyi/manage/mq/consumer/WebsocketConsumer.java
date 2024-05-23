@@ -35,12 +35,20 @@ public class WebsocketConsumer {
         log.info("初始化订阅");
         return obj -> {
             String jsonMsg = JSONObject.toJSONString(obj);
-            log.info("消息接收成功：" + jsonMsg);
+            log.info("消息接收成功：{}", jsonMsg);
             remoteWebSocketService.sendToOne(obj.getClientId(), jsonMsg);
             if (obj.getMsgType().equals(SocketMsgType.CASE.getType())) {
-                docCaseService.insertBatch(obj.getClientId());
+                if (obj.getMsgTitle().contains("全量")) {
+                    docCaseService.syncAllCase(obj.getClientId());
+                } else {
+                    docCaseService.syncIncCase(obj.getClientId());
+                }
             } else if (obj.getMsgType().equals(SocketMsgType.LAW.getType())) {
-                lawRegulationService.insertBatch(obj.getClientId());
+                if (obj.getMsgTitle().contains("全量")) {
+                    lawRegulationService.syncAll(obj.getClientId());
+                } else {
+                    lawRegulationService.syncInc(obj.getClientId());
+                }
             } else {
                 // TODO: 2024/2/27 处理其他消息
             }

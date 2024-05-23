@@ -13,6 +13,7 @@ import com.ruoyi.common.core.utils.BeanCopyUtils;
 import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
+import com.ruoyi.manage.domain.DocCase;
 import com.ruoyi.manage.domain.LawRegulation;
 import com.ruoyi.manage.domain.bo.LawRegulationBo;
 import com.ruoyi.manage.domain.bo.ProcessBo;
@@ -22,18 +23,22 @@ import com.ruoyi.manage.enums.SocketMsgType;
 import com.ruoyi.manage.mapper.LawRegulationMapper;
 import com.ruoyi.manage.service.ILawRegulationService;
 import com.ruoyi.retrieve.api.RemoteLawDocRetrieveService;
+import com.ruoyi.retrieve.api.domain.CaseDoc;
 import com.ruoyi.retrieve.api.domain.LawDoc;
 import com.ruoyi.websocket.api.RemoteWebSocketService;
 import com.ruoyi.websocket.domain.WebscoketMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * 法律法规Service业务层处理
@@ -150,17 +155,57 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
 //    }
 
     /**
-     * 批量添加法律法规到es
+     * 全量法律法规到es
+     *
+     * @param clientId 客户端ID
+     * @return {@link Integer }
      */
     @Override
-    public Integer insertBatch(String clientId) {
+    @Transactional(rollbackFor = Exception.class)
+    public Integer syncAll(String clientId) {
         // 验证clientId的合法性
         Assert.notNull(clientId, "clientId不能为空");
-
         List<LawRegulation> lawRegulations = baseMapper.selectList();
+        Integer successNum = syncLaw(clientId, lawRegulations);
+        return successNum == null ? 0 : successNum;
+    }
+
+    /**
+     * 增量法律法规到es
+     *
+     * @param clientId 客户端ID
+     * @return {@link Integer }
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Integer syncInc(String clientId) {
+        // 验证clientId的合法性
+        Assert.notNull(clientId, "clientId不能为空");
+        List<LawDoc> lawDocs = remoteLawRetrieveService.selectList();
+        // 创建一个包含lawDocs中所有ID的Set
+        Set<Long> lawIds = lawDocs.parallelStream()
+            .map(LawDoc::getId)
+            .collect(Collectors.toSet());
+        // 过滤出allLaws中ID不在lawIds中的LawRegulation对象
+        List<LawRegulation> incLaws = baseMapper.selectList(Wrappers.<LawRegulation>lambdaQuery().notIn(LawRegulation::getId, lawIds));
+        // 增量同步数据
+        Integer successNum = syncLaw(clientId, incLaws);
+        successNum = successNum == null ? 0 : successNum;
+        sendMessage(clientId, successNum, incLaws.size());
+        return successNum;
+    }
+
+    /**
+     * 同步法条
+     *
+     * @param clientId       客户端ID
+     * @param lawRegulations 法条
+     * @return {@link Integer }
+     */
+    private Integer syncLaw(String clientId, List<LawRegulation> lawRegulations) {
         // 当查询结果为空时，直接返回0或抛出异常，避免后续逻辑执行
         if (lawRegulations.isEmpty()) {
-            return 0;
+            return null;
         }
 
         List<LawDoc> lawDocs = BeanCopyUtils.copyList(lawRegulations, LawDoc.class);
@@ -179,9 +224,12 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         } else {
             int epoch = allLawSize / insertNum + (allLawSize % insertNum != 0 ? 1 : 0);
             for (int i = 0; i < epoch; i++) {
-                List<LawDoc> subList = (i == epoch - 1) ?
-                    lawDocs.subList(i * insertNum, allLawSize) :
-                    lawDocs.subList(i * insertNum, (i + 1) * insertNum);
+                List<LawDoc> subList = null;
+                if (lawDocs != null) {
+                    subList = (i == epoch - 1) ?
+                        lawDocs.subList(i * insertNum, allLawSize) :
+                        lawDocs.subList(i * insertNum, (i + 1) * insertNum);
+                }
                 successNum += remoteLawRetrieveService.insertBatch(subList);
                 sendMessage(clientId, successNum, allLawSize);
             }
@@ -197,7 +245,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
      */
     private void sendMessage(String clientId, int successNum, int allLawSize) {
         WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), SocketMsgType.LAW.getType(),
-            "全量同步法律法规", "同步进度：" + successNum + "/" + allLawSize, clientId);
+            "同步法律法规", "同步进度：" + successNum + "/" + allLawSize, clientId);
         remoteWebSocketService.sendToOne(clientId, JSONObject.toJSONString(message));
     }
 

@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * 司法案例Service接口
+ * 司法案件Service接口
  *
  * @author alleyf
  * @date 2024-01-26
@@ -20,37 +20,42 @@ import java.util.List;
 public interface IDocCaseService extends IService<DocCase> {
 
     /**
-     * 查询司法案例
+     * 查询司法案件
      */
     DocCaseVo queryById(Long id);
 
     /**
-     * 查询司法案例列表
+     * 查询司法案件列表
      */
     TableDataInfo<DocCaseVo> queryPageList(DocCaseBo bo, PageQuery pageQuery);
 
     /**
-     * 查询司法案例列表
+     * 查询司法案件列表
      */
     List<DocCaseVo> queryList(DocCaseBo bo);
 
     /**
-     * 修改司法案例
+     * 修改司法案件
      */
     Boolean insertByBo(DocCaseBo bo);
 
     /**
-     * 批量插入
+     * 全量同步到es
      */
-    Integer insertBatch(String clientId);
+    Integer syncAllCase(String clientId);
 
     /**
-     * 修改司法案例
+     * 增量同步到es
+     */
+    Integer syncIncCase(String clientId);
+
+    /**
+     * 修改司法案件
      */
     Boolean updateByBo(DocCaseBo bo);
 
     /**
-     * 校验并批量删除司法案例信息
+     * 校验并批量删除司法案件信息
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
 

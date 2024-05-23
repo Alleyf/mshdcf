@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
  * @date 2024/2/8 12:25
  * @site <a href="https://alleyf.github.io">getHelp</a>
  * @description 进行统计分析<br />
- * todo <p>1. 司法案例和法律法规数据总量</p>
- * <p>2. 司法案例和法律法规数据量增量（模糊查询新建日期大于等于前一天的所有数据量）</p>
+ * todo <p>1. 司法案件和法律法规数据总量</p>
+ * <p>2. 司法案件和法律法规数据量增量（模糊查询新建日期大于等于前一天的所有数据量）</p>
  * <p>3. 全国各省案件数量，各文书类型数量，各根案由数量，各审判程序数量，各个数据来源数量</p>
  */
 @Service

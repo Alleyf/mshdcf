@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询司法案例列表
+// 查询司法案件列表
 export function listCase(query) {
   return request({
     url: '/manage/case/list',
@@ -9,7 +9,7 @@ export function listCase(query) {
   })
 }
 
-// 查询司法案例详细
+// 查询司法案件详细
 export function getCase(id) {
   return request({
     url: '/manage/case/' + id,
@@ -17,7 +17,7 @@ export function getCase(id) {
   })
 }
 
-// 新增司法案例
+// 新增司法案件
 export function addCase(data) {
   return request({
     url: '/manage/case',
@@ -26,7 +26,7 @@ export function addCase(data) {
   })
 }
 
-// 全量同步司法案例
+// 全量同步司法案件
 export function syncAllCase(data) {
   return request({
     url: '/manage/case/syncAll',
@@ -34,7 +34,15 @@ export function syncAllCase(data) {
   })
 }
 
-// 修改司法案例
+// 增量同步司法案件
+export function syncIncCase(data) {
+  return request({
+    url: '/manage/case/syncInc',
+    method: 'get'
+  })
+}
+
+// 修改司法案件
 export function updateCase(data) {
   return request({
     url: '/manage/case',
@@ -43,7 +51,7 @@ export function updateCase(data) {
   })
 }
 
-// 批量智能处理保存司法案例
+// 批量智能处理保存司法案件
 export function saveProcessCase(data) {
   return request({
     url: '/manage/case/process',
@@ -52,7 +60,7 @@ export function saveProcessCase(data) {
   })
 }
 
-// 批量清洗保存司法案例
+// 批量清洗保存司法案件
 export function saveReviseCase(data) {
   return request({
     url: '/manage/case/revise',
@@ -61,7 +69,7 @@ export function saveReviseCase(data) {
   })
 }
 
-// 批量挖掘保存司法案例
+// 批量挖掘保存司法案件
 export function saveMiningCase(data) {
   return request({
     url: '/manage/case/mining',
@@ -70,7 +78,7 @@ export function saveMiningCase(data) {
   })
 }
 
-// 删除司法案例
+// 删除司法案件
 export function delCase(id) {
   return request({
     url: '/manage/case/' + id,

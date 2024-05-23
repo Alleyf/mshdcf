@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 
 
-// 查询司法案例详细
+// 查询司法案件详细
 export function getCase(id) {
   return request({
     url: '/retrieve/case/' + id,
@@ -9,7 +9,7 @@ export function getCase(id) {
   })
 }
 
-// 获取司法案例词云
+// 获取司法案件词云
 export function getCaseWorldCloud(id) {
   return request({
     url: '/retrieve/case/worldCloud/' + id,
@@ -17,7 +17,7 @@ export function getCaseWorldCloud(id) {
   })
 }
 
-// 查询司法案例列表
+// 查询司法案件列表
 export function listCase(query) {
   return request({
     url: '/retrieve/case/list',

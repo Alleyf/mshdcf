@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 批量清洗司法案例
+// 批量清洗司法案件
 export function reviseCase(id) {
   return request({
     url: `/process/case/revise/${id}`,
@@ -8,7 +8,7 @@ export function reviseCase(id) {
   })
 }
 
-// 批量挖掘司法案例
+// 批量挖掘司法案件
 export function miningCase(id) {
   return request({
     url: `/process/case/extractOne/${id}`,

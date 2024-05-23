@@ -78,6 +78,13 @@ public interface ILawDocService {
     List<LawDoc> selectList(String keyword, Boolean blurSearch);
 
     /**
+     * 查询法条列表
+     *
+     * @return {@link List }<{@link LawDoc }>
+     */
+    List<LawDoc> selectList();
+
+    /**
      * 根据关键字分页查询es数据
      *
      * @param keyword   关键字
@@ -102,4 +109,6 @@ public interface ILawDocService {
      * @return Integer
      */
     Integer insertBatch(List<LawDoc> entityList);
+
+
 }

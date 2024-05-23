@@ -8,7 +8,7 @@
 > **法院网站和数据库：** 许多法院都提供了在线访问法律文本和案例的平台。你可以使用网络爬虫工具，例如 Scrapy 或
 > BeautifulSoup，来抓取这些数据。
 
-1. `司法案例`
+1. `司法案件`
     - 裁判文书网（selenium 无法登录）： https:/wenshu.court.gov.cn/
     - openlaw（需登录，添加了图形验证码，基本已实现）： https://openlaw.cn/
     - [12309中国检察网（案例信息字段较少，无需登录）](https://www.12309.gov.cn/12309/zjxflws/index.shtml)

@@ -4,7 +4,7 @@ import {
   getRegulation,
   delRegulation,
   addRegulation,
-  updateRegulation, saveProcessRegulation, syncAllRegulation,
+  updateRegulation, saveProcessRegulation, syncAllRegulation, syncIncRegulation,
 } from '@/api/manage/regulation'
 import {getCurrentInstance, onMounted, reactive, ref, toRefs} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
@@ -505,10 +505,24 @@ const handleExport = () => {
 }
 
 //全量同步法律法规
-const handleSync = () => {
+const handleSyncAll = () => {
   ElMessageBox.confirm('是否确认同步所有数据项？').then(() => {
     loading.value = true
     return syncAllRegulation()
+  }).then(() => {
+    ElMessage.success('同步成功')
+    getList()
+  }).catch(() => {
+  }).finally(() => {
+    loading.value = false
+  })
+}
+
+//增量同步法律法规
+const handleSyncInc = () => {
+  ElMessageBox.confirm('是否确认同步新增数据项？').then(() => {
+    loading.value = true
+    return syncIncRegulation()
   }).then(() => {
     ElMessage.success('同步成功')
     getList()
@@ -602,8 +616,19 @@ onMounted(() => {
             plain
             size="default"
             type="success"
-            @click="handleSync"
+            @click="handleSyncAll"
           >全量同步
+          </el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
+            v-hasPermi="['manage:regulation:sync']"
+            icon="Plus"
+            plain
+            size="default"
+            type="success"
+            @click="handleSyncInc"
+          >增量同步
           </el-button>
         </el-col>
         <el-col :span="1.5">

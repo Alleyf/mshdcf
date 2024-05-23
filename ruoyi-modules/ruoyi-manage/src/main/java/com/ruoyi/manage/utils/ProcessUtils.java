@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  */
 public class ProcessUtils {
     /**
-     * 去除司法案例异常unicode
+     * 去除司法案件异常unicode
      *
      * @param data 原始文本
      * @return String
@@ -107,7 +107,7 @@ public class ProcessUtils {
     }
 
     /**
-     * 正则解析获取司法案例extra-JSON字符串
+     * 正则解析获取司法案件extra-JSON字符串
      *
      * @param text 原始文本
      * @return String

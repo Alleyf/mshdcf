@@ -34,6 +34,14 @@ export function syncAllRegulation(data) {
   })
 }
 
+// 全量同步法律法规
+export function syncIncRegulation(data) {
+  return request({
+    url: '/manage/regulation/syncInc',
+    method: 'get'
+  })
+}
+
 // 修改法律法规
 export function updateRegulation(data) {
   return request({
@@ -43,7 +51,7 @@ export function updateRegulation(data) {
   })
 }
 
-// 批量智能处理保存司法案例
+// 批量智能处理保存司法案件
 export function saveProcessRegulation(data) {
   return request({
     url: '/manage/regulation/process',
@@ -52,7 +60,7 @@ export function saveProcessRegulation(data) {
   })
 }
 
-// 批量清洗保存司法案例
+// 批量清洗保存司法案件
 export function reviseRegulation(data) {
   return request({
     url: '/manage/regulation/revise',
@@ -61,7 +69,7 @@ export function reviseRegulation(data) {
   })
 }
 
-// 批量挖掘保存司法案例
+// 批量挖掘保存司法案件
 export function miningRegulation(data) {
   return request({
     url: '/manage/regulation/mining',

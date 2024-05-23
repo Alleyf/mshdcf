@@ -20,7 +20,7 @@ public class SourceType extends BaseEntity {
      */
     private Long id;
     /**
-     * 数据源类型名（司法案例或法律法规）
+     * 数据源类型名（司法案件或法律法规）
      */
     private String name;
     /**

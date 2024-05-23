@@ -51,9 +51,9 @@ public class SourceBo extends BaseEntity {
     private String sourceUrl;
 
     /**
-     * 数据源类型（1：司法案例和法律法规；2：司法案例； 3：法律法规）
+     * 数据源类型（1：司法案件和法律法规；2：司法案件； 3：法律法规）
      */
-    @NotNull(message = "数据源类型（1：司法案例和法律法规；2：司法案例； 3：法律法规）不能为空", groups = {AddGroup.class, EditGroup.class})
+    @NotNull(message = "数据源类型（1：司法案件和法律法规；2：司法案件； 3：法律法规）不能为空", groups = {AddGroup.class, EditGroup.class})
     private Long sourceTypeId;
 
     /**

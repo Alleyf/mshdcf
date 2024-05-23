@@ -18,7 +18,7 @@ import java.util.Map;
 
 
 /**
- * 司法案例导入视图对象
+ * 司法案件导入视图对象
  *
  * @author alleyf
  * @date 2024-01-26

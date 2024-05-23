@@ -29,7 +29,7 @@ export function getRegulation(id) {
   })
 }
 
-// 获取司法案例词云
+// 获取司法案件词云
 export function getRegulationWorldCloud(id) {
   return request({
     url: '/retrieve/law/worldCloud/' + id,

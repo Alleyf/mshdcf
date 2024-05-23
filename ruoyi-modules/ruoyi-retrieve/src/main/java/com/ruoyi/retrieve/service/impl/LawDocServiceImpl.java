@@ -189,6 +189,16 @@ public class LawDocServiceImpl implements ILawDocService {
     }
 
     /**
+     * 查询法条列表
+     *
+     * @return {@link List }<{@link LawDoc }>
+     */
+    @Override
+    public List<LawDoc> selectList() {
+        return EsWrappers.lambdaChainQuery(lawDocMapper).select(LawDoc::getId).list();
+    }
+
+    /**
      * 根据关键字模糊查询
      *
      * @param keyword   关键字

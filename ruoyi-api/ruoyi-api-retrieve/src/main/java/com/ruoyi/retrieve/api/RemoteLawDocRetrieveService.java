@@ -13,6 +13,13 @@ import java.util.List;
 public interface RemoteLawDocRetrieveService {
 
     /**
+     * 查询法条列表
+     *
+     * @return {@link List }<{@link LawDoc }>
+     */
+    List<LawDoc> selectList();
+
+    /**
      * 新增
      *
      * @param lawDoc 法律法规索引对象
@@ -67,4 +74,6 @@ public interface RemoteLawDocRetrieveService {
      * @return 法律法规索引对象
      */
     Boolean exist(String name);
+
+
 }

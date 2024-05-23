@@ -49,7 +49,7 @@ public class SourceVo implements Serializable {
     private String sourceUrl;
 
     /**
-     * 数据源类型（1：司法案例和法律法规；2：司法案例； 3：法律法规）
+     * 数据源类型（1：司法案件和法律法规；2：司法案件； 3：法律法规）
      */
     @ExcelProperty(value = "数据源类型", converter = ExcelDictConvert.class)
     @ExcelDictFormat(dictType = "crawler_source_type")

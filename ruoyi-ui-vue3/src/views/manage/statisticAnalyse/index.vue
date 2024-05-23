@@ -44,7 +44,7 @@ const allProvinces = [
 const caseTypePie = ref({
   animation: true,
   title: {
-    text: "司法案例",
+    text: "司法案件",
     subtext: "种类",
     x: "center",
     y: "center",
@@ -525,7 +525,7 @@ import chinaMap from "@/views/chinaMap";
 <template>
   <div class="mx-auto">
     <!--    <el-tabs class="mx-auto w-full" lazy="false" tab-position="left">-->
-    <!--    <h2 class="text-center font-bold text-2xl">司法案例信息统计</h2>-->
+    <!--    <h2 class="text-center font-bold text-2xl">司法案件信息统计</h2>-->
     <el-tabs v-model="defaultListTab" :tab-position="'top'" class="el-tabs mx-1" style=""
              @tab-click="handleTabClick">
       <el-tab-pane :name="1" label="数据中台">
@@ -547,7 +547,7 @@ import chinaMap from "@/views/chinaMap";
           <!-- 中国地图 省级 一级页面 -->
           <el-row :gutter="20">
             <el-col :span="12">
-              <china-map :title="'全国各省司法案例分布'"/>
+              <china-map :title="'全国各省司法案件分布'"/>
             </el-col>
             <el-col :span="12">
               <!--          <el-calendar v-model="value"/>-->

@@ -44,7 +44,7 @@ public class DataProcessController extends BaseController {
     public R<Void> stripCaseAll() {
         int stripNum = dataProcessService.stripCaseContent(null);
         int reviseNum = dataProcessService.reviseCaseContentSave(null);
-        return R.ok("司法案例数据成功清洗格式化：" + stripNum + "条数据；" + "成功清洗修正：" + reviseNum + "条。");
+        return R.ok("司法案件数据成功清洗格式化：" + stripNum + "条数据；" + "成功清洗修正：" + reviseNum + "条。");
     }
 
     /**

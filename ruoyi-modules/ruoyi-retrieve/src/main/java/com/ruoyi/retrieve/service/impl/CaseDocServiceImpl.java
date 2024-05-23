@@ -6,7 +6,6 @@ import org.dromara.easyes.core.biz.SAPageInfo;
 import org.dromara.easyes.core.conditions.select.LambdaEsQueryChainWrapper;
 import org.dromara.easyes.core.conditions.select.LambdaEsQueryWrapper;
 import org.dromara.easyes.core.core.EsWrappers;
-import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.core.utils.WorldCloudUtils;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author fcs
@@ -70,7 +68,7 @@ public class CaseDocServiceImpl implements ICaseDocService {
      */
     @Override
     public Integer update(CaseDoc caseDoc) {
-        // TODO: 2024/2/2 更新和新建司法案例和法律法规均报错？
+        // TODO: 2024/2/2 更新和新建司法案件和法律法规均报错？
         //        设置词云
 //        String wordCloud = getWordCloud(caseDoc.getName(), caseDoc.getContent());
 //        caseDoc.setWordCloud(wordCloud);
@@ -181,7 +179,7 @@ public class CaseDocServiceImpl implements ICaseDocService {
      */
     @Override
     public List<CaseDoc> selectList(String keyword, Boolean blurSearch) {
-        System.out.println(keyword);
+//        System.out.println(keyword);
         if (ObjectUtil.isNull(blurSearch)) {
             blurSearch = true;
         }
@@ -189,6 +187,16 @@ public class CaseDocServiceImpl implements ICaseDocService {
             return fuzzySearchList(keyword);
         }
         return preciseSearchList(keyword);
+    }
+
+    /**
+     * 查询所有案件列表
+     *
+     * @return {@link List }<{@link CaseDoc }>
+     */
+    @Override
+    public List<CaseDoc> selectList() {
+        return EsWrappers.lambdaChainQuery(caseDocMapper).select(CaseDoc::getId).list();
     }
 
     /**
@@ -200,7 +208,7 @@ public class CaseDocServiceImpl implements ICaseDocService {
      */
     @Override
     public TableDataInfo<CaseDoc> selectPage(String keyword, PageQuery pageQuery) {
-        System.out.println("keyword:" + keyword + " pageQuery:" + pageQuery);
+//        System.out.println("keyword:" + keyword + " pageQuery:" + pageQuery);
 //        keyword不能为null
         LambdaEsQueryChainWrapper<CaseDoc> lqw = EsWrappers.lambdaChainQuery(caseDocMapper)
             .match(StringUtils.isNotEmpty(keyword), CaseDoc::getName, keyword)

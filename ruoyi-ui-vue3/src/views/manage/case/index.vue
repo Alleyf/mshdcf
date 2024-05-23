@@ -4,7 +4,7 @@ import {
   getCase,
   delCase,
   addCase,
-  updateCase, saveProcessCase, syncAllCase,
+  updateCase, saveProcessCase, syncAllCase, syncIncCase,
 } from '@/api/manage/case'
 import {download} from '@/utils/request'
 import {getCurrentInstance, onMounted, reactive, ref, toRefs} from "vue";
@@ -472,7 +472,7 @@ const cancelDialog = () => {
 const handleAdd = () => {
   resetForm()
   open.value = true
-  title.value = '添加司法案例'
+  title.value = '添加司法案件'
 }
 
 const handleUpdate = row => {
@@ -483,7 +483,7 @@ const handleUpdate = row => {
     loading.value = false
     form.value = res.data
     open.value = true
-    title.value = '修改司法案例'
+    title.value = '修改司法案件'
   })
 }
 
@@ -526,7 +526,7 @@ const submitForm = () => {
 
 const handleDelete = row => {
   const idLs = row.id || ids.value
-  ElMessageBox.confirm(`是否确认删除司法案例编号为"${idLs}"的数据项？`).then(() => {
+  ElMessageBox.confirm(`是否确认删除司法案件编号为"${idLs}"的数据项？`).then(() => {
     loading.value = true
     return delCase(idLs)
   }).then(() => {
@@ -593,11 +593,25 @@ const handleExportSelected = () => {
     , `case_${new Date().getTime()}.xlsx`)
 }
 
-//全量同步司法案例
-const handleSync = () => {
+//全量同步司法案件
+const handleSyncAll = () => {
   ElMessageBox.confirm('是否确认同步所有数据项？').then(() => {
     loading.value = true
     return syncAllCase()
+  }).then(() => {
+    ElMessage.success('同步成功')
+    getList()
+  }).catch(() => {
+  }).finally(() => {
+    loading.value = false
+  })
+}
+
+//增量同步司法案件
+const handleSyncInc = () => {
+  ElMessageBox.confirm('是否确认同步新增数据项？').then(() => {
+    loading.value = true
+    return syncIncCase()
   }).then(() => {
     ElMessage.success('同步成功')
     getList()
@@ -813,8 +827,19 @@ onMounted(() => {
             plain
             size="default"
             type="success"
-            @click="handleSync"
+            @click="handleSyncAll"
           >全量同步
+          </el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
+            v-hasPermi="['manage:case:sync']"
+            icon="Plus"
+            plain
+            size="default"
+            type="success"
+            @click="handleSyncInc"
+          >增量同步
           </el-button>
         </el-col>
         <el-col :span="1.5">
@@ -1210,7 +1235,7 @@ onMounted(() => {
           </el-table>
         </el-tab-pane>
       </el-tabs>
-      <!-- 添加或修改司法案例对话框 -->
+      <!-- 添加或修改司法案件对话框 -->
       <el-dialog v-model="open" :title="title" align-center draggable>
         <el-form ref="dialogForm" :model="form" :rules="rules" label-width="100px">
           <el-form-item label="案件名称" prop="name">
@@ -1460,7 +1485,7 @@ onMounted(() => {
             <div class="el-upload__tip text-center">
               <div class="el-upload__tip">
                 <el-checkbox v-model="upload.updateSupport"/>
-                是否更新已经存在的司法案例数据
+                是否更新已经存在的司法案件数据
               </div>
               <span>仅允许导入xls、xlsx格式文件。</span>
               <el-link :underline="false" style="font-size:12px;vertical-align: baseline;" type="primary"
@@ -1478,7 +1503,7 @@ onMounted(() => {
       </el-dialog>
 
       <!-- 清洗挖掘对话框 -->
-      <el-dialog v-model="processDialog" :fullscreen="true" draggable title="司法案例数据清洗挖掘" width="100%">
+      <el-dialog v-model="processDialog" :fullscreen="true" draggable title="司法案件数据清洗挖掘" width="100%">
         <el-steps :active="processStep" align-center class="mb-10" finish-status="success">
           <el-step :icon="Edit" description="对数据格式进行格式化并去除异常字符" title="Step 1：数据清洗"/>
           <el-step :icon="UploadFilled" :status="'finish'" description="对数据进行挖掘分析提取潜在信息"
