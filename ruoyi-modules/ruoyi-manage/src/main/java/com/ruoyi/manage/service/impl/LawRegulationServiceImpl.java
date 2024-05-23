@@ -95,6 +95,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         lqw.eq(bo.getSourceId() != null, LawRegulation::getSourceId, bo.getSourceId());
         lqw.eq(bo.getStatus() != null, LawRegulation::getStatus, bo.getStatus());
         lqw.eq(bo.getIsMining() != null, LawRegulation::getIsMining, MiningStatus.getMiningStatus(bo.getIsMining()));
+
         return lqw;
     }
 
@@ -108,7 +109,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         boolean flag = baseMapper.insert(add) > 0;
         if (flag) {
             bo.setId(add.getId());
-            //            添加es索引
+            // 添加es索引
             LawRegulation newLaw = selectLawRegulationByName(add.getName());
             flag = remoteLawRetrieveService.insert(BeanCopyUtils.copy(newLaw, LawDoc.class)) > 0;
         }
@@ -186,6 +187,9 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         Set<Long> lawIds = lawDocs.parallelStream()
             .map(LawDoc::getId)
             .collect(Collectors.toSet());
+        if (lawDocs.isEmpty()) {
+            syncAll(clientId);
+        }
         // 过滤出allLaws中ID不在lawIds中的LawRegulation对象
         List<LawRegulation> incLaws = baseMapper.selectList(Wrappers.<LawRegulation>lambdaQuery().notIn(LawRegulation::getId, lawIds));
         // 增量同步数据
@@ -259,7 +263,12 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         boolean flag = baseMapper.updateById(update) > 0;
         if (flag) {
 //            更新es索引
-            flag = remoteLawRetrieveService.update(BeanCopyUtils.copy(update, LawDoc.class)) > 0;
+            boolean exist = remoteLawRetrieveService.exist(update.getId());
+            if (!exist) {
+                flag = remoteLawRetrieveService.insert(BeanCopyUtils.copy(update, LawDoc.class)) > 0;
+            } else {
+                flag = remoteLawRetrieveService.update(BeanCopyUtils.copy(update, LawDoc.class)) > 0;
+            }
         }
         return flag;
     }

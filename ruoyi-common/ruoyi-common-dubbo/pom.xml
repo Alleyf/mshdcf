@@ -19,12 +19,6 @@
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-common-core</artifactId>
-            <!--            <exclusions>-->
-            <!--                <exclusion>-->
-            <!--                    <artifactId>commons-lang</artifactId>-->
-            <!--                    <groupId>commons-lang</groupId>-->
-            <!--                </exclusion>-->
-            <!--            </exclusions>-->
         </dependency>
 
         <dependency>
@@ -53,10 +47,6 @@
                 <exclusion>
                     <groupId>com.google.code.gson</groupId>
                     <artifactId>gson</artifactId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>fastjson2</artifactId>
-                    <groupId>com.alibaba.fastjson2</groupId>
                 </exclusion>
             </exclusions>
         </dependency>

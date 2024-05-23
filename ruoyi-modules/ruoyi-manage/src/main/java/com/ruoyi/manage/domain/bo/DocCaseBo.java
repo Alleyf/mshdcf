@@ -24,6 +24,7 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class DocCaseBo extends BaseEntity {
+    private static final long serialVersionUID = 1L;
 
     /**
      * 案件主键id（雪花id）

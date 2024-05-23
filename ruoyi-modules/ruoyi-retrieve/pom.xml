@@ -82,12 +82,12 @@
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-common-dubbo</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>fastjson2</artifactId>
-                    <groupId>com.alibaba.fastjson2</groupId>
-                </exclusion>
-            </exclusions>
+            <!--            <exclusions>-->
+            <!--                <exclusion>-->
+            <!--                    <artifactId>fastjson2</artifactId>-->
+            <!--                    <groupId>com.alibaba.fastjson2</groupId>-->
+            <!--                </exclusion>-->
+            <!--            </exclusions>-->
         </dependency>
 
         <dependency>

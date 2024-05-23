@@ -24,6 +24,7 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class LawRegulationBo extends BaseEntity {
+    private static final long serialVersionUID = 1L;
 
     /**
      * 法律法规主键id（雪花id）

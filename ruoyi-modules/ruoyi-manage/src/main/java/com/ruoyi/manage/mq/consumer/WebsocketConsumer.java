@@ -39,9 +39,9 @@ public class WebsocketConsumer {
             remoteWebSocketService.sendToOne(obj.getClientId(), jsonMsg);
             if (obj.getMsgType().equals(SocketMsgType.CASE.getType())) {
                 if (obj.getMsgTitle().contains("全量")) {
-                    docCaseService.syncAllCase(obj.getClientId());
+                    docCaseService.syncAll(obj.getClientId());
                 } else {
-                    docCaseService.syncIncCase(obj.getClientId());
+                    docCaseService.syncInc(obj.getClientId());
                 }
             } else if (obj.getMsgType().equals(SocketMsgType.LAW.getType())) {
                 if (obj.getMsgTitle().contains("全量")) {

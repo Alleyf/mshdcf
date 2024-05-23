@@ -59,6 +59,8 @@ dubbo:
     payload: 104857600 #10MB
   consumer:
     timeout: 200000
+  application:
+    serialize-check-status: WARN
 
 --- # rabbitmq 配置
 spring:

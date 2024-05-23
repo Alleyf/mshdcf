@@ -37,18 +37,18 @@
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-api-retrieve</artifactId>
             <exclusions>
-                <exclusion>
-                    <artifactId>commons-io</artifactId>
-                    <groupId>commons-io</groupId>
-                </exclusion>
+                <!--                <exclusion>-->
+                <!--                    <artifactId>commons-io</artifactId>-->
+                <!--                    <groupId>commons-io</groupId>-->
+                <!--                </exclusion>-->
                 <!--                <exclusion>-->
                 <!--                    <artifactId>commons-lang</artifactId>-->
                 <!--                    <groupId>commons-lang</groupId>-->
                 <!--                </exclusion>-->
-                <exclusion>
-                    <artifactId>HdrHistogram</artifactId>
-                    <groupId>org.hdrhistogram</groupId>
-                </exclusion>
+                <!--                <exclusion>-->
+                <!--                    <artifactId>HdrHistogram</artifactId>-->
+                <!--                    <groupId>org.hdrhistogram</groupId>-->
+                <!--                </exclusion>-->
             </exclusions>
         </dependency>
 
@@ -92,12 +92,12 @@
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-common-dubbo</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>fastjson2</artifactId>
-                    <groupId>com.alibaba.fastjson2</groupId>
-                </exclusion>
-            </exclusions>
+            <!--            <exclusions>-->
+            <!--                <exclusion>-->
+            <!--                    <artifactId>fastjson2</artifactId>-->
+            <!--                    <groupId>com.alibaba.fastjson2</groupId>-->
+            <!--                </exclusion>-->
+            <!--            </exclusions>-->
         </dependency>
 
         <dependency>

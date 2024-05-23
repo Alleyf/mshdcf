@@ -137,7 +137,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer syncAllCase(String clientId) {
+    public Integer syncAll(String clientId) {
         // 验证clientId的合法性
         Assert.notNull(clientId, "clientId不能为空");
         List<DocCase> allCase = baseMapper.selectList();
@@ -153,13 +153,16 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer syncIncCase(String clientId) {
+    public Integer syncInc(String clientId) {
         Assert.notNull(clientId, "clientId不能为空");
         List<CaseDoc> caseDocs = remoteCaseRetrieveService.selectList();
         // 创建一个包含caseDocs中所有ID的Set
         Set<Long> caseIds = caseDocs.parallelStream()
             .map(CaseDoc::getId)
             .collect(Collectors.toSet());
+        if (caseDocs.isEmpty()) {
+            syncAll(clientId);
+        }
         // 过滤出allCase中ID不在caseIds中的DocCase对象
         List<DocCase> IncCases = baseMapper.selectList(Wrappers.<DocCase>lambdaQuery().notIn(DocCase::getId, caseIds));
         // 增量同步数据
@@ -231,7 +234,12 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         boolean flag = baseMapper.updateById(update) > 0;
         if (flag) {
 //            更新es索引
-            flag = remoteCaseRetrieveService.update(BeanCopyUtils.copy(update, CaseDoc.class)) > 0;
+            Boolean exist = remoteCaseRetrieveService.exist(update.getId());
+            if (!exist) {
+                flag = remoteCaseRetrieveService.insert(BeanCopyUtils.copy(update, CaseDoc.class)) > 0;
+            } else {
+                flag = remoteCaseRetrieveService.update(BeanCopyUtils.copy(update, CaseDoc.class)) > 0;
+            }
         }
         return flag;
     }

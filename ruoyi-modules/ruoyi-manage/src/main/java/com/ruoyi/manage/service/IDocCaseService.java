@@ -42,12 +42,12 @@ public interface IDocCaseService extends IService<DocCase> {
     /**
      * 全量同步到es
      */
-    Integer syncAllCase(String clientId);
+    Integer syncAll(String clientId);
 
     /**
      * 增量同步到es
      */
-    Integer syncIncCase(String clientId);
+    Integer syncInc(String clientId);
 
     /**
      * 修改司法案件

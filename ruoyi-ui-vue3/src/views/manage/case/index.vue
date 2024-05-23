@@ -7,7 +7,7 @@ import {
   updateCase, saveProcessCase, syncAllCase, syncIncCase,
 } from '@/api/manage/case'
 import {download} from '@/utils/request'
-import {getCurrentInstance, onMounted, reactive, ref, toRefs} from "vue";
+import {getCurrentInstance, nextTick, onBeforeUnmount, onMounted, reactive, ref, toRefs} from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {getToken} from "@/utils/auth";
 import QEditor from "@/components/Editor/index.vue";
@@ -209,25 +209,6 @@ const handleProcess = () => {
     }
     return item;
   })
-  // tempList.value.forEach(item => {
-  //   const existIndex = processData.value.findIndex(data => item.id === data.id)
-  //   const exist = existIndex !== -1
-  //
-  //   // alert(JSON.stringify(item.extra))
-  //   // 判断extra是否是非空字符串，是则需要解析，否则无需解析
-  //   if ((item.extra !== "" || item.extra !== null) && typeof item.extra === 'string') {
-  //     // 解析json字符串
-  //     item.extra = JSON.parse(item.extra);
-  //   } else {
-  //     item.extra = extra.value
-  //   }
-  //   // 更新已存在于ProcessData的extra 字段
-  //   if (ids.value.includes(item.id)) {
-  //     toAdd.push(item); // 将元素添加到新数组中
-  //     // 将解析后的json对象还原为json字符串
-  //     // item.extra = JSON.stringify(item.extra);
-  //   }
-  // })
   processData.value = processData.value.concat(toAdd);
   processDialog.value = true
 }
@@ -626,29 +607,13 @@ const handleUploadPdf = () => {
 }
 const pdfContent = ref('')
 
-// function handlePdfFile(uploadFile) {
-//   console.log(uploadFile, pdfContent.value)
-//
-//   const url = uploadFile.url
-//   getDocument(url).promise.then((pdfDoc) => {
-//
-//     for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
-//       pdfDoc.getPage(pageNum).then((page) => {
-//         page.getTextContent().then((textContent) => {
-//           pdfContent.value += textContent.items.map((item) => item.str).join(' ');
-//         });
-//       });
-//     }
-//
-//   });
-//
-//   // fileReader.readAsArrayBuffer(uploadFile);
-// }
-
 onMounted(() => {
   getList()
-  // proxy.sendWebMessage("欢迎使用来到管理分析页面")
 })
+
+// 在组件卸载前移除事件监听器
+onBeforeUnmount(() => {
+});
 </script>
 
 
@@ -1526,16 +1491,17 @@ onMounted(() => {
                       原始正文
                     </el-header>
                     <el-form-item>
-                      <el-input v-model="data.content" :autosize="{ minRows: 25, maxRows: 25 }" resize="vertical"
-                                type="textarea"/>
+                      <el-input v-model="data.content" :autosize="{ minRows: 25, maxRows: 25 }"
+                                resize="vertical" type="textarea"
+                      />
                     </el-form-item>
                   </div>
                   <div v-else-if="processStep===1">
                     <el-header>
                       修正正文
                     </el-header>
-                    <el-input v-model="data.stripContent" :autosize="{ minRows: 25, maxRows: 25 }" resize="vertical"
-                              type="textarea"/>
+                    <el-input v-model="data.stripContent" :autosize="{ minRows: 25, maxRows: 25 }"
+                              resize="vertical" type="textarea"/>
                   </div>
                 </el-col>
                 <el-col :span="12">
@@ -1543,7 +1509,9 @@ onMounted(() => {
                     <el-header>
                       修正正文
                     </el-header>
-                    <el-input v-model="data.stripContent" :autosize="{ minRows: 25, maxRows: 25 }" type="textarea"/>
+                    <el-input v-model="data.stripContent" :autosize="{ minRows: 25, maxRows: 25 }"
+                              type="textarea"
+                    />
                   </div>
                   <div v-else-if="processStep===1">
                     <el-header>
