@@ -11,8 +11,6 @@ const key = computed(() => {
 });
 const tagsViewStore = useTagsViewStore()
 
-// 显示组件时，替换组件 name，解决同个组件路由不一致问题
-
 </script>
 
 

@@ -1,12 +1,9 @@
-version: '3'
-
+#name: mshdcf
+version: '1.0.0'
 services:
-
   #################################################################################################
   #################################### 系统基本必要中间件 #########################################
   #################################################################################################
-
-
   mysql:
     image: mysql:8.0.31
     container_name: mysql
@@ -16,14 +13,44 @@ services:
       # root 密码
       MYSQL_ROOT_PASSWORD: 123456
       # 初始化数据库
-      MYSQL_DATABASE: ry-cloud
+      MYSQL_DATABASE: ry-crawl
     ports:
       - "3306:3306"
     volumes:
       # 数据挂载
-      - A:/docker/mysql/data/:/var/lib/mysql/
+      - A:/docker/mysql/v8/data/:/var/lib/mysql/
       # 配置挂载
-      - A:/docker/mysql/conf/:/etc/mysql/conf.d/
+      - A:/docker/mysql/v8/conf/:/etc/mysql/conf.d/
+    command:
+      # 将mysql8.0默认密码策略 修改为 原先 策略 (mysql8.0对其默认策略做了更改 会导致密码无法匹配)
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
+    privileged: true
+    restart: always
+    #        #    network_mode: "host"
+    networks:
+      - mynetwork
+
+  mysql-5:
+    image: mysql:5.7.36
+    container_name: mysql-5
+    environment:
+      # 时区上海
+      TZ: Asia/Shanghai
+      # root 密码
+      MYSQL_ROOT_PASSWORD: 123456
+      # 初始化数据库
+      MYSQL_DATABASE: ry-crawl
+    ports:
+      - "33060:3306"
+    volumes:
+      # 数据挂载
+      - A:/docker/mysql/v5/data/:/var/lib/mysql/
+      # 配置挂载
+      - A:/docker/mysql/v5/conf/:/etc/mysql/conf.d/
     command:
       # 将mysql8.0默认密码策略 修改为 原先 策略 (mysql8.0对其默认策略做了更改 会导致密码无法匹配)
       --default-authentication-plugin=mysql_native_password
@@ -70,9 +97,10 @@ services:
       - A:/docker/redis/data/:/redis/data/
     command: "redis-server /redis/config/redis.conf"
     privileged: true
+    restart: always
     #    network_mode: "host"
-    networks:
-      - mynetwork
+    # networks:
+    #   - mynetwork
 
   minio:
     image: alleyf/minio:RELEASE.2023-03-24T21-41-23Z
@@ -191,6 +219,7 @@ services:
       - A:/docker/elk/elasticsearch/data:/usr/share/elasticsearch/data
       - A:/docker/elk/elasticsearch/logs:/usr/share/elasticsearch/logs
       #    network_mode: "host"
+    restart: always
     networks:
       - mynetwork
 
@@ -210,30 +239,68 @@ services:
       - A:/docker/rabbitmq/data:/var/lib/rabbitmq
     #      - A:/docker/rabbitmq/plugins:/plugins
     #        network_mode: "bridge"
-    networks:
-      - mynetwork
+    restart: always
+    # networks:
+    #   - mynetwork
 
 
-  crawlab_master:
+  crawlab:
     image: alleyf/crawlab
-    container_name: crawlab_master
+    container_name: crawlab
     environment:
       CRAWLAB_NODE_MASTER: "Y"
-      CRAWLAB_MONGO_HOST: "mongo"
+      CRAWLAB_MONGO_HOST: "mongo"  #
+      CRAWLAB_MONGO_PORT: "27017"  # mongo port
+      CRAWLAB_MONGO_DB: "crawlab"  # mongo database
+    volumes:
+      - "A:/docker/crawlab/data:/root/.crawlab"  # 持久化 crawlab 元数据
+      - "A:/docker/crawlab/data:/data"  # 持久化 crawlab 数据
+      - "A:/docker/crawlab/log:/var/logs/crawlab" # 持久化 crawlab 任务日志
     ports:
       - "8180:8080"
     depends_on:
       - mongo
-    networks:
-      - mynetwork
+      # network_mode: "bridge"
+      # networks:
+      # - mynetwork
+
 
   mongo:
     image: mongo:4.2
     container_name: mongo
     ports:
       - "27017:27017"
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: "alleyf"  # mongo username
+    #   MONGO_INITDB_ROOT_PASSWORD: "alleyfmongo"  # mongo password
+    volumes:
+      - A:/docker/mongo/config:/data/configdb
+      - A:/docker/mongo/data/db:/data/db
+      # network_mode: "bridge"
+      # networks:
+      # - mynetwork
+
+
+  metabase:
+    image: metabase/metabase
+    container_name: metabase
+    # restart: always
+    # volumes:
+    #   - A:/docker/dataease/conf:/opt/dataease/conf/
+    ports:
+      - "11210:3000"
     networks:
       - mynetwork
+
+  maxkb:
+    image: 1panel/maxkb:latest
+    container_name: maxkb
+    ports:
+      - "8190:8080"
+    volumes:
+      - A:/docker/maxkb/data:/var/lib/postgresql/data
+    # networks:
+    #   - mynetwork
 
 
   #################################################################################################
@@ -261,7 +328,7 @@ services:
 
 
   ruoyi-gateway:
-    image: ruoyi/ruoyi-gateway:1.8.1
+    image: alleyf/ruoyi-gateway:1.8.1
     container_name: ruoyi-gateway
     environment:
       # 时区上海
@@ -270,14 +337,14 @@ services:
       - "8080:8080"
     volumes:
       # 配置文件
-      - A:/docker/ruoyiCloudPlus/ruoyi-gateway/logs/:/ruoyi/gateway/logs
-      # skywalking 探针
-      - A:/docker/ruoyiCloudPlus/skywalking/agent/:/ruoyi/skywalking/agent
+      - A:/docker/mshdcf/ruoyi-gateway/logs/:/alleyf/gateway/logs
+    #      # skywalking 探针
+    #      - A:/docker/ruoyiCloudPlus/skywalking/agent/:/ruoyi/skywalking/agent
     privileged: true
-    #    network_mode: "bridge"
+    network_mode: "host"
     #    restart: always
-    networks:
-      - mynetwork
+  #    networks:
+  #      - mynetwork
 
   ruoyi-auth:
     image: ruoyi/ruoyi-auth:1.8.1

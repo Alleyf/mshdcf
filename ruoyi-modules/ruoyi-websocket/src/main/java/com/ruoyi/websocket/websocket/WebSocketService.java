@@ -1,6 +1,9 @@
 package com.ruoyi.websocket.websocket;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +14,10 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * websocket服务
@@ -23,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 
 
+@Data
 @ServerEndpoint(value = "/websocket/{clientId}")
 @Component
 public class WebSocketService implements Serializable {
@@ -33,9 +40,9 @@ public class WebSocketService implements Serializable {
     /**
      * 客户端集合
      */
+    @Getter
     @JsonBackReference
     private static ConcurrentHashMap<String, WebSocketClient> webSocketMap = new ConcurrentHashMap<>();
-
     /**
      * 与某个客户端的连接会话，需要通过它来给客户端发送数据
      */
@@ -44,6 +51,15 @@ public class WebSocketService implements Serializable {
      * 接收loginId,区分不同客户端用户
      */
     private String clientId = "";
+
+    /**
+     * 获取在线用户列表
+     *
+     * @return {@link List }<{@link String }>
+     */
+    public static List<String> selectOnlineClientList() {
+        return new ArrayList<>(webSocketMap.keySet());
+    }
 
     /**
      * 向指定客户端发送消息
@@ -75,28 +91,8 @@ public class WebSocketService implements Serializable {
     }
 
 
-    public static ConcurrentHashMap<String, WebSocketClient> getWebSocketMap() {
-        return webSocketMap;
-    }
-
     public static void setWebSocketMap(ConcurrentHashMap<String, WebSocketClient> webSocketMap) {
         WebSocketService.webSocketMap = webSocketMap;
-    }
-
-    public Session getSession() {
-        return session;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
     }
 
 

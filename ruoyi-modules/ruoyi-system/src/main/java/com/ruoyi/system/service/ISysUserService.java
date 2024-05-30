@@ -4,6 +4,7 @@ import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
 import com.ruoyi.system.api.domain.SysUser;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -61,6 +62,14 @@ public interface ISysUserService {
      * @return 用户对象信息
      */
     SysUser selectUserById(Long userId);
+
+    /**
+     * 通过用户IDs查询用户
+     *
+     * @param userIds 用户IDs
+     * @return 用户对象信息
+     */
+    List<SysUser> selectUserByIds(Collection<Long> userIds);
 
     /**
      * 根据用户ID查询用户所属角色组

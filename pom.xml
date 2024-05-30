@@ -8,9 +8,9 @@
     <artifactId>ruoyi-cloud-plus</artifactId>
     <version>1.8.1</version>
 
-    <name>RuoYi-Cloud-Plus</name>
-    <url>https://gitee.com/dromara/RuoYi-Cloud-Plus</url>
-    <description>RuoYi-Cloud-Plus微服务系统</description>
+    <name>MSHDCF</name>
+    <url>https://github.com/Alleyf/mshdcf</url>
+    <description>多源异构司法数据汇聚融合平台</description>
 
     <properties>
         <ruoyi.version>1.8.1</ruoyi.version>

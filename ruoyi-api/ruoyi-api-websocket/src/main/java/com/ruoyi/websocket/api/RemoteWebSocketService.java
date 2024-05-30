@@ -1,5 +1,7 @@
 package com.ruoyi.websocket.api;
 
+import java.util.List;
+
 /**
  * websocket远程服务
  *
@@ -22,4 +24,11 @@ public interface RemoteWebSocketService {
      * @param clientId 客户端id
      */
     void sendToOne(String clientId, String message);
+
+    /**
+     * 获取在线用户列表
+     *
+     * @return {@link List }<{@link String }>
+     */
+    List<String> selectOnlineClientList();
 }

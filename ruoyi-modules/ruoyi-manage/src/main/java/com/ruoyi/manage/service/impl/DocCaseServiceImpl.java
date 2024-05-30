@@ -108,6 +108,7 @@ public class DocCaseServiceImpl extends ServiceImpl<DocCaseMapper, DocCase> impl
         lqw.like(StringUtils.isNotBlank(bo.getLegalBasis()), DocCase::getLegalBasis, bo.getLegalBasis());
         lqw.eq(bo.getStatus() != null, DocCase::getStatus, bo.getStatus());
         lqw.eq(bo.getIsMining() != null, DocCase::getIsMining, MiningStatus.getMiningStatus(bo.getIsMining()));
+        lqw.orderByDesc(DocCase::getCreateTime);
         return lqw;
     }
 

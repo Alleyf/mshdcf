@@ -17,6 +17,7 @@
   "dependencies": {
     "@element-plus/icons-vue": "2.0.10",
     "@kangc/v-md-editor": "^2.3.18",
+    "@pureadmin/utils": "^2.4.7",
     "@rollup/plugin-inject": "^5.0.5",
     "@vueup/vue-quill": "1.2.0",
     "@vueuse/core": "9.5.0",

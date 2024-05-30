@@ -201,7 +201,7 @@
 
 <script name="Notice" setup>
 import {listNotice, getNotice, delNotice, addNotice, updateNotice, sendNotice} from "@/api/system/notice";
-import {listUser} from "@/api/system/user";
+import {listOnlineUser, listUser} from "@/api/system/user";
 
 const {proxy} = getCurrentInstance();
 const {sys_notice_status, sys_notice_type} = proxy.useDict("sys_notice_status", "sys_notice_type");
@@ -221,8 +221,8 @@ const checkAll = ref(false)
 const indeterminate = ref(false)
 const value = ref([])
 const options = ref(
-  Array.from(listUser().then(res => {
-    const users = res.rows;
+  Array.from(listOnlineUser().then(res => {
+    const users = res.data;
     users.map(user => {
       options.value.push({
         value: user.userId,

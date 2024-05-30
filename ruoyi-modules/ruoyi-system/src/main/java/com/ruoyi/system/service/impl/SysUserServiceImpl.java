@@ -33,10 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 用户 业务层处理
@@ -161,6 +158,17 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     public SysUser selectUserById(Long userId) {
         return baseMapper.selectUserById(userId);
+    }
+
+    /**
+     * 通过用户IDs查询用户
+     *
+     * @param userIds 用户ID
+     * @return 用户对象信息
+     */
+    @Override
+    public List<SysUser> selectUserByIds(Collection<Long> userIds) {
+        return baseMapper.selectVoBatchIds(userIds);
     }
 
     /**
@@ -483,7 +491,7 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     public String selectUserNameById(Long userId) {
         SysUser sysUser = baseMapper.selectOne(new LambdaQueryWrapper<SysUser>()
-                .select(SysUser::getUserName).eq(SysUser::getUserId, userId));
+            .select(SysUser::getUserName).eq(SysUser::getUserId, userId));
         return ObjectUtil.isNull(sysUser) ? null : sysUser.getUserName();
     }
 

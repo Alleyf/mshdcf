@@ -1,14 +1,12 @@
 <template>
   <div>
-    <el-badge :value="unreadNum" class="item">
+    <el-badge :value="unreadNum" class="item mt-2.5">
       <el-popover
         class="mt-auto"
         popper-style="box-shadow: rgb(14 18 22 / 35%) 0px 10px 38px -10px, rgb(14 18 22 / 20%) 0px 10px 20px -15px; min-width: fit-content; max-width: 300px"
       >
         <template #reference>
-          <el-icon :size="22" style="vertical-align: middle">
-            <Bell/>
-          </el-icon>
+          <Icon class="text-2xl ml-1.5" icon="majesticons:bell-line"/>
         </template>
         <template #default>
           <div v-if="notifications" style="display: flex; gap: 6px; flex-direction: column">
@@ -43,8 +41,11 @@
         <h3 class="text-blue-500 text-xl text-center">{{ detailsNotification.msgTitle }}</h3>
       </template>
       <div class="notification-details-content text-zinc-500">
+        <div v-if="detailsNotification && detailsNotification.msgText.includes('同步')" ref="chartRef"
+             style="width: 100%; height: 35vh"/>
         <!--        <p v-if="detailsNotification" v-html="detailsNotification.msgText"/>-->
-        <v-md-preview v-if="detailsNotification" :text="detailsNotification.msgText"></v-md-preview>
+        <v-md-preview v-if="detailsNotification && !detailsNotification.msgText.includes('同步')"
+                      :text="detailsNotification.msgText"></v-md-preview>
       </div>
     </el-drawer>
   </div>
@@ -83,7 +84,15 @@ import {onBeforeUnmount, onMounted, ref} from "vue";
 import useUserStore from "@/store/modules/user";
 import QEditor from "@/components/Editor/index.vue";
 import {QuillEditor} from "@vueup/vue-quill";
+import {Icon} from "@iconify/vue";
 // import {getToken} from "@/utils/auth";
+
+
+import {useECharts} from "@pureadmin/utils";
+
+// 初始化ECharts
+const chartRef = ref();
+
 
 const userId = useUserStore().id
 const loginId = "sys_user:" + userId
@@ -100,6 +109,7 @@ const announceDialog = ref({
 });
 // const suffix = "?Authorization=Bearer " + getToken();
 
+const syncProcess = ref(0);
 const websocket = new WebSocket('ws://localhost:8080/websocket/websocket/' + loginId)
 
 const connect = () => {
@@ -119,8 +129,21 @@ const connect = () => {
         announceDialog.value.message = notification.msgText;
       } else {
         notification.unread = true;
+        if (notification.msgText.includes('同步') && !notification.msgText.includes('开始')) {
+          let processStr = notification.msgText.split('：')[1]
+          const nowNum = processStr.split('/')[0]
+          const totalNum = processStr.split('/')[1]
+          console.log('nowNum:', nowNum, 'totalNum:', totalNum)
+          if (nowNum === totalNum) {
+            syncProcess.value = 100
+          } else {
+            syncProcess.value = parseInt(nowNum) / parseInt(totalNum) * 100
+          }
+          notifications.value.pop();
+        } else {
+          unreadNum.value++;
+        }
         notifications.value.push(notification);
-        unreadNum.value++;
       }
     } else {
       console.log('Received non-JSON data:', data);
@@ -161,8 +184,102 @@ const showDetails = (notification) => {
   }
   detailsNotification.value = notification;
   showDetailsModal.value = true;
-  // console.log(notification, showDetailsModal.value)
+  renderChart()
+
 };
+
+
+const {setOptions} = useECharts(chartRef);
+
+// 根据配置项渲染ECharts
+const renderChart = () => {
+  setOptions({
+    /** 配置项 https://echarts.apache.org/zh/option.html */
+    series: [
+      {
+        type: 'gauge',
+        startAngle: 180,
+        endAngle: 0,
+        center: ['50%', '75%'],
+        radius: '90%',
+        min: 0,
+        max: 1,
+        splitNumber: 8,
+        axisLine: {
+          lineStyle: {
+            width: 6,
+            color: [
+              [0.25, '#FF6E76'],
+              [0.5, '#FDDD60'],
+              [0.75, '#58D9F9'],
+              [1, '#7CFFB2']
+            ]
+          }
+        },
+        pointer: {
+          icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
+          length: '12%',
+          width: 20,
+          offsetCenter: [0, '-60%'],
+          itemStyle: {
+            color: 'auto'
+          }
+        },
+        axisTick: {
+          length: 12,
+          lineStyle: {
+            color: 'auto',
+            width: 2
+          }
+        },
+        splitLine: {
+          length: 20,
+          lineStyle: {
+            color: 'auto',
+            width: 5
+          }
+        },
+        axisLabel: {
+          color: '#464646',
+          fontSize: 20,
+          distance: -60,
+          rotate: 'tangential',
+          formatter: function (value) {
+            if (value === 0.875) {
+              return 'Grade A';
+            } else if (value === 0.625) {
+              return 'Grade B';
+            } else if (value === 0.375) {
+              return 'Grade C';
+            } else if (value === 0.125) {
+              return 'Grade D';
+            }
+            return '';
+          }
+        },
+        title: {
+          offsetCenter: [0, '-10%'],
+          fontSize: 20
+        },
+        detail: {
+          fontSize: 30,
+          offsetCenter: [0, '-35%'],
+          valueAnimation: true,
+          formatter: function (value) {
+            return Math.round(value) + '%';
+          },
+          color: 'inherit'
+        },
+        data: [
+          {
+            value: syncProcess.value,
+            name: '同步进度'
+          }
+        ]
+      }
+    ]
+  });
+}
 
 onMounted(() => {
   connect();
@@ -203,3 +320,4 @@ onBeforeUnmount(() => {
 }
 
 </style>
+

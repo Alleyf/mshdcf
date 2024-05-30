@@ -158,7 +158,7 @@ public class MoonShotGPTUtils {
         return new Request.Builder()
             .url(jsonRequest.get("url"))
             .post(body)
-            .addHeader("Authorization", GPTConstants.Local_MoonShot_API_SECRET)
+            .addHeader("Authorization", GPTConstants.MoonShot_API_SECRET)
             .addHeader("Content-Type", "application/json")
             .build();
     }
@@ -166,7 +166,7 @@ public class MoonShotGPTUtils {
     private static Map<String, String> getJsonRequest(String text) {
         return new HashMap<String, String>(2) {
             {
-                put("url", GPTConstants.Local_MoonShot_API_URL);
+                put("url", GPTConstants.MoonShot_API_URL);
                 put("text", moonShotRequest(text));
             }
         };

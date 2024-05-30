@@ -223,7 +223,7 @@ public enum PromptTemplate {
         "basis：相关法条[json数组]\n" +
         "scope：适用范围\n" +
         "main：主要内容[json数组，不超过5条]\n" +
-        "abstract：判决结果[摘要总结，不超过原文长度的20%]\n" +
+        "abstract：摘要总结[摘要总结，不超过原文长度的20%]\n" +
         "\n" +
         "## Output format: \n" +
         "{\n" +
@@ -267,11 +267,11 @@ public enum PromptTemplate {
     /**
      * 案例正文修正模板
      */
-    CASEREVISE("caseRevise", "修正下述司法案件正文的格式并纠正可能存在的错误，检查标点符号语法等正确后返回不带markdown格式的纯文本:\n", "你是一名专业的数据智能分析处理专家"),
+    CASEREVISE("caseRevise", "修正下述司法案件正文的格式并纠正可能存在的错误，检查标点符号语法等正确后返回的纯文本（不是markdown格式、不加粗不带星号字符、没有多于换行）:\n", "你是一名专业的数据智能分析处理专家"),
     /**
      * 法条正文修正模板
      */
-    LAWREVISE("lawRevision", "不改变原文内容的条件下，修正下述法条正文的格式并纠正可能存在的错误，如果正文含有章、条则按照分章、条以换行符\\n分段但不要有多余空行和*字符，检查标点符号语法等正确后返回纯文本（不带markdown格式、不加粗、没有多于换行）:\n", "你是一名专业的数据智能分析处理专家");
+    LAWREVISE("lawRevision", "不改变原文内容的条件下，修正下述法条正文的格式并纠正可能存在的错误，如果正文含有章、条则按照分章、条以换行符\\n分段但不要有多余空行和*字符，检查标点符号语法等正确后返回纯文本（不是markdown格式、不加粗不带星号字符、没有多于换行）:\n", "你是一名专业的数据智能分析处理专家");
 
     private final String name;
     private final String template;

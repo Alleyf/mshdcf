@@ -46,6 +46,6 @@ public interface GPTConstants {
     /**
      * MoonShot-GPT请求密钥
      */
-    String MoonShot_API_SECRET = "Bearer sk-3vLlnvvSjZweyMPvhtMZkt5UsLFJ5N1qN7pNpcF94z9ve2Ee";
+    String MoonShot_API_SECRET = "Bearer sk-3vLlnvvSjZweyMPvhtMZkt5UsLFJ5N1qN7pNpcF94z9ve2Ee"; //sk-oT7gorvy6TuUHv8QZ4OtSlDQnFyBOWfk4JuJh8Rk0NpNcUrB
     String Local_MoonShot_API_SECRET = "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTcxOTU2NDk5OSwiaWF0IjoxNzExNzg4OTk5LCJqdGkiOiJjbzN0N2h1Y3A3ZmN0MHF0djB1ZyIsInR5cCI6InJlZnJlc2giLCJzdWIiOiJjbmM3YzYybG5sOTU3N3VuaWRuMCIsInNwYWNlX2lkIjoiY25jN2M2MmxubDk1Nzd1bmlkbWciLCJhYnN0cmFjdF91c2VyX2lkIjoiY25jN2M2MmxubDk1Nzd1bmlkbTAifQ.AW4vuZ57gAHEp1SIvnhsgQFhccB90FERzn23xiABkV-GWxisam4kLF1VoHXPyHs6UcgyNO4gfjwNnjBJ6Ru4YQ";
 }

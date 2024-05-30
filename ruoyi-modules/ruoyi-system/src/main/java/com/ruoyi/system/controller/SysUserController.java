@@ -3,6 +3,7 @@ package com.ruoyi.system.controller;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.secure.BCrypt;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.constant.UserConstants;
@@ -29,8 +30,10 @@ import com.ruoyi.system.service.ISysDeptService;
 import com.ruoyi.system.service.ISysPostService;
 import com.ruoyi.system.service.ISysRoleService;
 import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.websocket.api.RemoteWebSocketService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 用户信息
@@ -58,6 +62,8 @@ public class SysUserController extends BaseController {
     private final ISysRoleService roleService;
     private final ISysPostService postService;
     private final ISysDeptService deptService;
+    @DubboReference
+    private final RemoteWebSocketService remoteWebSocketService;
 
     /**
      * 获取用户列表
@@ -66,6 +72,20 @@ public class SysUserController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo<SysUser> list(SysUser user, PageQuery pageQuery) {
         return userService.selectPageUserList(user, pageQuery);
+    }
+
+    /**
+     * 获取在线用户列表
+     */
+    @SaCheckPermission("system:notice:list")
+    @GetMapping("/listOnline")
+    public R<List<SysUser>> listOnlineUser() {
+        List<String> targetIds = remoteWebSocketService.selectOnlineClientList();
+        if (!targetIds.isEmpty()) {
+            List<Long> userIds = targetIds.stream().map(Convert::toLong).collect(Collectors.toList());
+            return R.ok(userService.selectUserByIds(userIds));
+        }
+        return R.ok(new ArrayList<>());
     }
 
     /**

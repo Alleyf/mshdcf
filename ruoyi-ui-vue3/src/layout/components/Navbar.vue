@@ -5,13 +5,11 @@
     <breadcrumb v-if="!settingsStore.topNav" id="breadcrumb-container" class="breadcrumb-container"/>
     <top-nav v-if="settingsStore.topNav" id="topmenu-container" class="topmenu-container"/>
 
-    <div class="right-menu mt-auto">
+    <div class="right-menu">
       <template v-if="appStore.device !== 'mobile'">
         <header-search id="header-search" class="hover-effect "/>
         <!--  消息通知-->
-        <!--        <el-tooltip content="消息通知" effect="dark" placement="bottom">-->
         <notify id="notification" class="right-menu-item hover-effect"/>
-        <!--        </el-tooltip>-->
 
         <!--        <Contact/>-->
         <el-tooltip content="源码地址" effect="dark" placement="bottom">

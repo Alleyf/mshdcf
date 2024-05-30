@@ -11,8 +11,10 @@ import com.ruoyi.common.log.annotation.Log;
 import com.ruoyi.common.log.enums.BusinessType;
 import com.ruoyi.common.mybatis.core.page.PageQuery;
 import com.ruoyi.common.mybatis.core.page.TableDataInfo;
+import com.ruoyi.system.api.domain.SysUser;
 import com.ruoyi.system.domain.SysNotice;
 import com.ruoyi.system.service.ISysNoticeService;
+import com.ruoyi.system.service.ISysUserService;
 import com.ruoyi.websocket.api.RemoteWebSocketService;
 import com.ruoyi.websocket.domain.WebscoketMessage;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 公告 信息操作处理
@@ -36,6 +40,7 @@ public class SysNoticeController extends BaseController {
     @DubboReference
     private final RemoteWebSocketService remoteWebSocketService;
     private final ISysNoticeService noticeService;
+    private final ISysUserService userService;
 
     /**
      * 获取通知公告列表
@@ -97,10 +102,14 @@ public class SysNoticeController extends BaseController {
     @SaCheckPermission("system:notice:query")
     @PutMapping("/send")
     public R<Void> send(@Validated @RequestBody SysNotice notice) {
-        Long[] targetIds = notice.getTargetIds();
-        if (ObjectUtil.isNotEmpty(targetIds)) {
-            Arrays.asList(notice.getTargetIds()).forEach(userId -> {
-                String targetUserId = "sys_user:" + Convert.toStr(userId);
+        List<String> targetIds = Arrays.stream(notice.getTargetIds()).map(Convert::toStr).collect(Collectors.toList());
+        if (targetIds.isEmpty()) {
+            // 获取所有在线用户
+            targetIds = remoteWebSocketService.selectOnlineClientList();
+        }
+        if (!targetIds.isEmpty()) {
+            targetIds.forEach(userId -> {
+                String targetUserId = "sys_user:" + userId;
                 String msgType = ObjectUtil.equal(notice.getNoticeType(), "1") ? "通知" : "公告";
                 WebscoketMessage message = new WebscoketMessage(IdUtil.simpleUUID(), msgType, notice.getNoticeTitle(), notice.getNoticeContent(), targetUserId);
                 remoteWebSocketService.sendToOne(targetUserId, JSONObject.toJSONString(message));
@@ -112,4 +121,6 @@ public class SysNoticeController extends BaseController {
         }
         return R.ok();
     }
+
+
 }

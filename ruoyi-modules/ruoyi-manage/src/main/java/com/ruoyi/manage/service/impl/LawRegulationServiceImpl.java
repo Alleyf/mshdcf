@@ -95,7 +95,7 @@ public class LawRegulationServiceImpl extends ServiceImpl<LawRegulationMapper, L
         lqw.eq(bo.getSourceId() != null, LawRegulation::getSourceId, bo.getSourceId());
         lqw.eq(bo.getStatus() != null, LawRegulation::getStatus, bo.getStatus());
         lqw.eq(bo.getIsMining() != null, LawRegulation::getIsMining, MiningStatus.getMiningStatus(bo.getIsMining()));
-
+        lqw.orderByDesc(LawRegulation::getCreateTime);
         return lqw;
     }
 

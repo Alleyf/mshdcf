@@ -56,25 +56,25 @@ public interface CacheNames {
     String ONLINE_TOKEN = "online_tokens";
 
     // 省份编号常量（缓存15分钟）
-    String PROVINCE_NUMBER = "statistical_analysis:province_number#15m";
+    String PROVINCE_NUMBER = "statistical_analysis:province_number#10m";
 
     // 案件类型常量
-    String CASE_TYPE = "statistical_analysis:case_type#15m";
+    String CASE_TYPE = "statistical_analysis:case_type#10m";
 
     // 适用法律类型常量
-    String LAW_TYPE = "statistical_analysis:law_type#15m";
+    String LAW_TYPE = "statistical_analysis:law_type#10m";
 
     // 案件起因常量
-    String CASE_CAUSE = "statistical_analysis:case_cause#15m";
+    String CASE_CAUSE = "statistical_analysis:case_cause#10m";
 
     // 案件处理过程常量
-    String CASE_PROCESS = "statistical_analysis:case_process#15m";
+    String CASE_PROCESS = "statistical_analysis:case_process#10m";
 
     // 新增案件数量常量
-    String NEW_CASES = "statistical_analysis:new_cases#15m";
+    String NEW_CASES = "statistical_analysis:new_cases#5m";
 
     // 新增法律条文常量
-    String NEW_LAWS = "statistical_analysis:new_laws#15m";
-    String CASE_TOTAL = "statistical_analysis:case_total#3m#10m#20";
-    String LAW_TOTAL = "statistical_analysis:case_total#3m#10m#20";
+    String NEW_LAWS = "statistical_analysis:new_laws#5m";
+    String CASE_TOTAL = "statistical_analysis:case_total#3m#10m#3";
+    String LAW_TOTAL = "statistical_analysis:case_total#3m#10m#3";
 }

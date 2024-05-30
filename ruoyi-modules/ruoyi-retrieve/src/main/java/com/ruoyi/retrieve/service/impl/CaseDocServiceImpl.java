@@ -315,7 +315,7 @@ public class CaseDocServiceImpl implements ICaseDocService {
             .like(StringUtils.isNotEmpty(bo.getLegalBasis()), CaseDoc::getLegalBasis, bo.getLegalBasis())
 //            .like(StringUtils.isNotEmpty(bo.getParty()), CaseDoc::getParty, bo.getParty())
 //            .notSelect(CaseDoc::getHighlightName, CaseDoc::getHighlightContent, CaseDoc::getHighlightStripContent, CaseDoc::getMysqlId, CaseDoc::getExtra)
-            .notSelect(CaseDoc::getHighlightContent, CaseDoc::getHighlightStripContent, CaseDoc::getMysqlId, CaseDoc::getExtra)
+            .notSelect(CaseDoc::getHighlightStripContent, CaseDoc::getMysqlId, CaseDoc::getExtra)
             .sortByScore(SortOrder.DESC);
         return lqw;
     }

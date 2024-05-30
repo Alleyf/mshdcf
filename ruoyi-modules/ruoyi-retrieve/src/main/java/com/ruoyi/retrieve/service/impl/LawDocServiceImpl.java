@@ -292,7 +292,7 @@ public class LawDocServiceImpl implements ILawDocService {
             .le(ObjectUtil.isNotNull(bo.getExecuteDate()), LawDoc::getExecuteDate, bo.getExecuteDate())
             .like(StringUtils.isNotEmpty(bo.getReleaseOrganization()), LawDoc::getReleaseOrganization, bo.getReleaseOrganization())
 //            .notSelect(LawDoc::getHighlightName, LawDoc::getHighlightContent, LawDoc::getHighlightStripContent, LawDoc::getMysqlId, LawDoc::getExtra)
-            .notSelect(LawDoc::getHighlightContent, LawDoc::getHighlightStripContent, LawDoc::getMysqlId, LawDoc::getExtra)
+            .notSelect(LawDoc::getHighlightStripContent, LawDoc::getMysqlId, LawDoc::getExtra)
             .sortByScore(SortOrder.DESC);
         return lqw;
     }

@@ -32,6 +32,9 @@ VMdPreview.use(githubTheme, {
   Hljs: hljs,
 });
 
+// 全局变量
+import * as echarts from "echarts";
+
 // 注册指令
 import plugins from './plugins' // plugins
 import {download} from '@/utils/request'
@@ -79,8 +82,6 @@ import useUserStore from "@/store/modules/user";
 
 const app = createApp(App)
 
-// 全局变量
-
 
 // 全局方法挂载
 app.config.globalProperties.useDict = useDict
@@ -94,6 +95,8 @@ app.config.globalProperties.addDateRange = addDateRange
 app.config.globalProperties.selectDictLabel = selectDictLabel
 app.config.globalProperties.selectDictLabels = selectDictLabels
 app.config.globalProperties.sendWebMessage = sendWebMessage
+// 这里$echarts写法自由，起名a、b、c都行，只要保证等号右侧引入的是echarts即可
+app.config.globalProperties.$echarts = echarts;
 
 // 全局组件挂载
 app.component('DictTag', DictTag)

@@ -1,9 +1,23 @@
 <script setup>
 import {getCurrentInstance, ref, onMounted} from 'vue';
 import {useRoute} from 'vue-router'
-import {Discount, Link} from "@element-plus/icons-vue";
+import {CopyDocument, Discount, Link} from "@element-plus/icons-vue";
 import {getRegulation, getRegulationWorldCloud} from "@/api/retrieve/regulation";
 import {Icon} from "@iconify/vue";
+import {useCopyToClipboard} from "@pureadmin/utils";
+
+const {copied, update} = useCopyToClipboard();
+
+function copy() {
+  update(text); // 更新要拷贝的文本值
+  if (copied.value) {
+    //  拷贝成功
+    proxy.$message({
+      message: "复制成功",
+      type: "success"
+    });
+  }
+}
 
 const {proxy} = getCurrentInstance();
 const {
@@ -154,6 +168,17 @@ const handleTabClick = (pane, ev) => {
           <span v-if="lawItem.releaseDate" class="flex">
               <Icon class="text-2xl text-purple-500" icon="material-symbols:calendar-clock"/>
               {{ lawItem.releaseDate }}
+          </span>
+          <span class="flex">
+                <el-button
+                  v-if="index === 0"
+                  :icon="CopyDocument"
+                  circle
+                  class="text-2xl text-green-500"
+                  size="small"
+                  type="success"
+                  @click="copy"
+                />
           </span>
         </p>
         <el-card ref="typewriter" class="bg-gray-100 border border-gray-200 rounded-lg p-4">

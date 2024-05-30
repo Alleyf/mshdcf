@@ -2,9 +2,22 @@
 import {getCurrentInstance, reactive, ref, toRefs, onMounted, onBeforeMount} from 'vue';
 import {pageCase, getCase, listCase, getCaseWorldCloud} from "@/api/retrieve/case";
 import {useRoute} from 'vue-router'
-import {Link} from "@element-plus/icons-vue";
+import {CopyDocument, Edit, Link} from "@element-plus/icons-vue";
 import {Icon} from '@iconify/vue';
+import {useCopyToClipboard} from "@pureadmin/utils";
 
+const {copied, update} = useCopyToClipboard();
+
+function copy() {
+  update(text); // 更新要拷贝的文本值
+  if (copied.value) {
+    //  拷贝成功
+    proxy.$message({
+      message: "复制成功",
+      type: "success"
+    });
+  }
+}
 
 const {proxy} = getCurrentInstance();
 const {
@@ -71,7 +84,7 @@ onMounted(() => {
     }
     // console.log(caseItem.value)
     // wordCloud.value = res.msg;
-    proxy.$modal.msgSuccess(`获取数据成功`);
+    // proxy.$modal.msgSuccess(`获取数据成功`);
     text.value = caseItem.value.stripContent !== undefined ? caseItem.value.stripContent : caseItem.value.content;
     textLs.value = text.value.split("\n")
     console.log(textLs.value)
@@ -157,6 +170,17 @@ const handleTabClick = (pane, ev) => {
           <span class="flex">
             <Icon v-if="index === 0" class="text-2xl text-purple-500" icon="material-symbols:calendar-clock"/>
               {{ caseItem.judgeDate }}
+          </span>
+          <span class="flex">
+                <el-button
+                  v-if="index === 0"
+                  :icon="CopyDocument"
+                  circle
+                  class="text-2xl text-green-500"
+                  size="small"
+                  type="success"
+                  @click="copy"
+                />
           </span>
         </p>
         <el-card ref="typewriter" class="bg-gray-100 border border-gray-200 rounded-lg p-4">
