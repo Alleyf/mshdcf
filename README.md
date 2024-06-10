@@ -2,21 +2,16 @@
 <img src="https://qnpicmap.fcsluck.top/pics/202312311949932.png" width="30%" height="30%" alt="coverage">
 </div>
 <div align='center'>
-
-<img src="https://img.shields.io/github/stars/Alleyf/mshdcf.svg?style=social&label=Stars" alt="windows">
 <img src="https://img.shields.io/badge/windows-10-blue.svg" alt="windows">
 <img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="version">
 <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license">
 <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
   <img src="https://img.shields.io/badge/node-%3E%3D16.13.0-blue.svg" />
-  <a href="https://github.com/Alleyf/big-event#readme" target="_blank">
+  <a href="https://github.com/Alleyf/mshdcf#readme" target="_blank">
     <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
   </a>
-  <a href="https://github.com/Alleyf/big-event/graphs/commit-activity" target="_blank">
-    <img alt="Maintenance" src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" />
-  </a>
-  <a href="https://github.com/Alleyf/big-event/blob/master/LICENSE" target="_blank">
-    <img alt="License: MIT" src="https://img.shields.io/github/license/Alleyf/big-event" />
+  <a href="https://github.com/Alleyf/mshdcf/blob/master/LICENSE" target="_blank">
+    <img alt="License: MIT" src="https://img.shields.io/github/license/Alleyf/mshdcf" />
   </a>
 </div>
 
