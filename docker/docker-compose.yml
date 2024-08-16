@@ -78,9 +78,9 @@ services:
       - A:/docker/nacos/logs/:/root/nacos/logs
       # 集群配置文件 集群所有nacos都必须使用此文件
       - A:/docker/nacos/conf/cluster.conf:/root/nacos/conf/cluster.conf
-      #        #    network_mode: "host"
-    networks:
-      - mynetwork
+  #    network_mode: "host"
+  #    networks:
+  #      - mynetwork
 
   redis:
     image: redis:6.2.7
@@ -96,11 +96,11 @@ services:
       # 数据文件
       - A:/docker/redis/data/:/redis/data/
     command: "redis-server /redis/config/redis.conf"
-    privileged: true
+    #    privileged: true
     restart: always
-    #    network_mode: "host"
-    # networks:
-    #   - mynetwork
+  #    network_mode: "host"
+  #    networks:
+  #      - mynetwork
 
   minio:
     image: alleyf/minio:RELEASE.2023-03-24T21-41-23Z
@@ -335,19 +335,22 @@ services:
       TZ: Asia/Shanghai
     ports:
       - "8080:8080"
-    volumes:
-      # 配置文件
-      - A:/docker/mshdcf/ruoyi-gateway/logs/:/alleyf/gateway/logs
+    #    volumes:
+    # 配置文件
+    #      - A:/docker/mshdcf/ruoyi-gateway/logs/:/alleyf/gateway/logs
     #      # skywalking 探针
     #      - A:/docker/ruoyiCloudPlus/skywalking/agent/:/ruoyi/skywalking/agent
     privileged: true
-    network_mode: "host"
+    #    network_mode: "host"
     #    restart: always
-  #    networks:
-  #      - mynetwork
+    # 与nacos 注册中心通信
+    depends_on:
+      - nacos
+    networks:
+      - mynetwork
 
   ruoyi-auth:
-    image: ruoyi/ruoyi-auth:1.8.1
+    image: alleyf/ruoyi-auth:1.8.1
     container_name: ruoyi-auth
     environment:
       # 时区上海
@@ -356,16 +359,16 @@ services:
       - "9210:9210"
     volumes:
       # 配置文件
-      - A:/docker/ruoyi-auth/logs/:/ruoyi/auth/logs
+      - A:/docker/mshdcf/ruoyi-auth/logs/:/ruoyi/auth/logs
       # skywalking 探针
-      - A:/docker/skywalking/agent/:/ruoyi/skywalking/agent
+      - A:/docker/mshdcf/skywalking/agent/:/ruoyi/skywalking/agent
     privileged: true
-    #    network_mode: "host"
-    networks:
-      - mynetwork
+  #    network_mode: "host"
+  #    networks:
+  #      - mynetwork
 
   ruoyi-system:
-    image: ruoyi/ruoyi-system:1.8.1
+    image: alleyf/ruoyi-system:1.8.1
     container_name: ruoyi-system
     environment:
       # 时区上海
@@ -374,13 +377,13 @@ services:
       - "9201:9201"
     volumes:
       # 配置文件
-      - A:/docker/ruoyi-system/logs/:/ruoyi/system/logs
+      - A:/docker/mshdcf/ruoyi-system/logs/:/ruoyi/system/logs
       # skywalking 探针
-      - A:/docker/skywalking/agent/:/ruoyi/skywalking/agent
+      - A:/docker/mshdcf/skywalking/agent/:/ruoyi/skywalking/agent
     privileged: true
-    #    network_mode: "host"
-    networks:
-      - mynetwork
+  #    network_mode: "host"
+  #    networks:
+  #      - mynetwork
 
   ruoyi-gen:
     image: ruoyi/ruoyi-gen:1.8.1
@@ -444,4 +447,5 @@ services:
 
 networks:
   mynetwork:
+    driver: bridge
     external: true

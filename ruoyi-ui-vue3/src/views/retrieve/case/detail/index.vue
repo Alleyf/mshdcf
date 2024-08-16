@@ -5,6 +5,7 @@ import {useRoute} from 'vue-router'
 import {CopyDocument, Edit, Link} from "@element-plus/icons-vue";
 import {Icon} from '@iconify/vue';
 import {useCopyToClipboard} from "@pureadmin/utils";
+import router from "@/router";
 
 const {copied, update} = useCopyToClipboard();
 
@@ -64,6 +65,11 @@ onMounted(() => {
   }
   getCase(id).then(async res => {
     caseItem.value = res.data;
+    if (caseItem.value === null) {
+      console.log("数据未同步，请先同步")
+      proxy.$modal.msgError("数据未同步，请先同步")
+      router.push("/manage/caseMan")
+    }
     // console.log(caseItem.value)
     caseItem.value.relatedCases = JSON.parse(caseItem.value.relatedCases);
 
@@ -154,7 +160,7 @@ const handleTabClick = (pane, ev) => {
     <el-backtop :bottom="100" target=".app-container"/>
     <el-row :gutter="20" :justify="'space-between'">
       <el-col :span="12" class="contentWrapper">
-        <el-link :href="caseItem.url" :icon="Link" :type="'success'" class="bold" target="_blank">{{
+        <el-link v-if="caseItem" :href="caseItem.url" :icon="Link" :type="'success'" class="bold" target="_blank">{{
             caseItem.name
           }}
         </el-link>

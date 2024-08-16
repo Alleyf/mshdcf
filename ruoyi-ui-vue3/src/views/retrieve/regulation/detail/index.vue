@@ -5,6 +5,7 @@ import {CopyDocument, Discount, Link} from "@element-plus/icons-vue";
 import {getRegulation, getRegulationWorldCloud} from "@/api/retrieve/regulation";
 import {Icon} from "@iconify/vue";
 import {useCopyToClipboard} from "@pureadmin/utils";
+import router from "@/router";
 
 const {copied, update} = useCopyToClipboard();
 
@@ -64,6 +65,11 @@ onMounted(() => {
   }
   getRegulation(id).then(async res => {
     lawItem.value = res.data;
+    if (lawItem.value === null) {
+      // console.log("数据未同步，请先同步")
+      proxy.$modal.msgError("数据未同步，请先同步")
+      router.push("/manage/regulationMan")
+    }
     // 正文内容处理(应该用es高亮查询的结果，但是es高亮结果为空)
     if (query.keyword !== "" || query.keyword === undefined) {
       // console.log(query.keyword)
@@ -150,7 +156,7 @@ const handleTabClick = (pane, ev) => {
     <el-backtop :bottom="100" target=".app-container"/>
 
     <el-row :gutter="20" :justify="'space-between'">
-      <el-col :span="12" class="contentWrapper">
+      <el-col v-if="lawItem" :span="12" class="contentWrapper">
         <el-link :href="lawItem.url" :icon="Link" :type="'success'" class="bold" target="_blank">{{
             lawItem.name
           }}
@@ -192,7 +198,7 @@ const handleTabClick = (pane, ev) => {
           <!--          <p style="padding: 10px;" v-html="displayedText"/>-->
         </el-card>
       </el-col>
-      <el-col :span="12" class="baseInfo">
+      <el-col v-if="lawItem" :span="12" class="baseInfo">
 
         <el-tabs class="mytabs" style="height: 200px" tab-position="top" @tab-click="handleTabClick">
           <el-tab-pane label="基本信息">
@@ -247,7 +253,7 @@ const handleTabClick = (pane, ev) => {
               </el-row>
             </el-card>
           </el-tab-pane>
-          <el-tab-pane :lazy="true" label="法条词云">
+          <el-tab-pane v-if="lawItem" :lazy="true" label="法条词云">
             <el-card :shadow="'always'">
               <el-tag style="font-weight: bold;font-size: large" type="warning">法条词云</el-tag>
               <el-divider/>
@@ -255,7 +261,7 @@ const handleTabClick = (pane, ev) => {
                         style="margin-left: 52px;height: 80%;width: 80%"/>
             </el-card>
           </el-tab-pane>
-          <el-tab-pane v-if="Object.keys(lawItem.extra).length !== 0" label="潜在信息"
+          <el-tab-pane v-if="lawItem && Object.keys(lawItem.extra).length !== 0" label="潜在信息"
                        style="font-weight: normal;font-size: medium">
 
             <el-tabs tab-position="right">

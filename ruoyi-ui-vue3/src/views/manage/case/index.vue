@@ -133,7 +133,7 @@ const data = reactive({
       {required: true, message: '案件来源不能为空', trigger: 'change'},
     ],
     judgeDate: [
-      {required: true, message: '判决日期不能为空', trigger: 'blur'},
+      // {required: true, message: '判决日期不能为空', trigger: 'blur'},
     ],
     pubDate: [],
     legalBasis: [],
@@ -602,10 +602,15 @@ const handleSyncInc = () => {
   })
 }
 
-const handleUploadPdf = () => {
-  uploadPdf.value.open = true
-}
 const pdfContent = ref('')
+
+const handleDetail = (item) => {
+  // 打开遮罩层
+  proxy?.$modal.loading("正在打开" + item.name + "案例文书，请稍后...");
+  proxy.$router.push("/retrieve/caseDetail/" + item.id)
+  // 关闭遮罩层
+  proxy?.$modal.closeLoading();
+}
 
 onMounted(() => {
   getList()
@@ -920,9 +925,18 @@ onBeforeUnmount(() => {
               align="center"
               fixed="right"
               label="操作"
-              width="180"
+              width="260"
             >
               <template #default="scope">
+                <el-button
+                  v-hasPermi="['manage:case:query']"
+                  icon="View"
+                  size="small"
+                  type="success"
+                  @click="handleDetail(scope.row)"
+                >
+                  查看
+                </el-button>
                 <el-button
                   v-hasPermi="['manage:case:edit']"
                   icon="Edit"
@@ -1045,9 +1059,18 @@ onBeforeUnmount(() => {
               align="center"
               fixed="right"
               label="操作"
-              width="180"
+              width="260"
             >
               <template #default="scope">
+                <el-button
+                  v-hasPermi="['manage:case:query']"
+                  icon="View"
+                  size="small"
+                  type="success"
+                  @click="handleDetail(scope.row)"
+                >
+                  查看
+                </el-button>
                 <el-button
                   v-hasPermi="['manage:case:edit']"
                   icon="Edit"
@@ -1171,9 +1194,18 @@ onBeforeUnmount(() => {
               align="center"
               fixed="right"
               label="操作"
-              width="180"
+              width="260"
             >
               <template #default="scope">
+                <el-button
+                  v-hasPermi="['manage:case:query']"
+                  icon="View"
+                  size="small"
+                  type="success"
+                  @click="handleDetail(scope.row)"
+                >
+                  查看
+                </el-button>
                 <el-button
                   v-hasPermi="['manage:case:edit']"
                   icon="Edit"

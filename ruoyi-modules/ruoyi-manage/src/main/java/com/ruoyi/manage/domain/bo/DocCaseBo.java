@@ -105,7 +105,7 @@ public class DocCaseBo extends BaseEntity {
     /**
      * 判决日期
      */
-    @NotNull(message = "判决日期不能为空", groups = {AddGroup.class, EditGroup.class})
+//    @NotNull(message = "判决日期不能为空", groups = {AddGroup.class, EditGroup.class})
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private String judgeDate;

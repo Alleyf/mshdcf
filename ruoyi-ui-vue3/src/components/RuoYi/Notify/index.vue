@@ -110,7 +110,9 @@ const announceDialog = ref({
 // const suffix = "?Authorization=Bearer " + getToken();
 
 const syncProcess = ref(0);
-const websocket = new WebSocket('ws://localhost:8080/websocket/websocket/' + loginId)
+const totalNum = ref(null);
+const nowNum = ref(null);
+const websocket = new WebSocket('ws://100.90.219.31:8080/websocket/websocket/' + loginId)
 
 const connect = () => {
   websocket.onopen = () => {
@@ -131,13 +133,13 @@ const connect = () => {
         notification.unread = true;
         if (notification.msgText.includes('同步') && !notification.msgText.includes('开始')) {
           let processStr = notification.msgText.split('：')[1]
-          const nowNum = processStr.split('/')[0]
-          const totalNum = processStr.split('/')[1]
-          console.log('nowNum:', nowNum, 'totalNum:', totalNum)
-          if (nowNum === totalNum) {
+          nowNum.value = processStr.split('/')[0]
+          totalNum.value = processStr.split('/')[1]
+          console.log('nowNum:', nowNum.value, 'totalNum:', totalNum.value)
+          if (nowNum.value === totalNum.value) {
             syncProcess.value = 100
           } else {
-            syncProcess.value = parseInt(nowNum) / parseInt(totalNum) * 100
+            syncProcess.value = parseInt(nowNum.value) / parseInt(totalNum.value) * 100
           }
           notifications.value.pop();
         } else {
@@ -273,7 +275,7 @@ const renderChart = () => {
         data: [
           {
             value: syncProcess.value,
-            name: '同步进度'
+            name: '同步进度'.concat(nowNum.value, '/', totalNum.value)
           }
         ]
       }

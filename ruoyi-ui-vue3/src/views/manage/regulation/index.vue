@@ -532,6 +532,14 @@ const handleSyncInc = () => {
   })
 }
 
+const handleDetail = (item) => {
+  // 打开遮罩层
+  proxy?.$modal.loading("正在打开" + item.name + "案例文书，请稍后...");
+  proxy.$router.push("/retrieve/lawDetail/" + item.id)
+  // 关闭遮罩层
+  proxy?.$modal.closeLoading();
+}
+
 onMounted(() => {
   getList()
 })
@@ -735,8 +743,17 @@ onMounted(() => {
             </el-table-column>
             <el-table-column align="center"
                              class-name="small-padding fixed-width"
-                             fixed="right" label="操作" width="180">
+                             fixed="right" label="操作" width="260">
               <template #default="scope">
+                <el-button
+                  v-hasPermi="['manage:case:query']"
+                  icon="View"
+                  size="small"
+                  type="text"
+                  @click="handleDetail(scope.row)"
+                >
+                  查看
+                </el-button>
                 <el-button v-hasPermi="['manage:regulation:edit']" icon="Edit" size="default" type="text"
                            @click="handleUpdate(scope.row)">修改
                 </el-button>
@@ -838,8 +855,17 @@ onMounted(() => {
             </el-table-column>
             <el-table-column align="center"
                              class-name="small-padding fixed-width"
-                             fixed="right" label="操作" width="180">
+                             fixed="right" label="操作" width="260">
               <template #default="scope">
+                <el-button
+                  v-hasPermi="['manage:case:query']"
+                  icon="View"
+                  size="small"
+                  type="text"
+                  @click="handleDetail(scope.row)"
+                >
+                  查看
+                </el-button>
                 <el-button v-hasPermi="['manage:regulation:edit']" icon="Edit" size="default" type="text"
                            @click="handleUpdate(scope.row)">修改
                 </el-button>
@@ -942,8 +968,17 @@ onMounted(() => {
             </el-table-column>
             <el-table-column align="center"
                              class-name="small-padding fixed-width"
-                             fixed="right" label="操作" width="180">
+                             fixed="right" label="操作" width="260">
               <template #default="scope">
+                <el-button
+                  v-hasPermi="['manage:case:query']"
+                  icon="View"
+                  size="small"
+                  type="text"
+                  @click="handleDetail(scope.row)"
+                >
+                  查看
+                </el-button>
                 <el-button v-hasPermi="['manage:regulation:edit']" icon="Edit" size="default" type="text"
                            @click="handleUpdate(scope.row)">修改
                 </el-button>

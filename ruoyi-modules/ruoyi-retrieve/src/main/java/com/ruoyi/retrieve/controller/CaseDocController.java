@@ -79,7 +79,9 @@ public class CaseDocController extends BaseController {
     public R<CaseDoc> get(@PathVariable("id") Long id) {
         CaseDoc caseDoc = caseDocService.selectById(id);
 //        todo: 设置为异步生成词云，通过消息队列实现
-        worldCloudProducer.sendMsg(caseDoc.getId(), caseDoc.getName(), caseDoc.getContent(), 0L);
+        if (caseDoc != null) {
+            worldCloudProducer.sendMsg(caseDoc.getId(), caseDoc.getName(), caseDoc.getContent(), 0L);
+        }
         return R.ok(caseDoc);
     }
 
