@@ -185,6 +185,12 @@
                 <artifactId>ruoyi-common-mq</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <!--            threadPool服务-->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-common-threadpool</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
